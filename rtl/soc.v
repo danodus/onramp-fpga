@@ -1,0 +1,88 @@
+module soc(
+    input i_clk,
+    input i_rst,
+    output [7:0] o_led
+);
+
+    // SBA Simple Bus Architecture
+    wire		sba_rst = i_rst;
+    wire		sba_clk = i_clk;
+    wire  [3:0] sba_we;
+    wire        sba_stb;
+    wire [31:0] sba_addr;
+    wire [31:0] sba_dat_r;
+    wire [31:0] sba_dat_w;
+    wire        sba_ack;
+
+    wire addr_is_rom = (sba_addr[31:28]==4'h0);
+    wire addr_is_bram = (sba_addr[31:28]==4'h1);
+    wire addr_is_led = (sba_addr[31:28]==4'h2);
+
+    assign sba_ack = addr_is_rom ? rom_ack :
+                     addr_is_bram ? bram_ack :
+                     addr_is_led ? led_ack :
+                     1'b0;
+
+    assign sba_dat_r = addr_is_rom ? rom_dat_r :
+                       addr_is_bram ? bram_dat_r :
+                       addr_is_led ? led_dat_r :
+                       32'd0;
+
+    // OR32 CPU
+    or32 or32(
+        .i_rst(sba_rst),
+        .i_clk(sba_clk),
+        .o_addr(sba_addr),
+        .o_dat_w(sba_dat_w),
+        .o_we(sba_we),
+        .i_dat_r(sba_dat_r),
+        .o_stb(sba_stb),
+        .i_ack(sba_ack)
+    );
+
+    // 32 kb of ROM preloaded with boot loader
+    reg [31:0] ROM[0:8191];
+    initial $readmemh("bios.hex",ROM); 
+    wire rom_stb = addr_is_rom & sba_stb;
+    wire [12:0] rom_addr = sba_addr[14:2];
+    reg [31:0] rom_dat_r;
+    always @(posedge i_clk)
+        rom_dat_r = ROM[rom_addr];
+    reg rom_ack;
+    always @(posedge i_clk)
+        if (rom_stb) rom_ack <= 1;
+        else rom_ack <= 0;
+    
+    // 12 kb of BRAM
+    reg [31:0] BRAM[0:3071];
+    wire bram_stb = addr_is_bram & sba_stb;
+    wire [11:0] bram_addr = sba_addr[13:2];
+    always @(posedge i_clk) begin
+        if(sba_we[0] & bram_stb) BRAM[bram_addr][ 7:0 ] <= sba_dat_w[ 7:0 ];
+        if(sba_we[1] & bram_stb) BRAM[bram_addr][15:8 ] <= sba_dat_w[15:8 ];
+        if(sba_we[2] & bram_stb) BRAM[bram_addr][23:16] <= sba_dat_w[23:16];
+        if(sba_we[3] & bram_stb) BRAM[bram_addr][31:24] <= sba_dat_w[31:24];
+    end
+    reg [31:0] bram_dat_r;
+    always @(posedge i_clk)
+        bram_dat_r = BRAM[bram_addr];
+    reg bram_ack;
+    always @(posedge i_clk)
+        if (bram_stb) bram_ack <= 1;
+        else bram_ack <= 0;
+
+    //LED
+    wire [31:0] led_dat_r;
+    wire led_ack;
+    led LED(
+        .i_clk(sba_clk),
+        .i_rst(sba_rst),
+        .i_stb(addr_is_led & sba_stb),
+        .i_we(sba_we[0]),
+        .o_ack(led_ack),
+        .i_dat_w(sba_dat_w),
+        .o_dat_r(led_dat_r),	
+        .o_led(o_led)
+    );
+
+endmodule

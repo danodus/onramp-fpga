@@ -1,0 +1,31 @@
+SRC =  top.v ../rtl/or32.v ../rtl/soc.v ../rtl/led.v
+
+#TOOLPREFIX = /opt/oss-cad-suite/bin/
+TOOLPREFIX =
+
+PNRFLAGS = --85k --package CABGA381 --speed 6 --lpf ulx3s.lpf
+
+DEFINES = -DUART -DSDRAM -DSDCARD -DPS2 -DVIDEO
+
+all:	build
+
+sim:	soc_tb.vcd
+
+build:	soc.bit
+
+soc.json: $(SRC) bios.hex
+	$(TOOLPREFIX)yosys -ql top.log -p 'verilog_defines $(DEFINES) ; read_verilog -sv $(SRC); synth_ecp5 -top top -json $@'
+
+soc_out.config: soc.json
+	$(TOOLPREFIX)nextpnr-ecp5 $(PNRFLAGS) --json $< --textcfg $@
+
+soc.bit: soc_out.config
+	$(TOOLPREFIX)ecppack --svf soc.svf $< $@
+
+clean:
+	rm -f *.asc *.bin *.json *.vcd *.out *.svf *.config *.bit
+
+prog: soc.bit
+	$(TOOLPREFIX)fujprog soc.bit
+
+.PHONY: all clean prog

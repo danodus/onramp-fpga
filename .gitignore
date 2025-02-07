@@ -1,0 +1,10 @@
+.vscode/
+sim/logs
+sim/obj_dir
+src/**/*.hex
+src/**/*.oe
+ulx3s/*.config
+ulx3s/*.bit
+ulx3s/*.json
+ulx3s/*.log
+ulx3s/*.svf
