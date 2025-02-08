@@ -3,6 +3,8 @@ sim/logs
 sim/obj_dir
 src/**/*.hex
 src/**/*.oe
+src/**/*.oo
+src/bios/bios.os
 ulx3s/*.config
 ulx3s/*.bit
 ulx3s/*.json
