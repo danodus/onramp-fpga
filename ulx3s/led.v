@@ -1,3 +1,5 @@
+// Copyright (c) 2025 Daniel Cliche
+// SPDX-License-Identifier: MIT
 
 `default_nettype none
 

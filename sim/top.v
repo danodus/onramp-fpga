@@ -1,40 +1,27 @@
+// Copyright (c) 2025 Daniel Cliche
+// SPDX-License-Identifier: MIT
+
 module top (
-    input        clk,
-    input        reset_i,
+    input  logic        clk,
+    input  logic        i_rst,
+    output logic [15:0] o_ext_addr,
+    output logic        o_ext_stb,
+    output logic [3:0]  o_ext_we,
+    input  logic        i_ext_ack,
+    output logic [31:0] o_ext_dat_w,
+    input  logic [31:0] i_ext_dat_r
+);
 
-    output [7:0] display_o,
-
-    input        rx_i,
-    output       tx_o,
-
-    output       vga_hsync,
-    output       vga_vsync,
-    output [7:0] vga_r,
-    output [7:0] vga_g,
-    output [7:0] vga_b,
-    output       vga_de,
-
-    input  [7:0]  ps2_kbd_code_i,
-    input         ps2_kbd_strobe_i,
-    input         ps2_kbd_err_i,
-
-    // SDRAM
-    output        sdram_clk_o,
-    output        sdram_cke_o,
-    output        sdram_cs_n_o,
-    output        sdram_we_n_o,
-    output        sdram_ras_n_o,
-    output        sdram_cas_n_o,
-    output [12:0] sdram_a_o,
-    output [1:0]  sdram_ba_o,
-    output [1:0]  sdram_dqm_o,
-    inout  [15:0] sdram_dq_io  
-    );
-
-    soc SOC(
+    soc soc(
         .i_clk(clk),
-        .i_rst(reset_i),
-        .o_led(display_o)
+        .i_rst(i_rst),
+        // External bus
+        .o_ext_addr(o_ext_addr),
+        .o_ext_stb(o_ext_stb),
+        .o_ext_we(o_ext_we),
+        .i_ext_ack(i_ext_ack),
+        .o_ext_dat_w(o_ext_dat_w),
+        .i_ext_dat_r(i_ext_dat_r)
     );
 
     // initial begin
@@ -44,7 +31,7 @@ module top (
     // end
 
     // always_ff @(posedge clk) begin
-    //     if ($time > 100000)
+    //     if ($time > 10000)
     //             $finish;
     // end
 

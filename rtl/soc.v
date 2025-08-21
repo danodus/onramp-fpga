@@ -1,7 +1,16 @@
+// Copyright (c) 2025 Daniel Cliche
+// SPDX-License-Identifier: MIT
+
 module soc(
     input i_clk,
     input i_rst,
-    output [7:0] o_led
+    // External bus
+    output logic [15:0] o_ext_addr,
+    output logic        o_ext_stb,
+    output logic [3:0]  o_ext_we,
+    input  logic        i_ext_ack,
+    output logic [31:0] o_ext_dat_w,
+    input  logic [31:0] i_ext_dat_r
 );
 
     // SBA Simple Bus Architecture
@@ -16,16 +25,16 @@ module soc(
 
     wire addr_is_rom = (sba_addr[31:28]==4'h0);
     wire addr_is_bram = (sba_addr[31:28]==4'h1);
-    wire addr_is_led = (sba_addr[31:28]==4'h2);
+    wire addr_is_ext = (sba_addr[31:28]==4'h2);
 
     assign sba_ack = addr_is_rom ? rom_ack :
                      addr_is_bram ? bram_ack :
-                     addr_is_led ? led_ack :
+                     addr_is_ext ? i_ext_ack :
                      1'b0;
 
     assign sba_dat_r = addr_is_rom ? rom_dat_r :
                        addr_is_bram ? bram_dat_r :
-                       addr_is_led ? led_dat_r :
+                       addr_is_ext ? i_ext_dat_r :
                        32'd0;
 
     // OR32 CPU
@@ -71,18 +80,10 @@ module soc(
         if (bram_stb) bram_ack <= 1;
         else bram_ack <= 0;
 
-    //LED
-    wire [31:0] led_dat_r;
-    wire led_ack;
-    led LED(
-        .i_clk(sba_clk),
-        .i_rst(sba_rst),
-        .i_stb(addr_is_led & sba_stb),
-        .i_we(sba_we[0]),
-        .o_ack(led_ack),
-        .i_dat_w(sba_dat_w),
-        .o_dat_r(led_dat_r),	
-        .o_led(o_led)
-    );
+    // External bus
+    assign o_ext_addr  = sba_addr[15:0];
+    assign o_ext_dat_w = sba_dat_w;
+    assign o_ext_we    = sba_we;
+    assign o_ext_stb   = addr_is_ext & sba_stb;    
 
 endmodule

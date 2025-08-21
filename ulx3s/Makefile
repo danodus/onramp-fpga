@@ -1,11 +1,11 @@
-SRC =  top.v ../rtl/or32.v ../rtl/soc.v ../rtl/led.v
+SRC =  top.v ../rtl/or32.v ../rtl/soc.v led.v
 
 #TOOLPREFIX = /opt/oss-cad-suite/bin/
 TOOLPREFIX =
 
 PNRFLAGS = --85k --package CABGA381 --speed 6 --lpf ulx3s.lpf
 
-DEFINES = -DUART -DSDRAM -DSDCARD -DPS2 -DVIDEO
+DEFINES =
 
 all:	build
 

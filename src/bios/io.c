@@ -1,7 +1,16 @@
+// Copyright (c) 2025 Daniel Cliche
+// SPDX-License-Identifier: MIT
+
 #include "io.h"
 
-#define LED 0x20000000
+void putchar(char c) {
+    *(int *)(0x20000004) = c;
+}
 
-void set_led(int value) {
-    *(uint32_t *)LED = value;
+char getchar(void) {
+    char c;
+    do {
+        c = *(int *)(0x20000008);
+    } while (c == 0);
+    return c;
 }

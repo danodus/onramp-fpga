@@ -1,8 +1,10 @@
+// Copyright (c) 2025 Daniel Cliche
+// SPDX-License-Identifier: MIT
+
 #ifndef IO_H
 #define IO_H
 
-typedef unsigned int uint32_t;
-
-void set_led(int value);
+void putchar(char c);
+char getchar(void);
 
 #endif
