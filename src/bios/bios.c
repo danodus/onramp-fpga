@@ -3,23 +3,15 @@
 
 #include "io.h"
 
-int main(int argc, char *argv[]) {
-    for (;;) {
-        putchar('H');
-        putchar('e');
-        putchar('l');
-        putchar('l');
-        putchar('o');
-        putchar(',');
-        putchar(' ');
-        putchar('w');
-        putchar('o');
-        putchar('r');
-        putchar('l');
-        putchar('d');
-        putchar('!');
-        putchar('\r');
-        putchar('\n');
+static void print(char *s) {
+    while (*s) {
+        putchar(*s);
+        s++;
     }
+}
+
+int main(int argc, char *argv[]) {
+    for (;;)
+        print("Hello, world!\r\n");
     return 0;
 }

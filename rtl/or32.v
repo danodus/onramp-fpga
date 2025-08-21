@@ -132,7 +132,16 @@ module or32(
                 LOAD_WAIT: begin
                     o_stb <= 1'b0;
                     if (i_ack) begin
-                        regs[arg1[3:0]] <= (opcode[3:0] == `OP_LDB) ? {24'd0, i_dat_r[7:0]} : i_dat_r;
+                        if (opcode[3:0] == `OP_LDB) begin
+                            case (o_addr[1:0])
+                                2'b00: regs[arg1[3:0]] <= {24'd0, i_dat_r[7:0]};
+                                2'b01: regs[arg1[3:0]] <= {24'd0, i_dat_r[15:8]};
+                                2'b10: regs[arg1[3:0]] <= {24'd0, i_dat_r[23:16]};
+                                2'b11: regs[arg1[3:0]] <= {24'd0, i_dat_r[31:24]};
+                            endcase
+                        end else begin
+                            regs[arg1[3:0]] <= i_dat_r;
+                        end
                         state <= FETCH;
                     end
                 end
