@@ -59,6 +59,8 @@ module or32(
 
     wire [31:0] next_ip = regs[`RIP] + 32'h4;
 
+    wire [31:0] addr = arg2_val + arg3_val;
+
     always @(posedge i_clk) begin
         if (i_rst) begin
             state <= FETCH;
@@ -125,7 +127,7 @@ module or32(
                     end
                 end
                 LOAD: begin
-                    o_addr <= arg2_val + arg3_val;
+                    o_addr <= {addr[31:2], 2'b0};
                     o_stb <= 1'b1;
                     state <= LOAD_WAIT;
                 end
@@ -133,7 +135,7 @@ module or32(
                     o_stb <= 1'b0;
                     if (i_ack) begin
                         if (opcode[3:0] == `OP_LDB) begin
-                            case (o_addr[1:0])
+                            case (addr[1:0])
                                 2'b00: regs[arg1[3:0]] <= {24'd0, i_dat_r[7:0]};
                                 2'b01: regs[arg1[3:0]] <= {24'd0, i_dat_r[15:8]};
                                 2'b10: regs[arg1[3:0]] <= {24'd0, i_dat_r[23:16]};
@@ -146,9 +148,30 @@ module or32(
                     end
                 end
                 STORE: begin
-                    o_addr <= arg2_val + arg3_val;
-                    o_dat_w <= arg1_val;
-                    o_we <= (opcode[3:0] == `OP_STB) ? 4'h1 : 4'hF;
+                    o_addr <= {addr[31:2], 2'b0};
+                    if (opcode[3:0] == `OP_STB) begin
+                        case (addr[1:0])
+                            2'b00: begin
+                                o_dat_w <= {24'd0, arg1_val[7:0]};
+                                o_we <= 4'b0001;
+                            end
+                            2'b01: begin
+                                o_dat_w <= {16'd0, arg1_val[7:0], 8'd0};
+                                o_we <= 4'b0010;
+                            end
+                            2'b10: begin
+                                o_dat_w <= {8'd0, arg1_val[7:0], 16'd0};
+                                o_we <= 4'b0100;
+                            end
+                            2'b11: begin
+                                o_dat_w <= {arg1_val[7:0], 24'd0};
+                                o_we <= 4'b1000;
+                            end
+                        endcase
+                    end else begin
+                        o_dat_w <= arg1_val;
+                        o_we <= 4'b1111;
+                    end
                     o_stb <= 1'b1;
                     state <= STORE_WAIT;
                 end
