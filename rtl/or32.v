@@ -61,8 +61,8 @@ module or32(
             state <= FETCH;
             o_we <= 4'h0;
             o_stb <= 1'b0;
-            regs[`RPP] <= 32'h00000080;
-            regs[`RIP] <= 32'h00000080;
+            regs[`RPP] <= 32'h00000000;
+            regs[`RIP] <= 32'h00000000;
         end else begin
             case (state)
                 FETCH: begin
