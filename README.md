@@ -11,11 +11,13 @@ The goal of this project is to have the Onramp toolchain running directly on a F
 
 ## Getting started
 
-### Build the BIOS using the Onramp toolchain
+### Build the BIOS and the OS using the Onramp toolchain
 
 ```bash
-cd src/bios
 export ONRAMP_BIN=/path/to/onramp/build/posix/bin
+cd src/bios
+source build.sh
+cd ../os
 source build.sh
 cd ../..
 ```

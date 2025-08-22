@@ -49,9 +49,9 @@ module soc(
         .i_ack(sba_ack)
     );
 
-    // 32 kb of ROM preloaded with boot loader
-    reg [31:0] ROM[0:8191];
-    initial $readmemh("bios.hex",ROM); 
+    // 32 KiB of ROM preloaded with boot loader
+    reg [31:0] ROM[8192];
+    initial $readmemh("bios.hex", ROM); 
     wire rom_stb = addr_is_rom & sba_stb;
     wire [12:0] rom_addr = sba_addr[14:2];
     reg [31:0] rom_dat_r;
@@ -62,10 +62,11 @@ module soc(
         if (rom_stb) rom_ack <= 1;
         else rom_ack <= 0;
     
-    // 12 kb of BRAM
-    reg [31:0] BRAM[0:3071];
+    // 256 KiB of BRAM preloaded with the OS kernel
+    reg [31:0] BRAM[65536];
+    initial $readmemh("kernel.hex", BRAM);
     wire bram_stb = addr_is_bram & sba_stb;
-    wire [11:0] bram_addr = sba_addr[13:2];
+    wire [15:0] bram_addr = sba_addr[17:2];
     always @(posedge i_clk) begin
         if(sba_we[0] & bram_stb) BRAM[bram_addr][ 7:0 ] <= sba_dat_w[ 7:0 ];
         if(sba_we[1] & bram_stb) BRAM[bram_addr][15:8 ] <= sba_dat_w[15:8 ];

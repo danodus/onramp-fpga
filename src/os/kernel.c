@@ -1,7 +1,9 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
-#include "io.h"
+static void putchar(char c) {
+    *(int *)(0x20000004) = c;
+}
 
 static void print(char *s) {
     while (*s) {
@@ -11,6 +13,6 @@ static void print(char *s) {
 }
 
 int main(void) {
-    print("BIOS: Hello World!\r\n");
+    print("OS: Hello, world!\r\n");
     return 0;
 }

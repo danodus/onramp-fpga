@@ -3,10 +3,6 @@
 
 =__start
     "~Onr~amp~   "      ; The executable file identifier; see "File Format" in the VM spec
-    imw rsp 0x10040000  ; Stack pointer to the end of RAM (256 KiB)
-    call ^main          ; BIOS initialization
-    imw r1 0x10000000   ; Jump to RAM
-    add rpp r1 0
-    add rip r1 0
+    call ^main
 :loop
     jmp &loop
