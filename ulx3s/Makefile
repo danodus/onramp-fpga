@@ -1,4 +1,4 @@
-SRC =  top.v ../rtl/or32.v ../rtl/soc.v led.v
+SRC =  top.v ../rtl/div.v ../rtl/or32.v ../rtl/soc.v led.v
 
 #TOOLPREFIX = /opt/oss-cad-suite/bin/
 TOOLPREFIX =

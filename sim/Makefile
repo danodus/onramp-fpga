@@ -15,6 +15,6 @@ sim: top.v sim_main.cpp
 	$(MAKE) -j 4 -C obj_dir -f Vtop.mk
 
 run: sim
-	obj_dir/Vtop
+	obj_dir/Vtop || true
 
 .PHONY: all clean

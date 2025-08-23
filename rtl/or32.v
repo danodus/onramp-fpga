@@ -42,6 +42,7 @@ module or32(
     localparam LOAD_WAIT  = 4'd4;
     localparam STORE      = 4'd5;
     localparam STORE_WAIT = 4'd6;
+    localparam DIV_WAIT   = 4'd7;
 
     reg [31:0] regs[16];
 
@@ -61,6 +62,26 @@ module or32(
 
     wire [31:0] addr = arg2_val + arg3_val;
 
+    // Division
+    reg div_start;
+    wire div_done;
+    reg [31:0] div_a, div_b;
+    wire [31:0] div_val;
+    
+    div div(
+        .i_rst(i_rst),
+        .i_clk(i_clk),
+        .i_start(div_start),
+        .o_busy(),
+        .o_done(div_done),
+        .o_valid(),
+        .o_dbz(),
+        .i_a(div_a),
+        .i_b(div_b),
+        .o_val(div_val),
+        .o_rem()
+    );
+
     always @(posedge i_clk) begin
         if (i_rst) begin
             state <= FETCH;
@@ -68,6 +89,7 @@ module or32(
             o_stb <= 1'b0;
             regs[`RPP] <= 32'h00000000;
             regs[`RIP] <= 32'h00000000;
+            div_start <= 1'b0;
         end else begin
             case (state)
                 FETCH: begin
@@ -94,9 +116,10 @@ module or32(
                             `OP_MUL:
                                 regs[arg1[3:0]] <= arg2_val * arg3_val;
                             `OP_DIV: begin
-`ifndef SYNTHESIS
-                                regs[arg1[3:0]] <= arg2_val / arg3_val;
-`endif
+                                div_a <= arg2_val;
+                                div_b <= arg3_val;
+                                div_start <= 1'b1;
+                                state <= DIV_WAIT;
                             end
                             `OP_AND:
                                 regs[arg1[3:0]] <= arg2_val & arg3_val;
@@ -179,6 +202,13 @@ module or32(
                     o_stb <= 1'b0;
                     if (i_ack) begin
                         o_we <= 4'h0;
+                        state <= FETCH;
+                    end
+                end
+                DIV_WAIT: begin
+                    div_start <= 1'b0;
+                    if (div_done) begin
+                        regs[arg1[3:0]] <= div_val;
                         state <= FETCH;
                     end
                 end
