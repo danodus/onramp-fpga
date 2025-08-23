@@ -4,6 +4,8 @@ sim/obj_dir
 src/**/*.hex
 src/**/*.oe
 src/**/*.oo
+src/**/*.oe.od
+src/**/*.lst
 src/bios/bios.os
 src/bios/io.os
 src/os/kernel.os
