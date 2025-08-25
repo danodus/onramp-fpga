@@ -15,6 +15,8 @@ sim: top.v sim_main.cpp
 	$(MAKE) -j 4 -C obj_dir -f Vtop.mk
 
 run: sim
+	cd ../src/bios && ./build.sh
+	cd ../src/os && ./build.sh
 	obj_dir/Vtop || true
 
 .PHONY: all clean

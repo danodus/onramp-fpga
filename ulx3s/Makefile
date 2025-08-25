@@ -13,7 +13,9 @@ sim:	soc_tb.vcd
 
 build:	soc.bit
 
-soc.json: $(SRC) bios.hex
+soc.json: $(SRC)
+	cd ../src/bios && ./build.sh
+	cd ../src/os && ./build.sh
 	$(TOOLPREFIX)yosys -ql top.log -p 'verilog_defines $(DEFINES) ; read_verilog -sv $(SRC); synth_ecp5 -top top -json $@'
 
 soc_out.config: soc.json
