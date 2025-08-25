@@ -48,6 +48,7 @@ for line in lines:
         for i in range(0, count, 4):
             start = total
             step = min(4, count - i)
+            print("{:08x} | ".format(start), end="")
             for j in range(step):
                 print(" {:02x}".format(bytecode[total]), end="")
                 total += 1
