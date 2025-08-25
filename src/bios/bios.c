@@ -10,7 +10,13 @@ static void print(char *s) {
     }
 }
 
+int sys_fwrite(int handle, const void* buffer, unsigned size) {
+    if (size > 0)
+        putchar(((char *)buffer)[0]);
+    return 1;
+}
+
 int main(void) {
-    print("BIOS: Hello World!\r\n");
+    print("BIOS: Initialized\r\n");
     return 0;
 }
