@@ -198,6 +198,15 @@ int main(int argc, char **argv, char **env)
                 } else {
                     top->i_ext_ack = 0;
                 }
+            } else if (top->o_ext_addr >= 0xF000) {
+                top->i_ext_dat_r = 0;
+                if (top->o_ext_stb) {
+                    if (top->o_ext_we != 0)
+                        printf("LED: %02x\r\n", top->o_ext_dat_w);
+                    top->i_ext_ack = 1;
+                } else {
+                    top->i_ext_ack = 0;
+                }
             }
         }
 

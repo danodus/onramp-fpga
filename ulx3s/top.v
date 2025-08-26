@@ -34,16 +34,18 @@ module top(
         .i_ext_dat_r(ext_dat_r)
     );
 
+    // always acknowledge
+    assign ext_ack = ext_stb;
+
     // LED
-    // Currently connected directly to the external bus.
     wire [31:0] led_dat_r;
-    wire led_ack;
+
     led LED(
         .i_clk(clk),
         .i_rst(rst),
-        .i_stb(ext_stb),
+        .i_stb((ext_addr[15:12] == 4'hF) && ext_stb),
         .i_we(ext_we[0]),
-        .o_ack(ext_ack),
+        .o_ack(),
         .i_dat_w(ext_dat_w),
         .o_dat_r(ext_dat_r),	
         .o_led(led)

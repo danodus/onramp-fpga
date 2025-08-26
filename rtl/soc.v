@@ -26,15 +26,18 @@ module soc(
     wire addr_is_rom = (sba_addr[31:28]==4'h0);
     wire addr_is_bram = (sba_addr[31:28]==4'h1);
     wire addr_is_ext = (sba_addr[31:28]==4'h2);
+    wire addr_is_timer = (sba_addr[31:28]==4'h3);
 
     assign sba_ack = addr_is_rom ? rom_ack :
                      addr_is_bram ? bram_ack :
                      addr_is_ext ? i_ext_ack :
+                     addr_is_timer ? timer_ack :
                      1'b0;
 
     assign sba_dat_r = addr_is_rom ? rom_dat_r :
                        addr_is_bram ? bram_dat_r :
                        addr_is_ext ? i_ext_dat_r :
+                       addr_is_timer ? timer_dat_r :
                        32'd0;
 
     // OR32 CPU
@@ -85,6 +88,18 @@ module soc(
     assign o_ext_addr  = sba_addr[15:0];
     assign o_ext_dat_w = sba_dat_w;
     assign o_ext_we    = sba_we;
-    assign o_ext_stb   = addr_is_ext & sba_stb;    
+    assign o_ext_stb   = addr_is_ext & sba_stb;
+
+    // Timer
+    wire [31:0] timer_dat_r;
+    wire timer_ack;
+    timer timer(
+        .i_clk(i_clk),
+        .i_rst(i_rst),
+        .i_addr(sba_addr[3:0]),
+        .i_stb(addr_is_timer & sba_stb),
+        .o_ack(timer_ack),
+        .o_dat_r(timer_dat_r)
+    );     
 
 endmodule

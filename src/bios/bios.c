@@ -13,8 +13,9 @@ static void print(char *s) {
 }
 
 int sys_time(unsigned out_buffer[3]) {
-    for (size_t i = 0; i < 4; ++i)
-        out_buffer[i] = 0;
+    out_buffer[0] = *(unsigned *)(0x30000000);
+    out_buffer[1] = *(unsigned *)(0x30000004);
+    out_buffer[2] = *(unsigned *)(0x30000008);
     return 0;
 }
 
