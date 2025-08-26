@@ -12,8 +12,8 @@
     jmp &loop
 
 =process_info_table
-    3                   ; version (3)
-    0x10030000          ; heap start address (0x10030000)
+    3                   ; version
+    0x10030000          ; heap start address
     ^sys_call_table     ; Table of system calls
     -1                  ; File handle of input stream
     -1                  ; File handle of output stream
@@ -22,44 +22,33 @@
     0                   ; Environment variables
     0                   ; Working directory
     0x0                 ; Capabilities
-    25                  ; Number of system calls (25)
-    12                  ; Number of entries in the process info table (12)
+    25                  ; Number of system calls
+    12                  ; Number of entries in the process info table
 
-; tail-call
-=sys_fwrite1
-    ; save rpp
-    sub rsp rsp 4
+=sys_time1
+    sub rsp rsp 4       ; save rpp
     stw rpp 0 rsp
-    ; set rpp to 0
-    mov rpp 0
-    ; call sys_fwrite
-    imw ra ^sys_fwrite
-    sub rsp rsp 4       ; push return address
-    add rb rip 8
-    stw rb 0 rsp
-    add rip rpp ra      ; call
-    add rsp rsp 4       ; pop return address
-    ; restore rpp
-    ldw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_time
+    ldw rpp 0 rsp       ; restore rpp
     add rsp rsp 4
-    ; return
-    ldw rip 0 rsp
+    ret
 
-; tail call
-=sys_fwrite3
-    ; return
-    mov r0 42
-    ;add rsp rfp 0
-    ;ldw rfp 0 rsp
-    ;add rsp rsp 4
-    ldw rip 0 rsp
+=sys_fwrite1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_fwrite
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret
 
 =sys_call_table
     0x00000000     ; 0
     0x00000000
     0x00000000     ; 1
     0x00000000
-    0x00000000     ; 2
+    ^sys_time1     ; 2 - time
     0x00000000
     0x00000000     ; 3
     0x00000000

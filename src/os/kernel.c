@@ -1,15 +1,16 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
-#include "system.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-static void sysprint(const char *s) {
-    while (*s)
-        if (write(1, s++, 1) < 0)
-            return;
+void exit_handler(void) {
+   // Exit the simulation with a recognizable LED pattern
+    *(int *)(0x20000000) = 0x55;
 }
 
 int main(void) {
-    sysprint("OS: Hello using system calls!\r\n");
-    return 0x55;
+    atexit(exit_handler);
+    printf("OS: Hello using system calls!\r\n");
+    return 0;
 }
