@@ -6,6 +6,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <fs.h>
+
 void set_led(int value) {
     *(int *)(0x2000F000) = value;
 }
@@ -14,17 +16,37 @@ void exit_handler(void) {
     set_led(0x55);
 }
 
+void ls(fs_context_t* fs_ctx) {
+    fs_file_info_t file_info;
+    uint16_t nb_files = fs_get_nb_files(fs_ctx);
+    for (uint16_t i = 0; i < nb_files; ++i) {
+        if (fs_get_file_info(fs_ctx, i, &file_info))
+            printf("%s\t%d\r\n", file_info.name, file_info.size);
+    }
+}
+
 int main(void) {
-    set_led(0);
 
     atexit(exit_handler);
+    printf("Onramp-FPGA OS\r\n");
 
-    for (int counter = 0; counter < 10; counter++) {
-        printf("OS: Hello using system calls! [%02d/10]\r\n", counter);
-        usleep(50000);
-        // write to LEDs
-        set_led(counter + 1);
+    // Initialize the SD card
+    if (!sdc_init()) {
+        printf("Unable to initialize the SD card\r\n");
+        return 1;
     }
 
-    return 42;
+    fs_context_t fs_ctx;
+    fs_init(&fs_ctx);
+
+    if (!fs_write(&fs_ctx, "test.txt", (const uint8_t*)"Hello, World!", 0, 13)) {
+        printf("Unable to write to a file\r\n");
+        sdc_dispose();
+        return 1;
+    }
+
+    ls(&fs_ctx);
+    sdc_dispose();
+
+    return 0;
 }

@@ -71,6 +71,16 @@ fatal:
 
 int main(int argc, char **argv, char **env)
 {
+
+    uint32_t sdc_addr = 0;
+    // Read sd.img
+    std::ifstream input( "sd.img", std::ios::in | std::ios::binary);
+    if (!input.is_open()) {
+        printf("Unable to open sd.img\n");
+        return 1;
+    }
+    std::vector<uint8_t> sdc_data((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+
     enable_raw_mode(STDIN_FILENO);
 
     // Create logs/ directory in case we have traces to put under it
@@ -106,8 +116,6 @@ int main(int argc, char **argv, char **env)
     const std::unique_ptr<Vtop> top{new Vtop{contextp.get(), "TOP"}};
 
     std::deque<uint8_t> keys;
-    std::array<uint8_t, 1*1024*1024> sdc_data;
-    uint32_t sdc_addr = 0;
 
     // Set Vtop's input signals
     top->i_rst = 1;

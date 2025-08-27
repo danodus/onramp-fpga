@@ -20,6 +20,8 @@ With the simulator, the external bus has the following memory-mapped devices:
 | 0x20000000 | Exit with exit code |
 | 0x20000004 | Write a character to console |
 | 0x20000008 | Read a character from console (0 if none) |
+| 0x2000000C | Set simulated SD card address |
+| 0x20000010 | Read/write byte from simulated SD card |
 | 0x2000F000 | Set LEDs |
 
 ### ULX3S

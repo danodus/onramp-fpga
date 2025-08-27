@@ -1,11 +1,13 @@
 .vscode/
 sim/logs
 sim/obj_dir
+sim/sd.img
 src/**/*.hex
 src/**/*.oe
 src/**/*.oo
 src/**/*.oe.od
 src/**/*.lst
+src/mkfs/mkfs
 src/bios/bios.os
 src/bios/io.os
 src/os/kernel.os
