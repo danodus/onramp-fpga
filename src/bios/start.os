@@ -25,6 +25,11 @@
     25                  ; Number of system calls
     12                  ; Number of entries in the process info table
 
+=sys_exit1
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_exit
+    ; Does not return
+
 =sys_time1
     sub rsp rsp 4       ; save rpp
     stw rpp 0 rsp
@@ -44,7 +49,7 @@
     ret
 
 =sys_call_table
-    0x00000000     ; 0
+    ^sys_exit1     ; 0 - exit
     0x00000000
     0x00000000     ; 1
     0x00000000

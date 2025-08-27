@@ -12,8 +12,6 @@ void set_led(int value) {
 
 void exit_handler(void) {
     set_led(0x55);
-    // Exit the simulation with exit code 0
-    *(int *)(0x20000000) = 0;
 }
 
 int main(void) {
@@ -23,10 +21,10 @@ int main(void) {
 
     for (int counter = 0; counter < 10; counter++) {
         printf("OS: Hello using system calls! [%02d/10]\r\n", counter);
-        usleep(500000);
+        usleep(50000);
         // write to LEDs
         set_led(counter + 1);
     }
 
-    return 0;
+    return 42;
 }
