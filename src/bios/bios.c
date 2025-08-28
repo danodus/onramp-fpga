@@ -47,5 +47,10 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
 
 int main(void) {
     print("BIOS: Initialized\n");
+    if (is_hardware()) {
+        print("Running on hardware\n");
+    } else {
+        print("Running on the simulator\n");
+    }
     return 0;
 }

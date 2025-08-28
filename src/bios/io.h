@@ -4,6 +4,8 @@
 #ifndef IO_H
 #define IO_H
 
+int is_hardware(void);
+
 void putchar(char c);
 char getchar(int blocking);
 

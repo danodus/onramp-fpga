@@ -3,6 +3,8 @@
 
 // Ref.: https://projectf.io/posts/division-in-verilog/
 
+`default_nettype none
+
 module div #(parameter WIDTH=32) (  // width of numbers in bits
     input                  i_rst,   // reset
     input                  i_clk,   // clock

@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
+`default_nettype none
+
 // Registers
 `define RPP 4'hE
 `define RIP 4'hF

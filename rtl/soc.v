@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
+`default_nettype none
+
 module soc(
     input i_clk,
     input i_rst,

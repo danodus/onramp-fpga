@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
+`default_nettype none
+
 module top (
     input  logic        clk,
     input  logic        i_rst,

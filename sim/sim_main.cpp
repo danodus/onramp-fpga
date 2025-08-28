@@ -157,6 +157,7 @@ int main(int argc, char **argv, char **env)
                         exit_value = top->o_ext_dat_w;
                         done = true;
                     }
+                    top->i_ext_dat_r = 0;   // configuration simulator
                     top->i_ext_ack = 1;
                 } else {
                     top->i_ext_ack = 0;

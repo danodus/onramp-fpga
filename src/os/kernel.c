@@ -11,10 +11,19 @@
 
 #include <fs.h>
 
+#define CFG         0x20000000
+#define LED         0x20001000
+
 extern unsigned* __process_info_table;
 
+int is_hardware(void) {
+    return *(int *)(CFG) & 1;
+}
+
 void set_led(int value) {
-    *(int *)(0x2000F000) = value;
+    if (is_hardware()) {
+         *(int *)(LED) = value;
+    }
 }
 
 void exit_handler(void) {
@@ -94,6 +103,16 @@ int main(void) {
 
     atexit(exit_handler);
     printf("Onramp-FPGA OS\n");
+
+    if (is_hardware()) {
+        int counter = 0;
+        for (;;) {
+            set_led(counter);
+            printf("Hello, world!\n");
+            usleep(500000);
+            counter++;
+        }
+    }
 
     // Initialize the SD card
     if (!sdc_init()) {
