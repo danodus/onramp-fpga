@@ -26,7 +26,7 @@ void sdc_dispose(void)
 
 bool sdc_read_single_block(uint32_t addr, uint8_t* buf)
 {
-    if (fseek(f, addr, SEEK_SET) != 0) {
+    if (fseek(f, addr * SDC_BLOCK_LEN, SEEK_SET) != 0) {
         printf("fseek failed\n");
         return false;
     }
@@ -39,7 +39,7 @@ bool sdc_read_single_block(uint32_t addr, uint8_t* buf)
 
 bool sdc_write_single_block(uint32_t addr, const uint8_t *buf)
 {
-    if (fseek(f, addr, SEEK_SET) != 0) {
+    if (fseek(f, addr * SDC_BLOCK_LEN, SEEK_SET) != 0) {
         printf("fseek failed\n");
         return false;
     }

@@ -14,7 +14,7 @@
 #define PRINTV_DBG(_s_, _v_)
 #endif
 
-#define FS_PARTITION_BLOCK_ADDR     (64*1024*1024 / SDC_BLOCK_LEN)
+#define FS_PARTITION_BLOCK_ADDR     0//(64*1024*1024 / SDC_BLOCK_LEN)
 #define FAT_NB_BLOCKS               ((sizeof(fs_fat_t) + SDC_BLOCK_LEN - 1) / SDC_BLOCK_LEN)
 
 static bool sdc_read(uint32_t first_block_addr, uint8_t* buf, size_t nb_bytes) {
