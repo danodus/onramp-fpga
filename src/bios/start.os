@@ -39,6 +39,15 @@
     add rsp rsp 4
     ret
 
+=sys_fread1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_fread
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret
+
 =sys_fwrite1
     sub rsp rsp 4       ; save rpp
     stw rpp 0 rsp
@@ -59,7 +68,7 @@
     0x00000000
     0x00000000     ; 4
     0x00000000
-    0x00000000     ; 5
+    ^sys_fread1    ; 5 - fread
     0x00000000
     ^sys_fwrite1   ; 6 - fwrite
     0x00000000

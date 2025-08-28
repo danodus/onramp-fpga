@@ -33,6 +33,15 @@ uint32_t get_file_size(fs_context_t* fs_ctx, const char* filename) {
     return 0;
 }
 
+void list_files(fs_context_t* fs_ctx) {
+    fs_file_info_t file_info;
+    uint16_t nb_files = fs_get_nb_files(fs_ctx);
+    for (uint16_t i = 0; i < nb_files; ++i) {
+        if (fs_get_file_info(fs_ctx, i, &file_info))
+            printf("%s\t%d\r\n", file_info.name, file_info.size);
+    }
+}
+
 bool run_program(fs_context_t* fs_ctx, const char* filename) {
     uint32_t program_size = get_file_size(fs_ctx, filename);
     
@@ -95,13 +104,37 @@ int main(void) {
     fs_context_t fs_ctx;
     fs_init(&fs_ctx);
 
-    if (!run_program(&fs_ctx, "hex.oe")) {
-        printf("Unable to run the program\n");
-        sdc_dispose();
-        return 1;
+    bool quit = false;
+    while (!quit) {
+        printf(
+            "\n"
+            "[l] list files\n"
+            "[r] run \"hex.oe\" without arguments\n"
+            "[q] quit\n"
+            "Make a selection...\n"
+        );
+        int c = getchar();
+        printf("\n");
+        switch (c) {
+            case 'L':
+            case 'l':
+                list_files(&fs_ctx);
+                break;
+            case 'R':
+            case 'r':
+                if (!run_program(&fs_ctx, "hex.oe"))
+                    printf("Unable to run the program\n");
+                break;
+            case 'Q':
+            case 'q':
+                quit = true;
+                break;
+            default:
+                printf("Invalid selection\n");
+        }
     }
 
-    printf("Success!\n");
+    printf("Bye!\n");
 
     sdc_dispose();
 

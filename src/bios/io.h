@@ -5,6 +5,6 @@
 #define IO_H
 
 void putchar(char c);
-char getchar(void);
+char getchar(int blocking);
 
 #endif

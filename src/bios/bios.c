@@ -26,6 +26,17 @@ int sys_time(unsigned out_buffer[3]) {
     return 0;
 }
 
+int sys_fread(int handle, void* buffer, unsigned size) {
+    if (size >= 1) {
+        char c = getchar(0);    // non-blocking
+        if (c) {
+            *(char *)buffer = c;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int sys_fwrite(int handle, const void* buffer, unsigned size) {
     for (unsigned i = 0; i < size; ++i) {
         putchar(*((char *)buffer));

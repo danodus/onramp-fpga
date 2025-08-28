@@ -7,10 +7,10 @@ void putchar(char c) {
     *(int *)(0x20000004) = c;
 }
 
-char getchar(void) {
+char getchar(int blocking) {
     char c;
     do {
         c = *(int *)(0x20000008);
-    } while (c == 0);
+    } while (c == 0 && blocking);
     return c;
 }

@@ -81,8 +81,10 @@ The BIOS offers a subset of system calls required for Onramp libc used by the ke
 
 Num | Description
 --- | -----------
+0 | exit with status
 2 | time (see below)
-6 | fwrite 
+5 | fread
+6 | fwrite
 
 The kernel will include a file system. It will therefore provide a more complete list of system calls to the programs being executed from the shell.
 
@@ -91,3 +93,11 @@ With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_ti
 # Known Issues
 
 - After pressing the reset button on the ULX3S, the program does not restart.
+
+# Next Steps
+
+Run everything we have with the simualtor on the ULX3S:
+- Add UART hooked to external bus
+- Add hardware SPI for SD card hooked to external bus
+- Add configuration register to know if we are running on hardware of simulator
+- Add hardware SD card initialization and other SPI transactions
