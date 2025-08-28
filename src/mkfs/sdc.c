@@ -8,7 +8,7 @@
 
 static FILE* f = NULL;
 
-bool sdc_init(const char *img_path)
+bool sdc_img_init(const char *img_path)
 {
     f = fopen(img_path, "w+b");
     if (f == NULL)
@@ -16,7 +16,7 @@ bool sdc_init(const char *img_path)
     return true;
 }
 
-void sdc_dispose(void)
+void sdc_img_dispose(void)
 {
     if (f != NULL) {
         fclose(f);

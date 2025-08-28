@@ -166,7 +166,11 @@ int main(int argc, char **argv, char **env)
                 if (top->o_ext_stb) {
                     if (top->o_ext_we != 0) {
                         int c = top->o_ext_dat_w;
-                        write(STDOUT_FILENO, &c, 1);
+                        if (c == '\n') {
+                            write(STDOUT_FILENO, "\r\n", 2);
+                        } else {
+                            write(STDOUT_FILENO, &c, 1);
+                        }
                     }
                     top->i_ext_ack = 1;
                 } else {

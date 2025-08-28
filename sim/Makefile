@@ -19,7 +19,7 @@ run: sim
 	cd ../src/bios && ./build.sh
 	cd ../src/os && ./build.sh
 	cd ../src/mkfs && ./build.sh
-	$(ONRAMP_BIN)/onrampvm ../src/mkfs/mkfs sd.img
+	$(ONRAMP_BIN)/onrampvm ../src/mkfs/mkfs sd.img $(ONRAMP_BIN)/../../intermediate/hex-0-onramp/hex.oe
 	obj_dir/Vtop || true
 
 .PHONY: all clean

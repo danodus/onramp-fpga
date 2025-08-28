@@ -35,6 +35,6 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
 }
 
 int main(void) {
-    print("BIOS: Initialized\r\n");
+    print("BIOS: Initialized\n");
     return 0;
 }
