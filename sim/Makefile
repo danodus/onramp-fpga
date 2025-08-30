@@ -9,7 +9,7 @@ all: sim
 
 clean:
 	rm -rf obj_dir
-	rm sd.img
+	rm -f sd.img
 
 sim: top.v sim_main.cpp
 	$(VERILATOR) -cc --exe $(CFLAGS) $(LDFLAGS) top.v sim_main.cpp $(DEFINES) -I../rtl --trace -Wno-NULLPORT -Wno-PINMISSING
