@@ -104,21 +104,13 @@ int main(void) {
     atexit(exit_handler);
     printf("Onramp-FPGA OS\n");
 
-    if (is_hardware()) {
-        int counter = 0;
-        for (;;) {
-            set_led(counter);
-            printf("Hello, world!\n");
-            usleep(500000);
-            counter++;
-        }
-    }
-
     // Initialize the SD card
     if (!sdc_init()) {
         printf("Unable to initialize the SD card\n");
         return 1;
     }
+
+    printf("SD card initialization successful!\n");
 
     fs_context_t fs_ctx;
     fs_init(&fs_ctx);
