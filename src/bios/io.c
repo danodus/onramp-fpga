@@ -8,6 +8,8 @@
 #define SIM_TX      0x20000004
 #define SIM_RX      0x20000008
 
+#define LED         0x20001000
+
 #define UART_DATA   0x20002000
 #define UART_STATUS 0x20002004
 
@@ -41,4 +43,24 @@ char getchar(int blocking) {
         } while (c == 0 && blocking);
     }
     return c;
+}
+
+unsigned int receive_word() {
+    unsigned int word = 0;
+    for (int i = 0; i < 4; ++i) {
+        word <<= 8;
+        int rx_ready;
+        do {
+            rx_ready = (*((int *)UART_STATUS) & UART_RX_READY);
+        } while (!rx_ready);        
+        unsigned int c = *((unsigned int *)UART_DATA);
+        word |= c;
+    }
+    return word;
+}
+
+void set_led(int value) {
+    if (is_hardware()) {
+         *(int *)(LED) = value;
+    }
 }

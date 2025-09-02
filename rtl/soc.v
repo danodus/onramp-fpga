@@ -69,7 +69,9 @@ module soc(
     
     // 256 KiB of BRAM preloaded with the OS kernel
     reg [31:0] BRAM[65536];
+`ifndef SYNTHESIS    
     initial $readmemh("kernel.hex", BRAM);
+`endif
     wire bram_stb = addr_is_bram & sba_stb;
     wire [15:0] bram_addr = sba_addr[17:2];
     always @(posedge i_clk) begin

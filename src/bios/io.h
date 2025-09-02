@@ -5,8 +5,11 @@
 #define IO_H
 
 int is_hardware(void);
+void set_led(int value);
 
 void putchar(char c);
 char getchar(int blocking);
+
+unsigned int receive_word(void);
 
 #endif
