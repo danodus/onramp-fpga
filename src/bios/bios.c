@@ -22,9 +22,15 @@ _Noreturn void sys_exit(int exit_code) {
 }
 
 int sys_time(unsigned out_buffer[3]) {
-    out_buffer[0] = *(unsigned *)(0x30000000);
-    out_buffer[1] = *(unsigned *)(0x30000004);
-    out_buffer[2] = *(unsigned *)(0x30000008);
+    unsigned long ms = *(unsigned int *)(0x30000004);
+    ms <<= 32;
+    ms |= *(unsigned int *)(0x30000000);
+    unsigned long s = ms / 1000UL;
+    unsigned long ns = 1000000 * (ms % 1000UL);
+
+    out_buffer[0] = s & 0xFFFFFFFF;
+    out_buffer[1] = s >> 32;
+    out_buffer[2] = ns;
     return 0;
 }
 

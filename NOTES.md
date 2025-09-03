@@ -40,9 +40,8 @@ The timer has the following memory-mapped registers:
 
 | Address | Description |
 | ------- | ----------- |
-| 0x30000000 | Seconds low 32-bit |
-| 0x30000004 | Seconds high 32-bit |
-| 0x30000008 | Nanoseconds |
+| 0x30000000 | Milliseconds low 32-bit |
+| 0x30000004 | Milliseconds high 32-bit |
 
 # Onramp Toolchain
 

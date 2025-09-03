@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 // Timer
-// 0x00: Number of seconds (low)
-// 0x04: Number of seconds (high)
-// 0x08: Number of nanoseconds
+// 0x00: Number of milliseconds (low)
+// 0x04: Number of milliseconds (high)
 
 `default_nettype none
 
@@ -19,27 +18,27 @@ module timer #(
     output wire o_ack
 );
 
-    reg [31:0] nanoseconds;
-    reg [63:0] seconds;
+    reg [15:0] counter;
+    reg [63:0] milliseconds;
 
     always @(posedge i_clk) begin
         if (i_rst) begin
-            nanoseconds <= 32'd0;
-            seconds <= 64'd0;
+            counter <= 16'd0;
+            milliseconds <= 64'd0;
         end else begin
-            nanoseconds <= nanoseconds + 32'(1_000_000_000 / FREQ_HZ);
-            if (nanoseconds >= 32'd1_000_000_000) begin
-                nanoseconds <= 32'd0;
-                seconds <= seconds + 64'd1;
+            if (counter >= 16'(FREQ_HZ / 1_000)) begin
+                milliseconds <= milliseconds + 64'd1;
+                counter <= 16'd0;
+            end else begin
+                counter <= counter + 16'd1;
             end
         end
     end
 
     assign o_ack = i_stb;
 
-    assign o_dat_r = (i_addr == 4'd0) ? seconds[31:0] :
-                     (i_addr == 4'd4) ? seconds[63:32] :
-                     (i_addr == 4'd8) ? nanoseconds :
+    assign o_dat_r = (i_addr == 4'd0) ? milliseconds[31:0] :
+                     (i_addr == 4'd4) ? milliseconds[63:32] :
                      32'd0;
 
 endmodule
