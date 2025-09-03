@@ -1,7 +1,7 @@
 .vscode/
 sim/logs
 sim/obj_dir
-sim/sd.img
+sd.img
 src/**/*.hex
 src/**/*.oe
 src/**/*.oo

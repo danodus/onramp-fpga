@@ -1,3 +1,5 @@
+SERIAL ?= /dev/ttyUSB0
+
 SRC =  top.v ../rtl/div.v ../rtl/or32.v ../rtl/timer.v ../rtl/soc.v cfg.v led.v uart.v uart_rx.v uart_tx.v spi.v
 
 #TOOLPREFIX = /opt/oss-cad-suite/bin/
@@ -15,7 +17,6 @@ build:	soc.bit
 
 soc.json: $(SRC)
 	cd ../src/bios && ./build.sh
-	cd ../src/os && ./build.sh
 	$(TOOLPREFIX)yosys -ql top.log -p 'verilog_defines $(DEFINES) ; read_verilog -sv $(SRC); synth_ecp5 -top top -json $@'
 
 soc_out.config: soc.json
@@ -30,4 +31,8 @@ clean:
 prog: soc.bit
 	$(TOOLPREFIX)fujprog soc.bit
 
-.PHONY: all clean prog
+run:
+	cd ../src/os && ./build.sh
+	python3 ../scripts/sendhex.py $(SERIAL) ../src/os/kernel.hex
+
+.PHONY: all clean prog run

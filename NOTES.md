@@ -17,16 +17,22 @@ With the simulator, the external bus has the following memory-mapped devices:
 
 | Address | Description |
 | ------- | ----------- |
-| 0x20000000 | Exit with exit code |
+| 0x20000000 | Configuration / Exit with code on write |
 | 0x20000004 | Write a character to console |
 | 0x20000008 | Read a character from console (0 if none) |
 | 0x2000000C | Set simulated SD card address |
 | 0x20000010 | Read/write byte from simulated SD card |
-| 0x2000F000 | Set LEDs |
 
 ### ULX3S
 
-Will always acknowledge but only recognize the LED device.
+On the ULX3S, the external bus has the following memory-mapped devices:
+
+| Address | Description |
+| ------- | ----------- |
+| 0x20000000 | Configuration |
+| 0x20001000 | LEDs |
+| 0x20002000 | UART |
+| 0x20003000 | SPI SD Card |
 
 ## Timer
 
