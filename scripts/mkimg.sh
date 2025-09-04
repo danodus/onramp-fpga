@@ -10,4 +10,4 @@ fi
 pushd ../src/mkfs
 ./build.sh
 popd
-$ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe
+$ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe ../src/hello/hello.ohx

@@ -3,12 +3,12 @@
 
 #include "fs.h"
 
-#include <string.h>
+#define NULL (void*)0
+
 
 #if DEBUG
-#include <stdio.h>
-#define PRINT_DBG(_s_) printf("%s", _s_);
-#define PRINTV_DBG(_s_, _v_) { printf("%s%d\r\n", _s_, _v_); }
+#define PRINT_DBG(_s_) print(_s_);
+#define PRINTV_DBG(_s_, _v_) { print(_s_); char b[32]; uitoa(_v_, b, 10); print(b); print("\r\n"); }
 #else
 #define PRINT_DBG(_s_)
 #define PRINTV_DBG(_s_, _v_)
@@ -16,6 +16,69 @@
 
 #define FS_PARTITION_BLOCK_ADDR     0//(64*1024*1024 / SDC_BLOCK_LEN)
 #define FAT_NB_BLOCKS               ((sizeof(fs_fat_t) + SDC_BLOCK_LEN - 1) / SDC_BLOCK_LEN)
+
+// ref: https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
+static char *uitoa(unsigned int value, char* result, int base)
+{
+    // check that the base if valid
+    if (base < 2 || base > 36) { *result = '\0'; return result; }
+
+    char* ptr = result, *ptr1 = result, tmp_char;
+    int tmp_value;
+
+    for (int i = 0; i < 8; ++i) {
+        tmp_value = value;
+        value /= base;
+        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+    }
+
+    *ptr-- = '\0';
+    while(ptr1 < ptr) {
+        tmp_char = *ptr;
+        *ptr--= *ptr1;
+        *ptr1++ = tmp_char;
+    }
+    return result;
+}
+
+static int strncmp(const char* a, const char* b, size_t n) {
+    const char* end = a + n;
+    for (;;) {
+        if (a == end)
+            return 0;
+        if (*a != *b)
+            break;
+        if (*a == 0)
+            return 0;
+        ++a;
+        ++b;
+    }
+    return (int)(unsigned char)(*a) - (int)(unsigned char)(*b);
+}
+
+static char* strncpy(char* restrict to, const char* restrict from, size_t count) {
+    char* ret = to;
+    char* end = to + count;
+    while (to != end && *from != 0) {
+        *to = *from;
+        ++to;
+        ++from;
+    }
+    /* strncpy() pads with zeroes. */
+    while (to != end)
+        *to++ = 0;
+    return ret;
+}
+
+static void* memset(void* vdest, int c, size_t count) {
+    unsigned char* restrict dest = (unsigned char*)vdest;
+    unsigned char* start = dest;
+    unsigned char* end = dest + count;
+    unsigned char uc = (unsigned char)c;
+    while (dest != end)
+        *dest++ = uc;
+    return start;
+}
 
 static bool sdc_read(uint32_t first_block_addr, uint8_t* buf, size_t nb_bytes) {
     size_t remaining_bytes;
@@ -73,7 +136,7 @@ static bool write_fat(const fs_fat_t* fat) {
 
 static fs_file_info_t* find_file(fs_fat_t* fat, const char* filename) {
     for (size_t i = 0; i < FS_MAX_NB_FILES; ++i) {
-        if (strcmp(fat->file_infos[i].name, filename) == 0)
+        if (strncmp(fat->file_infos[i].name, filename, FS_MAX_FILENAME_LEN) == 0)
             return &fat->file_infos[i];
     }
 

@@ -3,10 +3,6 @@
 
 #include "sdc.h"
 
-#include <stddef.h>
-#include <stdint.h>
-#include <unistd.h>
-
 #define SPI_RW  0x20003000
 #define SPI_CTR 0x20003004
 
@@ -22,6 +18,19 @@
 #define CS_DISABLE() *(volatile uint32_t *)SPI_CTR = SPI_SS
 
 int is_hardware(void);
+
+static unsigned long clock(void) {
+    unsigned long ms;
+    ms = *(unsigned int *)(0x30000004);
+    ms <<= 32;
+    ms |= *(unsigned int *)(0x30000000);
+    return ms;
+}
+
+static int msleep(unsigned int msec) {
+    unsigned long target = clock() + msec;
+    while (clock() < target);
+}
 
 static uint8_t spi_transfer(uint8_t mosi)
 {
@@ -83,7 +92,7 @@ static void sdc_power_up_seq(void)
     CS_DISABLE();
 
     // give sd card time to power up
-    usleep(1000);
+    msleep(1);
 
     // send 80 clock cycles to synchronize
     for (uint8_t i = 0; i < 10; ++i)
@@ -230,7 +239,7 @@ bool sdc_init(void) {
         while (retries++ < 3) {
             if (sdc_init_internal())
                 return true;
-            usleep(100000);
+            msleep(100);
         }
         return false;
     }

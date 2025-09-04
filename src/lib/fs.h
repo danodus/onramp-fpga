@@ -4,9 +4,6 @@
 #ifndef FS_H
 #define FS_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include <sdc.h>
 
 #define FS_MAX_FILENAME_LEN 31      // maximum filename length (excluding the terminating null byte)

@@ -1,57 +1,10 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
+#include "globals.h"
 #include "io.h"
 
 #define RAM_START 0x10000000
-
-typedef unsigned long size_t;
-
-static void print(char *s) {
-    while (*s) {
-        putchar(*s);
-        s++;
-    }
-}
-
-_Noreturn void sys_exit(int exit_code) {
-    // Exit the simulation
-    *(int *)(0x20000000) = exit_code;
-    // Make sure we don't go further on the hardware
-    for (;;);
-}
-
-int sys_time(unsigned out_buffer[3]) {
-    unsigned long ms = *(unsigned int *)(0x30000004);
-    ms <<= 32;
-    ms |= *(unsigned int *)(0x30000000);
-    unsigned long s = ms / 1000UL;
-    unsigned long ns = 1000000 * (ms % 1000UL);
-
-    out_buffer[0] = s & 0xFFFFFFFF;
-    out_buffer[1] = s >> 32;
-    out_buffer[2] = ns;
-    return 0;
-}
-
-int sys_fread(int handle, void* buffer, unsigned size) {
-    if (size >= 1) {
-        char c = getchar(0);    // non-blocking
-        if (c) {
-            *(char *)buffer = c;
-            return 1;
-        }
-    }
-    return 0;
-}
-
-int sys_fwrite(int handle, const void* buffer, unsigned size) {
-    for (unsigned i = 0; i < size; ++i) {
-        putchar(*((char *)buffer));
-        ++buffer;
-    }
-    return size;
-}
 
 static void receive(void) {
     set_led(0xFF);
@@ -102,7 +55,24 @@ static char* uitoa(unsigned int value, char* result, int base)
 }
 
 int main(void) {
+
+    bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
+    for (int i = 0; i < MAX_OPEN_FILES; ++i)
+        bios_globals->filenames[i][0] = '\0';
+
     print("BIOS: Initialized\n");
+
+    // Initialize the SD card
+    if (!sdc_init()) {
+        print("Unable to initialize the SD card\n");
+        return 1;
+    }
+
+    if (!fs_init(&bios_globals->fs_ctx)) {
+        print("Invalid FS image\n");
+        return 1;
+    }
+
     if (is_hardware()) {
         print("Running on hardware\n");
         receive();
@@ -116,15 +86,6 @@ int main(void) {
             print("Unknown program. System Halted.\n");
             for (;;);
         }
-
-/*
-    char buf[32];
-    for (int i = 0; i < 512; i += 4) {
-        uitoa(*(unsigned int *)(RAM_START + i), buf, 16);
-        print(buf);
-        print(" ");
-    }
-*/
 
     print("Starting...\n");
     return 0;

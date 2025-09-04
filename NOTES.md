@@ -88,15 +88,22 @@ Num | Description
 --- | -----------
 0 | exit with status
 2 | time (see below)
+3 | fopen
+4 | fclose
 5 | fread
 6 | fwrite
+10 | dopen
+12 | dread
+13 | stat
 
-The kernel includes a file system. It will therefore provide a more complete list of system calls to the programs being executed from the shell.
+A file system is provided in the BIOS.  Directories are not yet supported.
 
 With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_time` therefore this system call *must* be implemented.
 
 # Known Issues
 
+- The file system does not support current position not being a multiple of a SDC_BLOCK_LEN.
+
 # Next Steps
 
-Run hex-0 with argument.  We need to connect the file system calls to the child PIT.
+- Support reading files of more than 256 characters with `hex.oe`.

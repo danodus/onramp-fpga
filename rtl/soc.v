@@ -64,7 +64,13 @@ module soc(
         rom_dat_r = ROM[rom_addr];
     reg rom_ack;
     always @(posedge i_clk)
-        if (rom_stb) rom_ack <= 1;
+        if (rom_stb) begin
+`ifndef SYNTHESIS
+            if (|sba_we)
+                $display("*** Write to ROM: value %x at address %x\r", sba_dat_w, sba_addr);
+`endif            
+            rom_ack <= 1;
+        end
         else rom_ack <= 0;
     
     // 256 KiB of BRAM preloaded with the OS kernel

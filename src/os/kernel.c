@@ -6,15 +6,19 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <spawn.h>
-
-#include <fs.h>
+#include <__onramp/__pit.h>
 
 #define CFG         0x20000000
 #define LED         0x20001000
 
 extern unsigned* __process_info_table;
+
+int __sys_dopen(const char* path);
+int __sys_dread(int handle, char out_buffer[256]);
+int __sys_stat(const char* path, unsigned output[4]);
 
 int is_hardware(void) {
     return *(int *)(CFG) & 1;
@@ -30,50 +34,65 @@ void exit_handler(void) {
     set_led(0x55);
 }
 
-uint32_t get_file_size(fs_context_t* fs_ctx, const char* filename) {
-    fs_file_info_t file_info;
-    uint16_t nb_files = fs_get_nb_files(fs_ctx);
-    for (uint16_t i = 0; i < nb_files; ++i) {
-        if (fs_get_file_info(fs_ctx, i, &file_info)) {
-            if (strcmp(filename, file_info.name) == 0)
-                return file_info.size;
+unsigned int get_file_size(const char* filename) {
+    unsigned int stat[4];
+    if (__sys_stat(filename, stat) != 0) {
+        printf("sys_stat failed\n");
+        return 0;
+    };
+    return stat[2];
+}
+
+void list_files(void) {
+    if (__sys_dopen(NULL) != 0) {
+        printf("sys_dread failed\n");
+        return;
+    }
+
+    char path[256];
+    
+    for (;;) {
+        if (__sys_dread(0, path) != 0) {
+            printf("sys_dread failed\n");
+            return;
         }
-    }
-    return 0;
-}
-
-void list_files(fs_context_t* fs_ctx) {
-    fs_file_info_t file_info;
-    uint16_t nb_files = fs_get_nb_files(fs_ctx);
-    for (uint16_t i = 0; i < nb_files; ++i) {
-        if (fs_get_file_info(fs_ctx, i, &file_info))
-            printf("%s\t%d\r\n", file_info.name, file_info.size);
+        if (path[0] == '\0')
+            break;
+        unsigned int file_size = get_file_size(path);
+        printf("%s\t%d\n", path, file_size);
     }
 }
 
-bool run_program(fs_context_t* fs_ctx, const char* filename) {
-    uint32_t program_size = get_file_size(fs_ctx, filename);
+bool run_program(const char* filename) {
+    unsigned int program_size = get_file_size(filename);
     
     if (program_size == 0) {
         printf("%s is not found or empty\n", filename);
         return false;
     }
 
-    //
-    // Execute hex.oe
-    //
+    FILE* f = fopen(filename, "rb");
+    if (f == NULL) {
+        printf("Program not found\n");
+        return false;
+    }
 
-    char *program = malloc(program_size);
+    char* program = malloc(program_size);
     if (program == NULL) {
         printf("Out of memory\n");
+        fclose(f);
         return false;
     }
 
-    if (!fs_read(fs_ctx, filename, (uint8_t*)program, 0, program_size, NULL)) {
+
+    if (fread(program, 1, program_size, f) != program_size) {
         printf("Unable to read the program\n");
+        fclose(f);
         free(program);
         return false;
-    }
+    };
+
+    fclose(f);
 
     // Check if this is an Onramp program
     if (strncmp(program, "~Onr~amp~   ", 12) != 0) {
@@ -88,39 +107,42 @@ bool run_program(fs_context_t* fs_ctx, const char* filename) {
     unsigned int* parent_pit = __process_info_table;
     unsigned int* child_pit = __memdup(parent_pit, sizeof(int) * 12);
 
+    const char *args[] = {
+        filename,
+        "hello.ohx",
+        "-o",
+        "hello.bin",
+        NULL
+    };
+
     // Setup the child pit
-    //*(child_pit + PIT_ARGS) = (int)argv;
-    //*(child_pit + PIT_ENVIRON) = (int)environ;
+    *(child_pit + __ONRAMP_PIT_ARGS) = (int)args;
 
     // Run it
     int ret = __onramp_spawn_pit(program, program_size, child_pit, filename);
     
+    free(child_pit);
     free(program);
     return true;
 }
 
-int main(void) {
+
+int main(int argc, char *argv[]) {
 
     atexit(exit_handler);
     printf("Onramp-FPGA OS\n");
 
-    // Initialize the SD card
-    if (!sdc_init()) {
-        printf("Unable to initialize the SD card\n");
-        return 1;
+    printf("Number of arguments: %d\n", argc);
+    for (int i = 0; i < argc; ++i) {
+        printf("  argv[%d]=%s\n", i, argv[i]);
     }
-
-    printf("SD card initialization successful!\n");
-
-    fs_context_t fs_ctx;
-    fs_init(&fs_ctx);
 
     bool quit = false;
     while (!quit) {
         printf(
             "\n"
             "[l] list files\n"
-            "[r] run \"hex.oe\" without arguments\n"
+            "[r] run \"hex.oe hello.ohx -o hello.bin\"\n"
             "[q] quit\n"
             "Make a selection...\n"
         );
@@ -129,11 +151,11 @@ int main(void) {
         switch (c) {
             case 'L':
             case 'l':
-                list_files(&fs_ctx);
+                list_files();
                 break;
             case 'R':
             case 'r':
-                if (!run_program(&fs_ctx, "hex.oe"))
+                if (!run_program("hex.oe"))
                     printf("Unable to run the program\n");
                 break;
             case 'Q':
@@ -146,8 +168,6 @@ int main(void) {
     }
 
     printf("Bye!\n");
-
-    sdc_dispose();
 
     return 0;
 }

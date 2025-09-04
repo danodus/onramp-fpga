@@ -4,9 +4,7 @@
 #ifndef SDC_H
 #define SDC_H
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include "common.h"
 
 #define SDC_BLOCK_LEN  512
 
