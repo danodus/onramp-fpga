@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 
         //assert(index(shortname, '/') == 0);
 
-        if ((fd = open(argv[i], 0)) < 0)
+        if ((fd = open(argv[i], O_RDONLY)) < 0)
             die(argv[i]);
 
         // Skip leading _ in name when writing to file system.
@@ -164,10 +164,34 @@ int main(int argc, char *argv[]) {
     exit(0);
 }
 
+ssize_t readall(int fd, void *buf, size_t n) {
+    size_t nn = n;
+    do {
+        ssize_t c = read(fd, buf, nn);
+        if (c < 0)
+            return c;
+        nn -= (size_t)c;
+        buf += (size_t)c;
+    } while (nn > 0);
+    return n;
+}
+
+ssize_t writeall(int fd, const void *buf, size_t n) {
+    size_t nn = n;
+    do {
+        ssize_t c = write(fd, buf, nn);
+        if (c < 0)
+            return c;
+        nn -= (size_t)c;
+        buf += (size_t)c;
+    } while (nn > 0);
+    return n;
+}
+
 void wsect(uint32_t sec, void *buf) {
     if (lseek(fsfd, sec * BSIZE, 0) != sec * BSIZE)
         die("lseek");
-    if (write(fsfd, buf, BSIZE) != BSIZE)
+    if (writeall(fsfd, buf, BSIZE) != BSIZE)
         die("write");
 }
 
@@ -197,7 +221,7 @@ void rinode(uint32_t inum, struct dinode* ip) {
 void rsect(uint32_t sec, void* buf) {
     if (lseek(fsfd, sec * BSIZE, 0) != sec * BSIZE)
         die("lseek");
-    if (read(fsfd, buf, BSIZE) != BSIZE)
+    if (readall(fsfd, buf, BSIZE) != BSIZE)
         die("read");
 }
 

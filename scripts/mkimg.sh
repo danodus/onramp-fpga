@@ -10,5 +10,4 @@ set -e
 pushd ../src/mkfs
 ./build.sh
 popd
-#$ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../fs.img $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe ../src/hello/hello.ohx
-../src/mkfs/mkfs ../fs.img $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe ../src/hello/hello.ohx
+$ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../fs.img $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe ../src/hello/hello.ohx
