@@ -249,7 +249,7 @@ bool sdc_init(void) {
 void sdc_dispose(void) {
 }
 
-static bool sdc_read_single_block_hw(uint32_t addr, uint8_t *buf)
+static bool sdc_read_sector_hw(uint32_t addr, uint8_t *buf)
 {
     uint8_t token;
     uint8_t res1, read;
@@ -280,7 +280,7 @@ static bool sdc_read_single_block_hw(uint32_t addr, uint8_t *buf)
             // if response token is 0xFE
             if (read == 0xFE) {
                 // read block
-                for (uint16_t i = 0; i < SDC_BLOCK_LEN; ++i)
+                for (uint16_t i = 0; i < SSIZE; ++i)
                     *buf++ = spi_transfer(0xFF);
 
                 // read 16-bit CRC
@@ -300,7 +300,7 @@ static bool sdc_read_single_block_hw(uint32_t addr, uint8_t *buf)
     return res1 == 0x00 && token == 0xFE;
 }
 
-static bool sdc_write_single_block_hw(uint32_t addr, const uint8_t *buf)
+static bool sdc_write_sector_hw(uint32_t addr, const uint8_t *buf)
 {
     uint8_t token;
     uint8_t res1, write;
@@ -325,7 +325,7 @@ static bool sdc_write_single_block_hw(uint32_t addr, const uint8_t *buf)
         spi_transfer(SD_START_TOKEN);
 
         // write buffer to card
-        for (uint16_t i = 0; i < SDC_BLOCK_LEN; ++i)
+        for (uint16_t i = 0; i < SSIZE; ++i)
             spi_transfer(buf[i]);
     }
 
@@ -362,13 +362,13 @@ static bool sdc_write_single_block_hw(uint32_t addr, const uint8_t *buf)
     return res1 == 0x00 && token == 0x05;    
 }
 
-bool sdc_read_single_block(uint32_t addr, uint8_t* buf) {
+bool sdc_read_sector(uint32_t addr, uint8_t* buf) {
     if (is_hardware()) {
-        return sdc_read_single_block_hw(addr, buf);
+        return sdc_read_sector_hw(addr, buf);
     } else {
         int i;
-        *(uint32_t *)(0x2000000C) = addr * SDC_BLOCK_LEN;
-        for (size_t i = 0; i < SDC_BLOCK_LEN; i++) {
+        *(uint32_t *)(0x2000000C) = addr * SSIZE;
+        for (size_t i = 0; i < SSIZE; i++) {
             *buf = *(uint32_t *)(0x20000010);
             buf++;
         }
@@ -377,12 +377,12 @@ bool sdc_read_single_block(uint32_t addr, uint8_t* buf) {
     }
 }
 
-bool sdc_write_single_block(uint32_t addr, const uint8_t* buf) {
+bool sdc_write_sector(uint32_t addr, const uint8_t* buf) {
     if (is_hardware()) {
-        return sdc_write_single_block_hw(addr, buf);
+        return sdc_write_sector_hw(addr, buf);
     } else {
-        *(uint32_t *)(0x2000000C) = addr * SDC_BLOCK_LEN;
-        for (size_t i = 0; i < SDC_BLOCK_LEN; i++) {
+        *(uint32_t *)(0x2000000C) = addr * SSIZE;
+        for (size_t i = 0; i < SSIZE; i++) {
             *(uint32_t *)(0x20000010) = *buf;
             buf++;
         }

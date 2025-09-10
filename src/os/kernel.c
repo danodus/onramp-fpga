@@ -44,11 +44,11 @@ unsigned int get_file_size(const char* filename) {
 }
 
 void list_files(void) {
-    if (__sys_dopen(NULL) != 0) {
+    if (__sys_dopen(".") != 0) {
         printf("sys_dread failed\n");
         return;
     }
-
+/*
     char path[256];
     
     for (;;) {
@@ -61,6 +61,7 @@ void list_files(void) {
         unsigned int file_size = get_file_size(path);
         printf("%s\t%d\n", path, file_size);
     }
+*/        
 }
 
 bool run_program(const char* filename) {

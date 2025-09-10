@@ -29,9 +29,38 @@ char* strncpy(char* restrict to, const char* restrict from, size_t count) {
     return ret;
 }
 
+void* memmove(void* vdest, const void* vsrc, size_t count) {
+    void* start = vdest;
+    const unsigned char* src = (const unsigned char*)vsrc;
+    unsigned char* dest = (unsigned char*)vdest;
+    if (dest < src) {
+        // TODO vectorize
+        unsigned char* end = dest + count;
+        while (dest != end)
+            *dest++ = *src++;
+    } else if (dest > src) {
+        // TODO vectorize
+        unsigned char* end = dest;
+        dest += count;
+        src += count;
+        while (dest != end)
+            *--dest = *--src;
+    }
+    return start;
+}
+
 void print(const char* s) {
     while (*s) {
         putchar(*s);
         s++;
     }
+}
+
+_Noreturn void panic(const char* s) {
+    print("Panic: ");
+    print(s);
+    print("\n");
+    // Exit the simulation
+    *(int *)(0x20000000) = 1;    
+    for (;;);
 }

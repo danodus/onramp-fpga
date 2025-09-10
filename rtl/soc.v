@@ -66,8 +66,10 @@ module soc(
     always @(posedge i_clk)
         if (rom_stb) begin
 `ifndef SYNTHESIS
-            if (|sba_we)
+            if (|sba_we) begin
                 $display("*** Write to ROM: value %x at address %x\r", sba_dat_w, sba_addr);
+                $finish;
+            end
 `endif            
             rom_ack <= 1;
         end

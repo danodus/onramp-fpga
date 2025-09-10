@@ -1,8 +1,10 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
+#include "common.h"
 #include "globals.h"
 #include "io.h"
+#include "sdc.h"
 
 #define RAM_START 0x10000000
 
@@ -57,21 +59,15 @@ static char* uitoa(unsigned int value, char* result, int base)
 int main(void) {
 
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    for (int i = 0; i < MAX_OPEN_FILES; ++i)
-        bios_globals->filenames[i][0] = '\0';
 
     print("BIOS: Initialized\n");
 
     // Initialize the SD card
     if (!sdc_init()) {
-        print("Unable to initialize the SD card\n");
-        return 1;
+        panic("Unable to initialize the SD card");
     }
 
-    if (!fs_init(&bios_globals->fs_ctx)) {
-        print("Invalid FS image\n");
-        return 1;
-    }
+    fsinit(1);
 
     if (is_hardware()) {
         print("Running on hardware\n");
@@ -83,8 +79,7 @@ int main(void) {
     if (*(unsigned int *)RAM_START != 0x726e4f7e ||
         *(unsigned int *)(RAM_START + 4) != 0x706d617e ||
         *(unsigned int *)(RAM_START + 8) != 0x2020207e) {
-            print("Unknown program. System Halted.\n");
-            for (;;);
+            panic("Unknown program");
         }
 
     print("Starting...\n");

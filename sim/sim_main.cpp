@@ -74,9 +74,9 @@ int main(int argc, char **argv, char **env)
 
     uint32_t sdc_addr = 0;
     // Read sd.img
-    std::ifstream input( "../sd.img", std::ios::in | std::ios::binary);
+    std::ifstream input( "../fs.img", std::ios::in | std::ios::binary);
     if (!input.is_open()) {
-        printf("Unable to open ../sd.img\n");
+        printf("Unable to open ../fs.img\n");
         return 1;
     }
     std::vector<uint8_t> sdc_data((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());

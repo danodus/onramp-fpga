@@ -31,7 +31,7 @@ cd scripts
 cd ..
 ```
 
-Flash the SD card image `sd.img`.
+Flash the SD card image `fs.img`.
 
 ```bash
 source /path/to/oss-cad-suite/environment

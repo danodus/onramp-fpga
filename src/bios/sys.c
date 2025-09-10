@@ -28,17 +28,6 @@ int sys_time(unsigned out_buffer[3]) {
 int sys_fopen(const char* path, bool writeable) {
     print("sys_fopen\n");
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-
-    for (int i = 0; i < MAX_OPEN_FILES; ++i) {
-        if (bios_globals->filenames[i][0] == '\0') {
-            // empty slot found
-            strncpy(bios_globals->filenames[i], path, FS_MAX_FILENAME_LEN);
-            bios_globals->read_positions[i] = 0;
-            bios_globals->write_positions[i] = 0;
-            return 3 + i;
-        }
-    }
 
     return -1;
 }
@@ -46,7 +35,6 @@ int sys_fopen(const char* path, bool writeable) {
 int sys_fclose(int file_handle) {
     print("sys_fclose\n");
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    bios_globals->filenames[file_handle - 3][0] = '\0';
     return 0;
 }
 
@@ -55,14 +43,7 @@ int sys_fread(int handle, void* buffer, unsigned size) {
 
     if (handle > 2) {
         print("sys_fread called\n");
-        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        size_t nb_read_bytes;
-        if (!fs_read(fs_ctx, bios_globals->filenames[handle - 3], buffer, bios_globals->read_positions[handle - 3], size, &nb_read_bytes)) {
-            print("sys_fread: Unable to read\n");
-            return 0;
-        }
-        bios_globals->read_positions[handle - 3] += nb_read_bytes;
-        return nb_read_bytes;
+        return -1;
     } else {
         // stdin
         if (size >= 1) {
@@ -81,13 +62,7 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
 
     if (handle > 2) {
         print("sys_fwrite called\n");
-        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        if (!fs_write(fs_ctx, bios_globals->filenames[handle - 3], buffer, bios_globals->write_positions[handle - 3], size)) {
-            print("sys_fread: Unable to write\n");
-            return 0;
-        }
-        bios_globals->write_positions[handle - 3] += size;
-        return size;
+        return 0;
     } else {
         // stdout/stderr
         for (unsigned i = 0; i < size; ++i) {
@@ -99,56 +74,23 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
 }
 
 int sys_dopen(const char* path) {
-    bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+    bios_globals_t* g = (bios_globals_t*)BIOS_GLOBALS;
 
-    fs_file_info_t file_info;
-    bios_globals->dir_nb_files = fs_get_nb_files(fs_ctx);
-    bios_globals->dir_file_index = 0;
+    struct inode *ip;
+    ip = namei(path);
+    if (ip == 0)
+        return -1;
 
     return 0;
 }
 
 int sys_dread(int handle, char out_buffer[256]) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-
-    // If no more files are available
-    if (bios_globals->dir_file_index >= bios_globals->dir_nb_files) {
-        out_buffer[0] = '\0';
-        return 0;
-    }
-
-    fs_file_info_t file_info;
-    if (!fs_get_file_info(fs_ctx, bios_globals->dir_file_index, &file_info))
-        return 1;
-
-    for (size_t i = 0; i < sizeof(file_info.name); ++i)
-        out_buffer[i] = file_info.name[i];
-
-    bios_globals->dir_file_index++;
-
-    return 0;
+    return -1;
 }
 
 int sys_stat(const char* path, unsigned output[4]) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-    
-    uint16_t nb_files = fs_get_nb_files(fs_ctx);
-    bool found = false;
-    for (uint16_t i = 0; i < nb_files; ++i) {
-        fs_file_info_t file_info;
-        if (!fs_get_file_info(fs_ctx, i, &file_info))
-            break;
-        if (strcmp(file_info.name, path) == 0) {
-            output[0] = 0;              // type = file
-            output[1] = 493;            // mode = executable
-            output[2] = file_info.size; // size_low
-            output[3] = 0;              // size_high
-            found = true;
-        }
-    }
-    return found ? 0 : 1;
+    return -1;
 }
 
