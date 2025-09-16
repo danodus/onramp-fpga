@@ -17,6 +17,8 @@
 #define FS_PARTITION_BLOCK_ADDR     0//(64*1024*1024 / SDC_BLOCK_LEN)
 #define FAT_NB_BLOCKS               ((sizeof(fs_fat_t) + SDC_BLOCK_LEN - 1) / SDC_BLOCK_LEN)
 
+void print(const char *s);
+
 // ref: https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
 static char *uitoa(unsigned int value, char* result, int base)
 {
@@ -172,17 +174,21 @@ static uint16_t find_unused_block_table_index(fs_fat_t* fat, fs_file_info_t* fil
     return block_table_index;
 }
 
-static void remove_file_blocks(fs_fat_t* fat, fs_file_info_t* file_info) {
+static void remove_file_blocks(fs_fat_t* fat, fs_file_info_t* file_info, size_t from_offset) {
     // erase block entries
     uint16_t block_table_index = file_info->first_block_table_index;
     uint32_t nb_blocks = (file_info->size + SDC_BLOCK_LEN - 1) / SDC_BLOCK_LEN;
+    size_t offset = SDC_BLOCK_LEN;
     for (; nb_blocks; --nb_blocks) {
         uint16_t next_block_table_index = fat->blocks[block_table_index];
-        fat->blocks[block_table_index] = 0xFFFF;
+        if (offset >= from_offset)
+            fat->blocks[block_table_index] = 0xFFFF;
         block_table_index = next_block_table_index;
+        offset += SDC_BLOCK_LEN;
     }
-    file_info->first_block_table_index = 0xFFFF;
-    file_info->size = 0;
+    if (from_offset == 0)
+        file_info->first_block_table_index = 0xFFFF;
+    file_info->size = from_offset;
 }
 
 bool fs_format(bool quick) {
@@ -271,7 +277,7 @@ bool fs_delete(fs_context_t* ctx, const char* filename) {
         return false;
     }
     
-    remove_file_blocks(&tmp_fat, file_info);
+    remove_file_blocks(&tmp_fat, file_info, 0);
 
     // clear file info entry
     file_info->name[0] = '\0'; 
@@ -308,8 +314,7 @@ bool fs_rename(fs_context_t* ctx, const char* filename, const char* new_filename
     return true;
 }
 
-
-bool fs_read(fs_context_t* ctx, const char* filename, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes) {
+static bool fs_read_a(fs_context_t* ctx, const char* filename, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes) {
     PRINT_DBG("fs_read\r\n");
     PRINT_DBG("filename: ");
     PRINT_DBG(filename);
@@ -375,7 +380,7 @@ bool fs_read(fs_context_t* ctx, const char* filename, uint8_t* buf, size_t curre
     return true;
 }
 
-bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_t current_pos, size_t nb_bytes) {
+static bool fs_write_a(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_t current_pos, size_t nb_bytes) {
     PRINT_DBG("fs_write\r\n");
     PRINT_DBG("filename: ");
     PRINT_DBG(filename);
@@ -414,19 +419,10 @@ bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_
         file_info->size = 0;
 
     } else {
-        if (current_pos == 0) {
-            PRINT_DBG("Overwrite file\r\n");
-            // overwrite the file
-            remove_file_blocks(&tmp_fat, file_info);
-        } else {
-            PRINT_DBG("Append to file\r\n");
-            PRINTV_DBG("Initial size: ", file_info->size);
-            // append to the current file
-            if (file_info->size % SDC_BLOCK_LEN)  {
-                PRINT_DBG("Append to file with size not being a multiple of SDC_BLOCK_LEN\r\n");
-                return false;
-            }
-        }
+        // update the file
+        PRINT_DBG("Update file\r\n");
+        // truncate
+        remove_file_blocks(&tmp_fat, file_info, current_pos);
     }
 
     uint32_t first_block_addr = FS_PARTITION_BLOCK_ADDR + FAT_NB_BLOCKS;
@@ -492,6 +488,114 @@ bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_
     PRINTV_DBG("Final size: ", file_info->size);
 
     ctx->fat = tmp_fat;
+
+    return true;
+}
+
+bool fs_read(fs_context_t* ctx, const char* filename, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes) {
+    if (current_pos % SDC_BLOCK_LEN == 0)
+        return fs_read_a(ctx, filename, buf, current_pos, nb_bytes, nb_read_bytes);
+
+    PRINT_DBG("Unaligned read...\r\n");
+    PRINT_DBG("filename: ");
+    PRINT_DBG(filename);
+    PRINT_DBG("\r\n");
+    PRINTV_DBG("current_pos: ", current_pos);
+    PRINTV_DBG("nb_bytes: ", nb_bytes);    
+
+    // The current position is not aligned to the sector size.
+    // 1. Read the first sector and copy the desired region to the output buffer
+    // 2. Read the remaining sectors if necessary
+    
+    // Read the first sector
+    uint8_t b[SDC_BLOCK_LEN];
+    size_t pos_a = (current_pos / SDC_BLOCK_LEN) * SDC_BLOCK_LEN;
+    size_t n1, n2;
+    if (!fs_read_a(ctx, filename, b, pos_a, SDC_BLOCK_LEN, &n1))
+        return false;
+
+    // Copy the desired region to the output buffer
+    size_t n = current_pos % SDC_BLOCK_LEN;
+    if (n >= n1) {
+        // Nothing to copy
+        PRINT_DBG("Nothing more to copy\r\n");
+        if (nb_read_bytes)
+            *nb_read_bytes = 0;
+
+        return true;
+    }
+
+    uint8_t* p = buf;
+    size_t r = n1 - n;
+
+    for (size_t i = 0; i < r; ++i) {
+        *p = b[n + i];
+        p++;
+    }
+
+    n2 = 0;
+
+    // Read the remaining sectors if we still have bytes to read
+    if (nb_bytes > r) {
+        pos_a += SDC_BLOCK_LEN;
+        if (!fs_read_a(ctx, filename, p, pos_a, nb_bytes - r, &n2))
+            return false;
+    }
+
+    if (nb_read_bytes)
+        *nb_read_bytes = r + n2;
+
+    return true;
+}
+
+bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_t current_pos, size_t nb_bytes) {
+    if (current_pos % SDC_BLOCK_LEN == 0)
+        return fs_write_a(ctx, filename, buf, current_pos, nb_bytes);
+
+    PRINT_DBG("unaligned write...\r\n");
+    PRINT_DBG("filename: ");
+    PRINT_DBG(filename);
+    PRINT_DBG("\r\n");
+    PRINTV_DBG("current_pos: ", current_pos);
+    PRINTV_DBG("nb_bytes: ", nb_bytes);
+
+    // The current position is not aligned to the sector size.
+    // 1. Read the first sector in a temp buffer
+    // 2. Fill the temp buffer with the data to write
+    // 3. Write the first sector
+    // 4. Write the remaining sectors if necessary
+
+    // Read the first sector
+    uint8_t b[SDC_BLOCK_LEN];
+    size_t pos_a = (current_pos / SDC_BLOCK_LEN) * SDC_BLOCK_LEN;
+    size_t n1;
+    if (!fs_read_a(ctx, filename, b, pos_a, SDC_BLOCK_LEN, &n1))
+        return false;
+
+    size_t n = current_pos % SDC_BLOCK_LEN;
+
+    const uint8_t* p = buf;
+    size_t r = SDC_BLOCK_LEN - n;
+
+    if (r > nb_bytes)
+        r = nb_bytes;
+
+    // Fill the temp buffer with the data to write
+    for (size_t i = 0; i < r; ++i) {
+        b[n + i] = *p;
+        p++;
+    }
+
+    // Write the first sector
+    if (!fs_write_a(ctx, filename, b, pos_a, n + r))
+        return false;
+
+    // Write the remaining sectors if we still have bytes to write
+    if (nb_bytes > r) {
+        pos_a += SDC_BLOCK_LEN;
+        if (!fs_write_a(ctx, filename, p, pos_a, nb_bytes - r))
+            return false;
+    }
 
     return true;
 }

@@ -26,7 +26,7 @@ int sys_time(unsigned out_buffer[3]) {
 }
 
 int sys_fopen(const char* path, bool writeable) {
-    print("sys_fopen\n");
+    //print("sys_fopen\n");
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;
 
@@ -44,7 +44,7 @@ int sys_fopen(const char* path, bool writeable) {
 }
 
 int sys_fclose(int file_handle) {
-    print("sys_fclose\n");
+    //print("sys_fclose\n");
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     bios_globals->filenames[file_handle - 3][0] = '\0';
     return 0;
@@ -54,7 +54,7 @@ int sys_fread(int handle, void* buffer, unsigned size) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
 
     if (handle > 2) {
-        print("sys_fread called\n");
+        //print("sys_fread called\n");
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
         size_t nb_read_bytes;
         if (!fs_read(fs_ctx, bios_globals->filenames[handle - 3], buffer, bios_globals->read_positions[handle - 3], size, &nb_read_bytes)) {
@@ -80,10 +80,10 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
 
     if (handle > 2) {
-        print("sys_fwrite called\n");
+        //print("sys_fwrite called\n");
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
         if (!fs_write(fs_ctx, bios_globals->filenames[handle - 3], buffer, bios_globals->write_positions[handle - 3], size)) {
-            print("sys_fread: Unable to write\n");
+            print("sys_fwrite: Unable to write\n");
             return 0;
         }
         bios_globals->write_positions[handle - 3] += size;

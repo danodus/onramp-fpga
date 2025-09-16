@@ -126,6 +126,24 @@ bool run_program(const char* filename) {
     return true;
 }
 
+void cat(const char* filename) {
+    FILE* f;
+    char buf[256];
+    char* ss;
+    f = fopen(filename, "rb");
+    if (f != NULL) {
+        size_t n;
+        do {
+            n = fread(buf, 1, sizeof(buf), f);
+            fwrite(buf, 1, n, stdout);
+        } while (n > 0);
+
+        fclose(f);
+    } else {
+        printf("file not found\n");
+    }
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -143,6 +161,7 @@ int main(int argc, char *argv[]) {
             "\n"
             "[l] list files\n"
             "[r] run \"hex.oe hello.ohx -o hello.bin\"\n"
+            "[c] cat \"hello.bin\"\n"
             "[q] quit\n"
             "Make a selection...\n"
         );
@@ -157,6 +176,10 @@ int main(int argc, char *argv[]) {
             case 'r':
                 if (!run_program("hex.oe"))
                     printf("Unable to run the program\n");
+                break;
+            case 'C':
+            case 'c':
+                cat("hello.bin");
                 break;
             case 'Q':
             case 'q':

@@ -54,11 +54,11 @@ module soc(
         .i_ack(sba_ack)
     );
 
-    // 32 KiB of ROM preloaded with boot loader
-    reg [31:0] ROM[8192];
+    // 64 KiB of ROM preloaded with boot loader
+    reg [31:0] ROM[16384];
     initial $readmemh("bios.hex", ROM); 
     wire rom_stb = addr_is_rom & sba_stb;
-    wire [12:0] rom_addr = sba_addr[14:2];
+    wire [13:0] rom_addr = sba_addr[15:2];
     reg [31:0] rom_dat_r;
     always @(posedge i_clk)
         rom_dat_r = ROM[rom_addr];

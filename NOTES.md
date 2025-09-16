@@ -4,7 +4,7 @@ The memory map is the following:
 
 | Region | Description |
 | ------ | ----------- |
-| 0x00000000-0x0FFFFFFF | ROM with the BIOS (32 KiB) |
+| 0x00000000-0x0FFFFFFF | ROM with the BIOS (64 KiB) |
 | 0x10000000-0x1FFFFFFF | RAM with the operating system (256 KiB for now. I will eventually add SDRAM support for up to 32 MiB on my board) |
 | 0x20000000-0x2000FFFF | External BUS |
 | 0x30000000-0x3000000F | Timer |
@@ -102,8 +102,15 @@ With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_ti
 
 # Known Issues
 
-- The file system does not support current position not being a multiple of a SDC_BLOCK_LEN.
+- fs_read and fs_write are currently not atomic operations with unaligned accesses
 
 # Next Steps
 
-- Support reading files of more than 256 characters with `hex.oe`.
+- put "core/ld/0-global/ld.oe.ohx" on SD image
+- run "hex.oe ld.oe.ohx -o ld.oe"
+- run "ld.oe" without parameters
+We should have:
+```
+ERROR: Invalid arguments.
+Usage: ld -o <output_file> <input_file> [input_file...]
+```
