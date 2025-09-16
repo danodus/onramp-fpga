@@ -6,6 +6,10 @@
 
 #include <fs.h>
 
+void print(const char *s) {
+    printf("%s", s);
+}
+
 bool add_file(fs_context_t* fs_ctx, const char* filepath) {
     FILE *f = fopen(filepath, "rb");
     if (f == NULL) {
@@ -29,7 +33,11 @@ bool add_file(fs_context_t* fs_ctx, const char* filepath) {
         size_t n = fread(buf, 1, sizeof(buf), f);
         if (n <= 0)
             break;
-        fs_write(fs_ctx, filename, buf, total_size, n);
+        if (!fs_write(fs_ctx, filename, buf, total_size, n)) {
+            printf("Unable to write %s\n", filename);
+            return false;
+        }
+
         total_size += n;
     }   
 

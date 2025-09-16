@@ -102,15 +102,10 @@ With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_ti
 
 # Known Issues
 
+- not enough RAM to run `ld.oe`, must have at least 512 KiB
 - fs_read and fs_write are currently not atomic operations with unaligned accesses
 
 # Next Steps
 
-- put "core/ld/0-global/ld.oe.ohx" on SD image
-- run "hex.oe ld.oe.ohx -o ld.oe"
-- run "ld.oe" without parameters
-We should have:
-```
-ERROR: Invalid arguments.
-Usage: ld -o <output_file> <input_file> [input_file...]
-```
+- Add SDRAM
+- Continue the bootstrap process...

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <spawn.h>
 #include <__onramp/__pit.h>
@@ -63,7 +64,7 @@ void list_files(void) {
     }
 }
 
-bool run_program(const char* filename) {
+bool run_program(const char* filename, const char *args[]) {
     unsigned int program_size = get_file_size(filename);
     
     if (program_size == 0) {
@@ -107,14 +108,6 @@ bool run_program(const char* filename) {
     unsigned int* parent_pit = __process_info_table;
     unsigned int* child_pit = __memdup(parent_pit, sizeof(int) * 12);
 
-    const char *args[] = {
-        filename,
-        "hello.ohx",
-        "-o",
-        "hello.bin",
-        NULL
-    };
-
     // Setup the child pit
     *(child_pit + __ONRAMP_PIT_ARGS) = (int)args;
 
@@ -144,6 +137,28 @@ void cat(const char* filename) {
     }
 }
 
+void xxd(const char* filename) {
+    FILE* f;
+    uint8_t buf[256];
+    char* ss;
+    f = fopen(filename, "rb");
+    if (f != NULL) {
+        size_t n;
+        do {
+            n = fread(buf, 1, sizeof(buf), f);
+            for (int i = 0; i < n; ++i) {
+                if (i % 32 == 0)
+                    printf("\n");
+                printf("%02x ", buf[i]);
+            }
+        } while (n > 0);
+        printf("\n");
+
+        fclose(f);
+    } else {
+        printf("file not found\n");
+    }
+}
 
 int main(int argc, char *argv[]) {
 
@@ -160,8 +175,14 @@ int main(int argc, char *argv[]) {
         printf(
             "\n"
             "[l] list files\n"
+            "\n"
             "[r] run \"hex.oe hello.ohx -o hello.bin\"\n"
             "[c] cat \"hello.bin\"\n"
+            "\n"
+            "[1] run \"hex.oe ld.oe.ohx -o ld.oe\"\n"
+            "[2] xxd \"ld.oe\"\n"
+            "[3] run \"ld.oe\" (requires 512 KiB of RAM)\n"
+            "\n"
             "[q] quit\n"
             "Make a selection...\n"
         );
@@ -174,13 +195,48 @@ int main(int argc, char *argv[]) {
                 break;
             case 'R':
             case 'r':
-                if (!run_program("hex.oe"))
-                    printf("Unable to run the program\n");
+                {
+                    const char *args[] = {
+                        "hex.oe",
+                        "hello.ohx",
+                        "-o",
+                        "hello.bin",
+                        NULL
+                    }; 
+                    if (!run_program("hex.oe", args))
+                        printf("Unable to run the program\n");
+                }
                 break;
             case 'C':
             case 'c':
                 cat("hello.bin");
                 break;
+            case '1':
+                {
+                    const char *args[] = {
+                        "hex.oe",
+                        "ld.oe.ohx",
+                        "-o",
+                        "ld.oe",
+                        NULL
+                    };
+                    if (!run_program("hex.oe", args))
+                        printf("Unable to run the program\n");
+                }
+                break;
+            case '2':
+                xxd("ld.oe");
+                break;                
+            case '3':
+                {
+                    const char *args[] = {
+                        "ld.oe",
+                        NULL
+                    };
+                    if (!run_program("ld.oe", args))
+                        printf("Unable to run the program\n");
+                }
+                break;                
             case 'Q':
             case 'q':
                 quit = true;
