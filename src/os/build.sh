@@ -9,6 +9,6 @@ fi
 
 CC="$ONRAMP_BIN/onrampvm $ONRAMP_BIN/../share/onramp/bin/cc.oe"
 
-eval $CC -g -I../lib kernel.c -o kernel.oe
-hexdump -v -e '1/4 "%08x\n"' kernel.oe > kernel.hex
-python3 ../../scripts/disassemble.py kernel.oe > kernel.lst
+eval $CC -g -I../lib shell.c -o shell.oe
+hexdump -v -e '1/4 "%08x\n"' shell.oe > shell.hex
+python3 ../../scripts/disassemble.py shell.oe > shell.lst

@@ -62,9 +62,9 @@ I build the BIOS as freestanding with `-nostdlib` and `-nostdinc`.  I therefore 
 1) Set the stack pointer to the end of the RAM.
 2) Set r0 to the address of my process info table filled with my low-level IO routines.
 3) Set the rpp register to the start of RAM.  This register is used as a base offset for calls.
-4) Jumps to the start of RAM.  This is the kernel entry point.
+4) Jumps to the start of RAM.  This is the shell entry point.
 
-# Kernel
+# Shell
 
 # Structure Initialization
 
@@ -82,7 +82,7 @@ mystruct_t v = {
 
 # System Calls
 
-The BIOS offers a subset of system calls required for Onramp libc used by the kernel. Includes:
+The BIOS offers a subset of system calls required for Onramp libc used by the shell. Includes:
 
 Num | Description
 --- | -----------

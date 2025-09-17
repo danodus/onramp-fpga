@@ -33,6 +33,6 @@ prog: soc.bit
 
 run:
 	cd ../src/os && ./build.sh
-	python3 ../scripts/sendhex.py $(SERIAL) ../src/os/kernel.hex
+	python3 ../scripts/sendhex.py $(SERIAL) ../src/os/shell.hex
 
 .PHONY: all clean prog run

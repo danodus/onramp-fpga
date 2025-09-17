@@ -141,11 +141,11 @@ module soc(
 
 `else // SDRAM
 
-    // 32 MiB of BRAM preloaded with the OS kernel
+    // 32 MiB of BRAM preloaded with the OS shell
     
     reg [31:0] BRAM[32*1024*1024/4];
 `ifndef SYNTHESIS    
-    initial $readmemh("kernel.hex", BRAM);
+    initial $readmemh("shell.hex", BRAM);
 `endif
     wire bram_stb = addr_is_ram & sba_stb;
     wire [22:0] bram_addr = sba_addr[24:2];
