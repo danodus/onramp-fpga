@@ -60,7 +60,7 @@ void list_files(void) {
         if (path[0] == '\0')
             break;
         unsigned int file_size = get_file_size(path);
-        printf("%s\t%d\n", path, file_size);
+        printf("%s\t\t%d\n", path, file_size);
     }
 }
 
@@ -102,7 +102,13 @@ bool run_program(const char* filename, const char *args[]) {
         return false;
     }
 
-    printf("Execute %s...\n", filename);
+    printf("Executing \"%s", filename);
+    if (args[0]) {
+        size_t i = 1;
+        while (args[i])
+            printf(" %s", args[i++]);
+    }
+    printf("\"...\n");
 
     // Allocate a process information table for the child as a copy of ours
     unsigned int* parent_pit = __process_info_table;
@@ -176,12 +182,13 @@ int main(int argc, char *argv[]) {
             "\n"
             "[l] list files\n"
             "\n"
-            "[r] run \"hex.oe hello.ohx -o hello.bin\"\n"
-            "[c] cat \"hello.bin\"\n"
+            "[x] xxd \"hex.oe\"\n"
+            "[r] run \"hex.oe hello.ohx -o hello.txt\"\n"
+            "[c] cat \"hello.txt\"\n"
             "\n"
-            "[1] run \"hex.oe ld.oe.ohx -o ld.oe\"\n"
-            "[2] xxd \"ld.oe\"\n"
-            "[3] run \"ld.oe\"\n"
+            "[1] build \"bin/ld-0-global/ld.oe\"\n"
+            "[2] build \"bin/ar-0-cat/ar.oe\"\n"
+            "[3] run \"bin/ar-0-cat/ar.oe\"\n"
             "\n"
             "[q] quit\n"
             "Make a selection...\n"
@@ -193,6 +200,10 @@ int main(int argc, char *argv[]) {
             case 'l':
                 list_files();
                 break;
+            case 'X':
+            case 'x':
+                xxd("hex.oe");
+                break;                
             case 'R':
             case 'r':
                 {
@@ -200,43 +211,60 @@ int main(int argc, char *argv[]) {
                         "hex.oe",
                         "hello.ohx",
                         "-o",
-                        "hello.bin",
+                        "hello.txt",
                         NULL
                     }; 
-                    if (!run_program("hex.oe", args))
-                        printf("Unable to run the program\n");
+                    run_program("hex.oe", args);
                 }
                 break;
             case 'C':
             case 'c':
-                cat("hello.bin");
+                cat("hello.txt");
                 break;
             case '1':
                 {
                     const char *args[] = {
                         "hex.oe",
-                        "ld.oe.ohx",
+                        "core/ld/0-global/ld.oe.ohx",
                         "-o",
-                        "ld.oe",
+                        "bin/ld-0-global/ld.oe",
                         NULL
                     };
-                    if (!run_program("hex.oe", args))
-                        printf("Unable to run the program\n");
+                    run_program("hex.oe", args);
                 }
                 break;
             case '2':
-                xxd("ld.oe");
+                {
+                    const char *args[] = {
+                        "ld.oe",
+                        "core/libc/0-oo/src/start.oo",
+                        "core/libc/0-oo/src/ctype.oo",
+                        "core/libc/0-oo/src/environ.oo",
+                        "core/libc/0-oo/src/errno.oo",
+                        "core/libc/0-oo/src/malloc.oo",
+                        "core/libc/0-oo/src/malloc_util.oo",
+                        "core/libc/0-oo/src/spawn.oo",
+                        "core/libc/0-oo/src/stdio.oo",
+                        "core/libc/0-oo/src/string.oo",
+                        "core/libo/0-oo/src/libo-error.oo",
+                        "core/libo/0-oo/src/libo-util.oo",
+                        "core/ar/0-cat/ar.oo",
+                        "-o",
+                        "bin/ar-0-cat/ar.oe",
+                        NULL
+                    };
+                    run_program("bin/ld-0-global/ld.oe", args);
+                }
                 break;                
             case '3':
                 {
                     const char *args[] = {
-                        "ld.oe",
+                        "ar.oe",
                         NULL
                     };
-                    if (!run_program("ld.oe", args))
-                        printf("Unable to run the program\n");
+                    run_program("bin/ar-0-cat/ar.oe", args);
                 }
-                break;                
+                break;
             case 'Q':
             case 'q':
                 quit = true;

@@ -11,21 +11,26 @@ void print(const char *s) {
 }
 
 bool add_file(fs_context_t* fs_ctx, const char* filepath) {
-    FILE *f = fopen(filepath, "rb");
+    // Get the filename
+    char path[256];
+    strncpy(path, filepath, sizeof(path));
+    char* srcpath = path;
+    char* dstpath = strrchr(path, ':');
+    if (dstpath) {
+         // skip delimiter
+        *dstpath = '\0';
+        ++dstpath;
+    } else {
+        dstpath = srcpath;
+    }
+
+    FILE *f = fopen(srcpath, "rb");
     if (f == NULL) {
-        printf("Unable to open %s\n", filepath);
+        printf("Unable to open %s\n", srcpath);
         return false;
     }
 
-    // Get the filename
-    const char* filename = strrchr(filepath, '/');
-    if (filename) {
-        ++filename; // skip '/'
-    } else {
-        filename = filepath;
-    }
-
-    printf("Adding file %s...\n", filename);
+    printf("Adding file %s...\n", dstpath);
 
     uint8_t buf[512];
     size_t total_size = 0;
@@ -33,8 +38,8 @@ bool add_file(fs_context_t* fs_ctx, const char* filepath) {
         size_t n = fread(buf, 1, sizeof(buf), f);
         if (n <= 0)
             break;
-        if (!fs_write(fs_ctx, filename, buf, total_size, n)) {
-            printf("Unable to write %s\n", filename);
+        if (!fs_write(fs_ctx, dstpath, buf, total_size, n)) {
+            printf("Unable to write %s\n", dstpath);
             return false;
         }
 
