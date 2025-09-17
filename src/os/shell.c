@@ -186,9 +186,9 @@ int main(int argc, char *argv[]) {
             "[r] run \"hex.oe hello.ohx -o hello.txt\"\n"
             "[c] cat \"hello.txt\"\n"
             "\n"
-            "[1] build \"bin/ld-0-global/ld.oe\"\n"
-            "[2] build \"bin/ar-0-cat/ar.oe\"\n"
-            "[3] run \"bin/ar-0-cat/ar.oe\"\n"
+            "[1] build \"ld-0-global/ld.oe\"\n"
+            "[2] build \"ar-0-cat/ar.oe\"\n"
+            "[3] build \"libc-0-oo/libc.oa\"\n"
             "\n"
             "[q] quit\n"
             "Make a selection...\n"
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
                         "hex.oe",
                         "core/ld/0-global/ld.oe.ohx",
                         "-o",
-                        "bin/ld-0-global/ld.oe",
+                        "build/ld-0-global/ld.oe",
                         NULL
                     };
                     run_program("hex.oe", args);
@@ -250,19 +250,30 @@ int main(int argc, char *argv[]) {
                         "core/libo/0-oo/src/libo-util.oo",
                         "core/ar/0-cat/ar.oo",
                         "-o",
-                        "bin/ar-0-cat/ar.oe",
+                        "build/ar-0-cat/ar.oe",
                         NULL
                     };
-                    run_program("bin/ld-0-global/ld.oe", args);
+                    run_program("build/ld-0-global/ld.oe", args);
                 }
                 break;                
             case '3':
                 {
                     const char *args[] = {
                         "ar.oe",
+                        "rc",
+                        "build/libc-0-oo/libc.oa",
+                        "core/libc/0-oo/src/start.oo",
+                        "core/libc/0-oo/src/ctype.oo",
+                        "core/libc/0-oo/src/environ.oo",
+                        "core/libc/0-oo/src/errno.oo",
+                        "core/libc/0-oo/src/malloc.oo",
+                        "core/libc/0-oo/src/malloc_util.oo",
+                        "core/libc/0-oo/src/spawn.oo",
+                        "core/libc/0-oo/src/stdio.oo",
+                        "core/libc/0-oo/src/string.oo",
                         NULL
                     };
-                    run_program("bin/ar-0-cat/ar.oe", args);
+                    run_program("build/ar-0-cat/ar.oe", args);
                 }
                 break;
             case 'Q':
