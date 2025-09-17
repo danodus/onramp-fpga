@@ -1,13 +1,13 @@
 SERIAL ?= /dev/ttyUSB0
 
-SRC =  top.v ../rtl/div.v ../rtl/or32.v ../rtl/timer.v ../rtl/soc.v cfg.v led.v uart.v uart_rx.v uart_tx.v spi.v
+SRC =  top.v ../rtl/div.v ../rtl/or32.v ../rtl/sdram.v ../rtl/timer.v ../rtl/soc.v cfg.v led.v uart.v uart_rx.v uart_tx.v spi.v
 
 #TOOLPREFIX = /opt/oss-cad-suite/bin/
 TOOLPREFIX =
 
 PNRFLAGS = --85k --package CABGA381 --speed 6 --lpf ulx3s.lpf
 
-DEFINES =
+DEFINES = -DSDRAM
 
 all:	build
 

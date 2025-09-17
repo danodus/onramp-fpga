@@ -5,7 +5,7 @@ The memory map is the following:
 | Region | Description |
 | ------ | ----------- |
 | 0x00000000-0x0FFFFFFF | ROM with the BIOS (64 KiB) |
-| 0x10000000-0x1FFFFFFF | RAM with the operating system (256 KiB for now. I will eventually add SDRAM support for up to 32 MiB on my board) |
+| 0x10000000-0x1FFFFFFF | RAM with the operating system (32 MiB) |
 | 0x20000000-0x2000FFFF | External BUS |
 | 0x30000000-0x3000000F | Timer |
 
@@ -102,10 +102,8 @@ With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_ti
 
 # Known Issues
 
-- not enough RAM to run `ld.oe`, must have at least 512 KiB
 - fs_read and fs_write are currently not atomic operations with unaligned accesses
 
 # Next Steps
 
-- Add SDRAM
 - Continue the bootstrap process...

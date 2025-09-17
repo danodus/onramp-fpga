@@ -4,15 +4,26 @@
 `default_nettype none
 
 module top(
-   input        clk,
-   input  [6:0] btn,
-   output [7:0] led,
-   input        uart_rx,
-   output       uart_tx,
-   input        sd_miso,
-   output       sd_mosi,
-   output       sd_sck,
-   output       sd_ss
+    input        clk,
+    input  [6:0] btn,
+    output [7:0] led,
+    input        uart_rx,
+    output       uart_tx,
+    input        sd_miso,
+    output       sd_mosi,
+    output       sd_sck,
+    output       sd_ss,
+    // SDRAM
+    output        SDRAM_CLK,      // Clock for SDRAM chip
+    output        SDRAM_CKE,      // Clock enabled
+    inout  [15:0] SDRAM_DQ,       // Bidirectional data lines to/from SDRAM
+    output [12:0] SDRAM_A,        // Address bus, multiplexed, 13 bits
+    output [1:0]  SDRAM_BA,       // Bank select wires for 4 banks
+    output [1:0]  SDRAM_DQM,      // Byte mask
+    output        SDRAM_CSX,      // Chip select
+    output        SDRAM_WEX,      // Write enable
+    output        SDRAM_RASX,     // Row address select
+    output        SDRAM_CASX      // Columns address select
 );
 
     // Reset
@@ -39,7 +50,18 @@ module top(
         .o_ext_we(ext_we),
         .i_ext_ack(ext_ack),
         .o_ext_dat_w(ext_dat_w),
-        .i_ext_dat_r(ext_dat_r)
+        .i_ext_dat_r(ext_dat_r),
+        // SDRAM
+        .SDRAM_CLK(SDRAM_CLK),        // Clock for SDRAM chip
+        .SDRAM_CKE(SDRAM_CKE),        // Clock enabled
+        .SDRAM_D(SDRAM_DQ),           // Bidirectional data lines to/from SDRAM
+        .SDRAM_ADDR(SDRAM_A),         // Address bus, multiplexed, 13 bits
+        .SDRAM_BA(SDRAM_BA),          // Bank select wires for 4 banks
+        .SDRAM_DQM(SDRAM_DQM),        // Byte mask
+        .SDRAM_CS(SDRAM_CSX),         // Chip select
+        .SDRAM_WE(SDRAM_WEX),         // Write enable
+        .SDRAM_RAS(SDRAM_RASX),       // Row address select
+        .SDRAM_CAS(SDRAM_CASX)        // Columns address select        
     );
 
     //

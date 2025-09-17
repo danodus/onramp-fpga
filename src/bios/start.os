@@ -2,7 +2,7 @@
 ; SPDX-License-Identifier: MIT
 
 =__start
-    imw rsp 0x1003f000  ; Stack pointer to the end of RAM (256 KiB) - 4 KiB for BIOS globals 
+    imw rsp 0x11ff0000  ; Stack pointer to the end of RAM (32 MiB) - 64 KiB for BIOS globals 
     call ^main          ; BIOS initialization
     imw r0 ^process_info_table
     imw r1 0x10000000   ; Jump to RAM

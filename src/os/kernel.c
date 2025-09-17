@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
             "\n"
             "[1] run \"hex.oe ld.oe.ohx -o ld.oe\"\n"
             "[2] xxd \"ld.oe\"\n"
-            "[3] run \"ld.oe\" (requires 512 KiB of RAM)\n"
+            "[3] run \"ld.oe\"\n"
             "\n"
             "[q] quit\n"
             "Make a selection...\n"

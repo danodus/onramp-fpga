@@ -6,7 +6,7 @@
 
 #include <fs.h>
 
-#define BIOS_GLOBALS 0x1003f000
+#define BIOS_GLOBALS 0x11ff0000  // (32 MiB - 64 KiB)
 
 #define MAX_OPEN_FILES  4
 
