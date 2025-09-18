@@ -81,6 +81,15 @@
     add rsp rsp 4
     ret
 
+=sys_ftrunc1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_ftrunc
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret
+
 =sys_dopen1
     sub rsp rsp 4       ; save rpp
     stw rpp 0 rsp
@@ -127,7 +136,7 @@
     0x00000000
     0x00000000     ; 8
     0x00000000
-    0x00000000     ; 9
+    ^sys_ftrunc1   ; 9 - ftrunc
     0x00000000
     ^sys_dopen1    ; 10 - dopen
     0x00000000

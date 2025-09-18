@@ -92,6 +92,7 @@ Num | Description
 4 | fclose
 5 | fread
 6 | fwrite
+9 | ftrunc
 10 | dopen
 12 | dread
 13 | stat

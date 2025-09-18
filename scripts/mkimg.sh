@@ -26,7 +26,8 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libo/0-oo/src/libo-error.oo:core/libo/0-oo/src/libo-error.oo \
     $ONRAMP_BIN/../../../core/libo/0-oo/src/libo-util.oo:core/libo/0-oo/src/libo-util.oo \
     $ONRAMP_BIN/../../../core/ar/0-cat/ar.oo:core/ar/0-cat/ar.oo \
-    # \
-    # $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/ld-0-global/ld.oe \
-    # $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/ar-0-cat/ar.oe \
+    \
+    $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/ld-0-global/ld.oe \
+    $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/ar-0-cat/ar.oe \
+    $ONRAMP_BIN/../../intermediate/libc-0-oo/libc.oa:build/libc-0-oo/libc.oa \
 

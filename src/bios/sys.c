@@ -98,6 +98,21 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
     return size;
 }
 
+int sys_ftrunc(int handle, unsigned size_low, unsigned size_high) {
+        bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
+
+    if (handle > 2) {
+        //print("sys_ftrunc called\n");
+        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+        if (!fs_write(fs_ctx, bios_globals->filenames[handle - 3], (void*)0, size_low, 0)) {
+            print("sys_ftrunc: Unable to write\n");
+            return -1;
+        }
+        return 0;
+    }
+    return -1;
+}
+
 int sys_dopen(const char* path) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;
