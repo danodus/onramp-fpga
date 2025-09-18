@@ -167,3 +167,12 @@ int sys_stat(const char* path, unsigned output[4]) {
     return found ? 0 : 1;
 }
 
+int sys_unlink(const char* path) {
+    bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
+    fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+    
+    if (fs_delete(fs_ctx, path))
+        return 0;
+
+    return -1;
+}

@@ -96,6 +96,7 @@ Num | Description
 10 | dopen
 12 | dread
 13 | stat
+16 | unlink
 
 A file system is provided in the BIOS.  Directories are not yet supported.
 

@@ -117,6 +117,15 @@
     add rsp rsp 4
     ret    
 
+=sys_unlink1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_unlink
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret
+
 =sys_call_table
     ^sys_exit1     ; 0 - exit
     0x00000000
@@ -150,7 +159,7 @@
     0x00000000
     0x00000000     ; 15
     0x00000000
-    0x00000000     ; 16
+    ^sys_unlink1   ; 16 - unlink
     0x00000000
     0x00000000     ; 17
     0x00000000

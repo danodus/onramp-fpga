@@ -20,6 +20,7 @@ extern unsigned* __process_info_table;
 int __sys_dopen(const char* path);
 int __sys_dread(int handle, char out_buffer[256]);
 int __sys_stat(const char* path, unsigned output[4]);
+int __sys_unlink(const char* path);
 
 int is_hardware(void) {
     return *(int *)(CFG) & 1;
@@ -186,6 +187,8 @@ int main(int argc, char *argv[]) {
             "[r] run \"hex.oe hello.ohx -o hello.txt\"\n"
             "[c] cat \"hello.txt\"\n"
             "\n"
+            "[0] clean\n"
+            "\n"
             "[1] build \"ld-0-global/ld.oe\"\n"
             "[2] build \"ar-0-cat/ar.oe\"\n"
             "[3] build \"libc-0-oo/libc.oa\"\n"
@@ -220,6 +223,13 @@ int main(int argc, char *argv[]) {
             case 'C':
             case 'c':
                 cat("hello.txt");
+                break;
+            case '0':
+                if (__sys_unlink("build/ld-0-global/ld.oe") ||
+                    __sys_unlink("build/ar-0-cat/ar.oe")    ||
+                    __sys_unlink("build/libc-0-oo/libc.oa")) {
+                        printf("One or more files could not be removed\n");
+                    }
                 break;
             case '1':
                 {
