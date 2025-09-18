@@ -30,4 +30,5 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/ar-0-cat/ar.oe \
     $ONRAMP_BIN/../../intermediate/libc-0-oo/libc.oa:build/libc-0-oo/libc.oa \
+    $ONRAMP_BIN/../../intermediate/libo-0-oo/libo.oa:build/libo-0-oo/libo.oa \
 
