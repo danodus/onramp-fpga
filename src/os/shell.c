@@ -194,6 +194,7 @@ int main(int argc, char *argv[]) {
             "[3] build \"libc-0-oo/libc.oa\"\n"
             "\n"
             "[4] build \"libo-0-oo/libo.oa\"\n"
+            "[5] build \"as-0-basic/as.oe\"\n"
             "\n"
             "[q] quit\n"
             "Make a selection...\n"
@@ -230,7 +231,8 @@ int main(int argc, char *argv[]) {
                 if (__sys_unlink("build/ld-0-global/ld.oe") ||
                     __sys_unlink("build/ar-0-cat/ar.oe")    ||
                     __sys_unlink("build/libc-0-oo/libc.oa") ||
-                    __sys_unlink("build/libo-0-oo/libo.oa")) {
+                    __sys_unlink("build/libo-0-oo/libo.oa") ||
+                    __sys_unlink("build/as-0-basic/as.oe")) {
                         printf("One or more files could not be removed\n");
                     }
                 break;
@@ -300,6 +302,20 @@ int main(int argc, char *argv[]) {
                         NULL
                     };
                     run_program("build/ar-0-cat/ar.oe", args);
+                }
+                break;
+                case '5':
+                {
+                    const char *args[] = {
+                        "ld.oe",
+                        "-o",
+                        "build/as-0-basic/as.oe",
+                        "build/libc-0-oo/libc.oa",
+                        "build/libo-0-oo/libo.oa",
+                        "core/as/0-basic/as.oo",
+                        NULL
+                    };
+                    run_program("build/ld-0-global/ld.oe", args);
                 }
                 break;
             case 'Q':
