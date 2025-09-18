@@ -528,6 +528,9 @@ bool fs_read(fs_context_t* ctx, const char* filename, uint8_t* buf, size_t curre
     uint8_t* p = buf;
     size_t r = n1 - n;
 
+    if (r > nb_bytes)
+        r = nb_bytes;
+
     for (size_t i = 0; i < r; ++i) {
         *p = b[n + i];
         p++;
