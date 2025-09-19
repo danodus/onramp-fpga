@@ -68,6 +68,8 @@ int sys_fread(int handle, void* buffer, unsigned size) {
         if (size >= 1) {
             char c = getchar(0);    // non-blocking
             if (c) {
+                if (c == 13)
+                    c = 10;
                 *(char *)buffer = c;
                 return 1;
             }
