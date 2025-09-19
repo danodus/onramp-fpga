@@ -184,6 +184,7 @@ int main(int argc, char *argv[]) {
             "[l] list files\n"
             "\n"
             "[x] xxd \"hex.oe\"\n"
+            "[e] run \"ed.oe hello.ohx\"\n"
             "[r] run \"hex.oe hello.ohx -o hello.txt\"\n"
             "[c] cat \"hello.txt\"\n"
             "\n"
@@ -212,6 +213,17 @@ int main(int argc, char *argv[]) {
             case 'x':
                 xxd("hex.oe");
                 break;                
+            case 'E':
+            case 'e':
+                {
+                    const char *args[] = {
+                        "ed.oe",
+                        "hello.ohx",
+                        NULL
+                    }; 
+                    run_program("ed.oe", args);
+                }
+                break;
             case 'R':
             case 'r':
                 {
