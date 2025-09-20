@@ -65,6 +65,39 @@ void list_files(void) {
     }
 }
 
+bool remove_file_with_prefix(const char* prefix) {
+    if (__sys_dopen(NULL) != 0) {
+        printf("sys_dread failed\n");
+        return false;
+    }
+
+    char path[256];
+    
+    bool removed = false;
+
+    size_t prefix_len = strlen(prefix);
+    for (;;) {
+        if (__sys_dread(0, path) != 0) {
+            printf("sys_dread failed\n");
+            return false;
+        }
+        if (path[0] == '\0')
+            break;
+        if (strncmp(prefix, path, prefix_len) == 0) {
+            printf("Removing %s\n", path);
+            __sys_unlink(path);
+            removed = true;
+            break;
+        }
+    }
+
+    return removed;
+}
+
+void remove_files_with_prefix(const char* prefix) {
+    while (remove_file_with_prefix(prefix));
+}
+
 bool run_program(const char* filename, const char *args[]) {
     unsigned int program_size = get_file_size(filename);
     
@@ -241,24 +274,7 @@ int main(int argc, char *argv[]) {
                 cat("hello.txt");
                 break;
             case '0':
-                // TODO: Clean everything beginning with build/ instead
-                if (__sys_unlink("build/ld-0-global/ld.oe")     ||
-                    __sys_unlink("build/ar-0-cat/ar.oe")        ||
-                    __sys_unlink("build/libc-0-oo/libc.oa")     ||
-                    __sys_unlink("build/libo-0-oo/libo.oa")     ||
-                    __sys_unlink("build/as-0-basic/as.oe")      ||
-                    __sys_unlink("build/as-1-compound/emit.oo") ||
-                    __sys_unlink("build/as-1-compound/main.oo") ||
-                    __sys_unlink("build/as-1-compound/op_arithmetic.oo") ||
-                    __sys_unlink("build/as-1-compound/op_control.oo")    ||
-                    __sys_unlink("build/as-1-compound/op_logic.oo")      ||
-                    __sys_unlink("build/as-1-compound/op_memory.oo")     ||
-                    __sys_unlink("build/as-1-compound/opcodes.oo")       ||
-                    __sys_unlink("build/as-1-compound/parse.oo")         ||
-                    __sys_unlink("build/as-1-compound/as.oe")
-                    ) {
-                        //printf("One or more files could not be removed\n");
-                    }
+                remove_files_with_prefix("build/");
                 break;
             case '1':
                 {
