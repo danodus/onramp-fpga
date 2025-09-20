@@ -57,8 +57,10 @@ static char* uitoa(unsigned int value, char* result, int base)
 int main(void) {
 
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    for (int i = 0; i < MAX_OPEN_FILES; ++i)
-        bios_globals->filenames[i][0] = '\0';
+    for (int i = 0; i < MAX_OPEN_FILES; ++i) {
+        file_t* f = &bios_globals->files[i];
+        f->filename[0] = '\0';
+    }
 
     print("BIOS: Initialized\n");
 

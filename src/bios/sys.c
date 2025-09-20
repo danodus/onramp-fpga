@@ -31,11 +31,14 @@ int sys_fopen(const char* path, bool writeable) {
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;
 
     for (int i = 0; i < MAX_OPEN_FILES; ++i) {
-        if (bios_globals->filenames[i][0] == '\0') {
+        file_t* f = &bios_globals->files[i];
+        if (f->filename[0] == '\0') {
             // empty slot found
-            strncpy(bios_globals->filenames[i], path, FS_MAX_FILENAME_LEN);
-            bios_globals->read_positions[i] = 0;
-            bios_globals->write_positions[i] = 0;
+            strncpy(f->filename, path, FS_MAX_FILENAME_LEN);
+            f->read_position = 0;
+            f->write_position = 0;
+            f->read_buf.count = 0;
+            f->write_buf.count = 0;
             return 3 + i;
         }
     }
@@ -46,7 +49,16 @@ int sys_fopen(const char* path, bool writeable) {
 int sys_fclose(int file_handle) {
     //print("sys_fclose\n");
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-    bios_globals->filenames[file_handle - 3][0] = '\0';
+    file_t* f = &bios_globals->files[file_handle - 3];
+
+    // If the I/O buffer is not empty, flush it
+    if (f->write_buf.count > 0) {
+        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+        if (!fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, f->write_buf.count))
+            print("sys_fwrite: Unable to write\n");
+    }
+
+    f->filename[0] = '\0';
     return 0;
 }
 
@@ -55,14 +67,35 @@ int sys_fread(int handle, void* buffer, unsigned size) {
 
     if (handle > 2) {
         //print("sys_fread called\n");
-        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        size_t nb_read_bytes;
-        if (!fs_read(fs_ctx, bios_globals->filenames[handle - 3], buffer, bios_globals->read_positions[handle - 3], size, &nb_read_bytes)) {
-            print("sys_fread: Unable to read\n");
-            return 0;
+
+        file_t* f = &bios_globals->files[handle - 3];
+
+        // 1. If the I/O buffer is empty, fill it to its maximum capacity
+        // 2. Empty the I/O buffer as much as possible based on the user request
+
+        // Fill the I/O buffer if empty
+        if (f->read_buf.count == 0) {
+            fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+            size_t nb_read_bytes;
+            if (!fs_read(fs_ctx, f->filename, f->read_buf.data, f->read_position, IO_BUFFER_SIZE, &nb_read_bytes)) {
+                print("sys_fread: Unable to read\n");
+                return 0;
+            }
+
+            f->read_buf.count += nb_read_bytes;
+            f->read_position += nb_read_bytes;
+            f->read_buf_offset = 0;
         }
-        bios_globals->read_positions[handle - 3] += nb_read_bytes;
-        return nb_read_bytes;
+
+        // Empty the I/O buffer
+        if (size > f->read_buf.count)
+            size = f->read_buf.count;
+
+        memcpy(buffer, f->read_buf.data + f->read_buf_offset, size);
+        f->read_buf.count -= size;
+        f->read_buf_offset += size;
+
+        return size;
     } else {
         // stdin
         if (size >= 1) {
@@ -83,13 +116,32 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
 
     if (handle > 2) {
         //print("sys_fwrite called\n");
-        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        if (!fs_write(fs_ctx, bios_globals->filenames[handle - 3], buffer, bios_globals->write_positions[handle - 3], size)) {
-            print("sys_fwrite: Unable to write\n");
-            return 0;
+
+        file_t* f = &bios_globals->files[handle - 3];        
+
+        // 1. If the I/O buffer is full, flush it
+        // 2. Fill the I/O buffer as much as possible based on the user request
+        
+        // If the I/O buffer is full, flush it
+        if (f->write_buf.count == IO_BUFFER_SIZE) {
+            fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+            if (!fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, IO_BUFFER_SIZE)) {
+                print("sys_fwrite: Unable to write\n");
+                return 0;
+            }
+            f->write_buf.count = 0;
+            f->write_position += IO_BUFFER_SIZE;
         }
-        bios_globals->write_positions[handle - 3] += size;
+
+        // Fill the I/O buffer as much as possible based on the user request
+        size_t r = IO_BUFFER_SIZE - f->write_buf.count;
+        if (size > r)
+            size = r;
+
+        memcpy(f->write_buf.data + f->write_buf.count, buffer, size);
+        f->write_buf.count += size;
         return size;
+
     } else {
         // stdout/stderr
         for (unsigned i = 0; i < size; ++i) {
@@ -105,8 +157,9 @@ int sys_ftrunc(int handle, unsigned size_low, unsigned size_high) {
 
     if (handle > 2) {
         //print("sys_ftrunc called\n");
+        file_t* f = &bios_globals->files[handle - 3]; 
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        if (!fs_write(fs_ctx, bios_globals->filenames[handle - 3], (void*)0, size_low, 0)) {
+        if (!fs_write(fs_ctx, f->filename, (void*)0, size_low, 0)) {
             print("sys_ftrunc: Unable to write\n");
             return -1;
         }

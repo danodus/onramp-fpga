@@ -5,6 +5,16 @@
 
 #include "io.h"
 
+void* memcpy(void* vdest, const void* vsrc, size_t count) {
+    void* start = vdest;
+    const unsigned char* src = (const unsigned char*)vsrc;
+    unsigned char* dest = (unsigned char*)vdest;
+    unsigned char* end = dest + count;
+    while (dest != end)
+        *dest++ = *src++;
+    return start;
+}
+
 int strcmp(const char* a, const char* b) {
     while (*a == *b) {
         if (*a == 0)

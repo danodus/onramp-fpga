@@ -6,17 +6,30 @@
 
 #include <fs.h>
 
-#define BIOS_GLOBALS 0x11ff0000  // (32 MiB - 64 KiB)
+#define BIOS_GLOBALS 0x11fc0000  // (32 MiB - 256 KiB)
 
 #define MAX_OPEN_FILES  4
+
+#define IO_BUFFER_SIZE  4096
+
+typedef struct {
+    uint8_t data[IO_BUFFER_SIZE];
+    size_t count;
+} io_buffer_t;
+
+typedef struct {
+    char filename[FS_MAX_FILENAME_LEN + 1];
+    size_t read_position;
+    size_t write_position;
+    io_buffer_t read_buf, write_buf;
+    size_t read_buf_offset;
+} file_t;
 
 typedef struct {
     fs_context_t fs_ctx;
 
     // Files
-    char filenames[MAX_OPEN_FILES][FS_MAX_FILENAME_LEN + 1];
-    size_t read_positions[MAX_OPEN_FILES];
-    size_t write_positions[MAX_OPEN_FILES];
+    file_t files[MAX_OPEN_FILES];
 
     // Directory listing
     uint16_t dir_nb_files;

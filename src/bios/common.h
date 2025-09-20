@@ -13,6 +13,7 @@ typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
 typedef unsigned long size_t;
 
+void* memcpy(void* vdest, const void* vsrc, size_t count);
 int strcmp(const char* a, const char* b);
 char* strncpy(char* restrict to, const char* restrict from, size_t count);
 void print(const char* s);
