@@ -104,7 +104,7 @@ With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_ti
 
 # Known Issues
 
-- fs_read and fs_write are currently not atomic operations with unaligned accesses
+
 
 # Next Steps
 
