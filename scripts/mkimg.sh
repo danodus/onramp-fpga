@@ -47,5 +47,5 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/libc-0-oo/libc.oa:build/libc-0-oo/libc.oa \
     $ONRAMP_BIN/../../intermediate/libo-0-oo/libo.oa:build/libo-0-oo/libo.oa \
     $ONRAMP_BIN/../../intermediate/as-0-basic/as.oe:build/as-0-basic/as.oe \
-    # $ONRAMP_BIN/../../intermediate/as-1-compound/as.oe:build/as-1-compound/as.oe \
+    $ONRAMP_BIN/../../intermediate/as-1-compound/as.oe:build/as-1-compound/as.oe \
 

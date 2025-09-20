@@ -196,8 +196,7 @@ int main(int argc, char *argv[]) {
             "\n"
             "[4] build \"libo-0-oo/libo.oa\"\n"
             "[5] build \"as-0-basic/as.oe\"\n"
-            "[6] build partial \"as-1-compound/as.oe\" (only \"build/as-1-compound/emit.oo\")\n"
-            "[7] cat \"build/as-1-compound/emit.oo\"\n"
+            "[6] build \"as-1-compound/as.oe\"\n"
             "\n"
             "[q] quit\n"
             "Make a selection...\n"
@@ -242,13 +241,21 @@ int main(int argc, char *argv[]) {
                 cat("hello.txt");
                 break;
             case '0':
+                // TODO: Clean everything beginning with build/ instead
                 if (__sys_unlink("build/ld-0-global/ld.oe")     ||
                     __sys_unlink("build/ar-0-cat/ar.oe")        ||
                     __sys_unlink("build/libc-0-oo/libc.oa")     ||
                     __sys_unlink("build/libo-0-oo/libo.oa")     ||
                     __sys_unlink("build/as-0-basic/as.oe")      ||
-                    __sys_unlink("build/as-1-compound/emit.oo") // ||
-                    //__sys_unlink("build/as-1-compound/as.oe")
+                    __sys_unlink("build/as-1-compound/emit.oo") ||
+                    __sys_unlink("build/as-1-compound/main.oo") ||
+                    __sys_unlink("build/as-1-compound/op_arithmetic.oo") ||
+                    __sys_unlink("build/as-1-compound/op_control.oo")    ||
+                    __sys_unlink("build/as-1-compound/op_logic.oo")      ||
+                    __sys_unlink("build/as-1-compound/op_memory.oo")     ||
+                    __sys_unlink("build/as-1-compound/opcodes.oo")       ||
+                    __sys_unlink("build/as-1-compound/parse.oo")         ||
+                    __sys_unlink("build/as-1-compound/as.oe")
                     ) {
                         //printf("One or more files could not be removed\n");
                     }
@@ -347,8 +354,6 @@ int main(int argc, char *argv[]) {
                     };
                     run_program("build/as-0-basic/as.oe", args);
                 }
-                // TODO: Remaining
-                /*
                 {
                     const char *args[] = {
                         "as.oe",
@@ -438,10 +443,6 @@ int main(int argc, char *argv[]) {
                     };
                     run_program("build/ld-0-global/ld.oe", args);
                 }
-                */
-                break;
-            case '7':
-                cat("build/as-1-compound/emit.oo");
                 break;
             case 'Q':
             case 'q':
