@@ -231,6 +231,8 @@ int main(int argc, char *argv[]) {
             "[5] build \"as-0-basic/as.oe\"\n"
             "[6] build \"as-1-compound/as.oe\"\n"
             "\n"
+            "[7] build \"cpp-0-strip/cpp.oe\"\n"
+            "\n"
             "[q] quit\n"
             "Make a selection...\n"
         );
@@ -455,6 +457,30 @@ int main(int argc, char *argv[]) {
                         "build/as-1-compound/parse.oo",
                         "-o",
                         "build/as-1-compound/as.oe",
+                        NULL
+                    };
+                    run_program("build/ld-0-global/ld.oe", args);
+                }
+                break;
+            case '7':
+                {
+                    const char *args[] = {
+                        "as.oe",
+                        "core/cpp/0-strip/cpp.os",
+                        "-o",
+                        "build/cpp-0-strip/cpp.oo",
+                        NULL
+                    };
+                    run_program("build/as-1-compound/as.oe", args);
+                }
+                {
+                    const char *args[] = {
+                        "ld.oe",
+                        "build/libc-0-oo/libc.oa",
+                        "build/libo-0-oo/libo.oa",
+                        "build/cpp-0-strip/cpp.oo",
+                        "-o",
+                        "build/cpp-0-strip/cpp.oe",
                         NULL
                     };
                     run_program("build/ld-0-global/ld.oe", args);
