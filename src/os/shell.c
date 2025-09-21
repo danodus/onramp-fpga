@@ -12,6 +12,8 @@
 #include <spawn.h>
 #include <__onramp/__pit.h>
 
+#include <conio.h>
+
 #define CFG         0x20000000
 #define LED         0x20001000
 
@@ -232,7 +234,7 @@ static void command_prompt(void) {
     for(;;) {
         fputs(">", stdout);
         fflush(stdout);
-        if (fgets(buf, sizeof(buf), stdin)) {
+        if (read_line(buf, sizeof(buf) - 1)) {
             if (!buf[0] || buf[0] == '\n')
                 break;
             run_command(buf);

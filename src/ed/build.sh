@@ -9,4 +9,4 @@ fi
 
 CC="$ONRAMP_BIN/onrampvm $ONRAMP_BIN/../share/onramp/bin/cc.oe"
 
-eval $CC ed.c -o ed.oe
+eval $CC -I../lib ../lib/conio.c ed.c -o ed.oe

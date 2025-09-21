@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#include <conio.h>
+
 char* lines[2000], line[BUFSIZ];
 int a1, a2, a3, last_line, curr_line;
 char cmd;
@@ -26,7 +28,7 @@ char* str_dup(char* s) {
 // (.)a: Append new lines to buffer after given address
 bool cmd_append() {
     if (!have_a1) { a2 = a1 = curr_line; have_a1 = true; }
-    while (fgets(line, sizeof(line), stdin)) {
+    while (read_line(line, sizeof(line))) {
         if (!strcmp(line, ".\n")) break;        // Done inputting lines with single '.'
         a1++;   // Will append after given address 1
         // Move curret buffer lines to make rooom for new line
@@ -164,7 +166,7 @@ bool next_command() {
     // Print prompt by default
     printf("*"), fflush(stdout);
     // Read in next line addresses and command to run
-    if (!fgets(line, sizeof(line), stdin)) return false;
+    if (!read_line(line, sizeof(line), stdin)) return false;
     a1 = a2 = a3 = 0;
     have_a1 = have_a2 = have_a3 = false;
     cmd = '\0';
