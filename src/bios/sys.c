@@ -35,6 +35,7 @@ int sys_fopen(const char* path, bool writeable) {
         if (f->filename[0] == '\0') {
             // empty slot found
             strncpy(f->filename, path, FS_MAX_FILENAME_LEN);
+            f->filename[FS_MAX_FILENAME_LEN] = '\0';
             f->read_position = 0;
             f->write_position = 0;
             f->read_buf.count = 0;
