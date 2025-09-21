@@ -206,32 +206,11 @@ static bool run_command(const char* cmd) {
     size_t nb_args = 0;
     const char* args[256];
 
-/*
-    char* token = strtok(b, " \n");
+    char* token = strtok(buf, " \n");
 
     while (token) {
-        args[args_index++] = token;
+        args[nb_args++] = token;
         token = strtok(NULL, " \n");
-    }
-*/
-
-    size_t token_first_char_index = 0;
-    size_t i = 0;
-    for (;;) {
-        if (buf[i] == '\n' || buf[i] == ' ' || buf[i] == '\0') {
-            bool end_of_string = (buf[i] == '\0');
-            if (i > token_first_char_index) {
-                args[nb_args] = &buf[token_first_char_index];
-                buf[i] = '\0';
-                nb_args++;
-                if (nb_args >= sizeof(args) - 1)
-                    break;
-            }
-            token_first_char_index = i + 1;
-            if (end_of_string)
-                break;
-        }
-        i++;
     }
 
     if (nb_args < 1) {
