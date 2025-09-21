@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <fs.h>
 
@@ -12,8 +13,7 @@ void print(const char *s) {
 
 bool add_file(fs_context_t* fs_ctx, const char* filepath) {
     // Get the filename
-    char path[256];
-    strncpy(path, filepath, sizeof(path));
+    char* path = strdup(filepath);
     char* srcpath = path;
     char* dstpath = strrchr(path, ':');
     if (dstpath) {
@@ -27,6 +27,7 @@ bool add_file(fs_context_t* fs_ctx, const char* filepath) {
     FILE *f = fopen(srcpath, "rb");
     if (f == NULL) {
         printf("Unable to open %s\n", srcpath);
+        free(path);
         return false;
     }
 
@@ -40,6 +41,8 @@ bool add_file(fs_context_t* fs_ctx, const char* filepath) {
             break;
         if (!fs_write(fs_ctx, dstpath, buf, total_size, n)) {
             printf("Unable to write %s\n", dstpath);
+            fclose(f);
+            free(path);
             return false;
         }
 
@@ -47,6 +50,7 @@ bool add_file(fs_context_t* fs_ctx, const char* filepath) {
     }   
 
     fclose(f);
+    free(path);
     return true;
 }
 

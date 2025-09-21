@@ -159,6 +159,7 @@ bool run_program(const char* filename, const char *args[]) {
     return true;
 }
 
+// TODO: Move this to a separate executable
 void cat(const char* filename) {
     FILE* f;
     char buf[256];
@@ -200,6 +201,66 @@ void xxd(const char* filename) {
     }
 }
 
+static bool run_command(const char* cmd) {
+    char* buf = strdup(cmd);
+    size_t nb_args = 0;
+    const char* args[256];
+
+/*
+    char* token = strtok(b, " \n");
+
+    while (token) {
+        args[args_index++] = token;
+        token = strtok(NULL, " \n");
+    }
+*/
+
+    size_t token_first_char_index = 0;
+    size_t i = 0;
+    for (;;) {
+        if (buf[i] == '\n' || buf[i] == ' ' || buf[i] == '\0') {
+            bool end_of_string = (buf[i] == '\0');
+            if (i > token_first_char_index) {
+                args[nb_args] = &buf[token_first_char_index];
+                buf[i] = '\0';
+                nb_args++;
+                if (nb_args >= sizeof(args) - 1)
+                    break;
+            }
+            token_first_char_index = i + 1;
+            if (end_of_string)
+                break;
+        }
+        i++;
+    }
+
+    if (nb_args < 1) {
+        free(buf);
+        return false;
+    }
+
+    args[nb_args++] = NULL;
+
+    bool ret = run_program(args[0], args);
+    free(buf);
+
+    return ret;
+}
+
+static void command_prompt(void) {
+    char buf[256];
+
+    for(;;) {
+        fputs(">", stdout);
+        fflush(stdout);
+        if (fgets(buf, sizeof(buf), stdin)) {
+            if (!buf[0] || buf[0] == '\n')
+                break;
+            run_command(buf);
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
 
     atexit(exit_handler);
@@ -215,11 +276,7 @@ int main(int argc, char *argv[]) {
         printf(
             "\n"
             "[l] list files\n"
-            "\n"
-            "[x] xxd \"hex.oe\"\n"
-            "[e] run \"ed.oe hello.ohx\"\n"
-            "[r] run \"hex.oe hello.ohx -o hello.txt\"\n"
-            "[c] cat \"hello.txt\"\n"
+            "[p] command prompt\n"
             "\n"
             "[0] clean\n"
             "\n"
@@ -243,248 +300,120 @@ int main(int argc, char *argv[]) {
             case 'l':
                 list_files();
                 break;
-            case 'X':
-            case 'x':
-                xxd("hex.oe");
+            case 'P':
+            case 'p':
+                command_prompt();
                 break;                
-            case 'E':
-            case 'e':
-                {
-                    const char *args[] = {
-                        "ed.oe",
-                        "hello.ohx",
-                        NULL
-                    }; 
-                    run_program("ed.oe", args);
-                }
-                break;
-            case 'R':
-            case 'r':
-                {
-                    const char *args[] = {
-                        "hex.oe",
-                        "hello.ohx",
-                        "-o",
-                        "hello.txt",
-                        NULL
-                    }; 
-                    run_program("hex.oe", args);
-                }
-                break;
-            case 'C':
-            case 'c':
-                cat("hello.txt");
-                break;
             case '0':
                 remove_files_with_prefix("build/");
                 break;
             case '1':
-                {
-                    const char *args[] = {
-                        "hex.oe",
-                        "core/ld/0-global/ld.oe.ohx",
-                        "-o",
-                        "build/ld-0-global/ld.oe",
-                        NULL
-                    };
-                    run_program("hex.oe", args);
-                }
+                run_command("hex.oe core/ld/0-global/ld.oe.ohx -o build/ld-0-global/ld.oe");
                 break;
             case '2':
-                {
-                    const char *args[] = {
-                        "ld.oe",
-                        "core/libc/0-oo/src/start.oo",
-                        "core/libc/0-oo/src/ctype.oo",
-                        "core/libc/0-oo/src/environ.oo",
-                        "core/libc/0-oo/src/errno.oo",
-                        "core/libc/0-oo/src/malloc.oo",
-                        "core/libc/0-oo/src/malloc_util.oo",
-                        "core/libc/0-oo/src/spawn.oo",
-                        "core/libc/0-oo/src/stdio.oo",
-                        "core/libc/0-oo/src/string.oo",
-                        "core/libo/0-oo/src/libo-error.oo",
-                        "core/libo/0-oo/src/libo-util.oo",
-                        "core/ar/0-cat/ar.oo",
-                        "-o",
-                        "build/ar-0-cat/ar.oe",
-                        NULL
-                    };
-                    run_program("build/ld-0-global/ld.oe", args);
-                }
+                run_command("build/ld-0-global/ld.oe "
+                    "core/libc/0-oo/src/start.oo "
+                    "core/libc/0-oo/src/ctype.oo "
+                    "core/libc/0-oo/src/environ.oo "
+                    "core/libc/0-oo/src/errno.oo "
+                    "core/libc/0-oo/src/malloc.oo "
+                    "core/libc/0-oo/src/malloc_util.oo "
+                    "core/libc/0-oo/src/spawn.oo "
+                    "core/libc/0-oo/src/stdio.oo "
+                    "core/libc/0-oo/src/string.oo "
+                    "core/libo/0-oo/src/libo-error.oo "
+                    "core/libo/0-oo/src/libo-util.oo "
+                    "core/ar/0-cat/ar.oo "
+                    "-o build/ar-0-cat/ar.oe"
+                );
                 break;                
             case '3':
-                {
-                    const char *args[] = {
-                        "ar.oe",
-                        "rc",
-                        "build/libc-0-oo/libc.oa",
-                        "core/libc/0-oo/src/start.oo",
-                        "core/libc/0-oo/src/ctype.oo",
-                        "core/libc/0-oo/src/environ.oo",
-                        "core/libc/0-oo/src/errno.oo",
-                        "core/libc/0-oo/src/malloc.oo",
-                        "core/libc/0-oo/src/malloc_util.oo",
-                        "core/libc/0-oo/src/spawn.oo",
-                        "core/libc/0-oo/src/stdio.oo",
-                        "core/libc/0-oo/src/string.oo",
-                        NULL
-                    };
-                    run_program("build/ar-0-cat/ar.oe", args);
-                }
+                run_command("build/ar-0-cat/ar.oe "
+                    "rc build/libc-0-oo/libc.oa "
+                    "core/libc/0-oo/src/start.oo "
+                    "core/libc/0-oo/src/ctype.oo "
+                    "core/libc/0-oo/src/environ.oo "
+                    "core/libc/0-oo/src/errno.oo "
+                    "core/libc/0-oo/src/malloc.oo "
+                    "core/libc/0-oo/src/malloc_util.oo "
+                    "core/libc/0-oo/src/spawn.oo "
+                    "core/libc/0-oo/src/stdio.oo "
+                    "core/libc/0-oo/src/string.oo"
+                );
                 break;
-                case '4':
-                {
-                    const char *args[] = {
-                        "ar.oe",
-                        "rc",
-                        "build/libo-0-oo/libo.oa",
-                        "core/libo/0-oo/src/libo-error.oo",
-                        "core/libo/0-oo/src/libo-util.oo",
-                        NULL
-                    };
-                    run_program("build/ar-0-cat/ar.oe", args);
-                }
+            case '4':
+                run_command("build/ar-0-cat/ar.oe "
+                    "rc build/libo-0-oo/libo.oa "
+                    "core/libo/0-oo/src/libo-error.oo "
+                    "core/libo/0-oo/src/libo-util.oo "
+                );
                 break;
-                case '5':
-                {
-                    const char *args[] = {
-                        "ld.oe",
-                        "-o",
-                        "build/as-0-basic/as.oe",
-                        "build/libc-0-oo/libc.oa",
-                        "build/libo-0-oo/libo.oa",
-                        "core/as/0-basic/as.oo",
-                        NULL
-                    };
-                    run_program("build/ld-0-global/ld.oe", args);
-                }
+            case '5':
+                run_command("build/ld-0-global/ld.oe "
+                    "-o build/as-0-basic/as.oe "
+                    "build/libc-0-oo/libc.oa "
+                    "build/libo-0-oo/libo.oa "
+                    "core/as/0-basic/as.oo "
+                );
                 break;
-                case '6':
-                // TODO: create a run_command() to simplify 
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/emit.os",
-                        "-o",
-                        "build/as-1-compound/emit.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/main.os",
-                        "-o",
-                        "build/as-1-compound/main.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/op_arithmetic.os",
-                        "-o",
-                        "build/as-1-compound/op_arithmetic.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/op_control.os",
-                        "-o",
-                        "build/as-1-compound/op_control.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/op_logic.os",
-                        "-o",
-                        "build/as-1-compound/op_logic.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/op_memory.os",
-                        "-o",
-                        "build/as-1-compound/op_memory.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/opcodes.os",
-                        "-o",
-                        "build/as-1-compound/opcodes.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/as/1-compound/src/parse.os",
-                        "-o",
-                        "build/as-1-compound/parse.oo",
-                        NULL
-                    };
-                    run_program("build/as-0-basic/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "ld.oe",
-                        "build/libc-0-oo/libc.oa",
-                        "build/libo-0-oo/libo.oa",
-                        "build/as-1-compound/emit.oo",
-                        "build/as-1-compound/main.oo",
-                        "build/as-1-compound/op_arithmetic.oo",
-                        "build/as-1-compound/op_control.oo",
-                        "build/as-1-compound/op_logic.oo",
-                        "build/as-1-compound/op_memory.oo",
-                        "build/as-1-compound/opcodes.oo",
-                        "build/as-1-compound/parse.oo",
-                        "-o",
-                        "build/as-1-compound/as.oe",
-                        NULL
-                    };
-                    run_program("build/ld-0-global/ld.oe", args);
-                }
+            case '6':
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/emit.os "
+                    "-o build/as-1-compound/emit.oo"
+                );
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/main.os "
+                    "-o build/as-1-compound/main.oo"
+                );
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/op_arithmetic.os "
+                    "-o build/as-1-compound/op_arithmetic.oo"
+                );
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/op_control.os "
+                    "-o build/as-1-compound/op_control.oo"
+                );
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/op_logic.os "
+                    "-o build/as-1-compound/op_logic.oo"
+                );
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/op_memory.os "
+                    "-o build/as-1-compound/op_memory.oo"
+                );
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/opcodes.os "
+                    "-o build/as-1-compound/opcodes.oo"
+                );
+                run_command("build/as-0-basic/as.oe "
+                    "core/as/1-compound/src/parse.os "
+                    "-o build/as-1-compound/parse.oo"
+                );
+                run_command("build/ld-0-global/ld.oe "
+                    "build/libc-0-oo/libc.oa "
+                    "build/libo-0-oo/libo.oa "
+                    "build/as-1-compound/emit.oo "
+                    "build/as-1-compound/main.oo "
+                    "build/as-1-compound/op_arithmetic.oo "
+                    "build/as-1-compound/op_control.oo "
+                    "build/as-1-compound/op_logic.oo "
+                    "build/as-1-compound/op_memory.oo "
+                    "build/as-1-compound/opcodes.oo "
+                    "build/as-1-compound/parse.oo "
+                    "-o build/as-1-compound/as.oe"
+                );
                 break;
             case '7':
-                {
-                    const char *args[] = {
-                        "as.oe",
-                        "core/cpp/0-strip/cpp.os",
-                        "-o",
-                        "build/cpp-0-strip/cpp.oo",
-                        NULL
-                    };
-                    run_program("build/as-1-compound/as.oe", args);
-                }
-                {
-                    const char *args[] = {
-                        "ld.oe",
-                        "build/libc-0-oo/libc.oa",
-                        "build/libo-0-oo/libo.oa",
-                        "build/cpp-0-strip/cpp.oo",
-                        "-o",
-                        "build/cpp-0-strip/cpp.oe",
-                        NULL
-                    };
-                    run_program("build/ld-0-global/ld.oe", args);
-                }
+                run_command("build/as-1-compound/as.oe "
+                    "core/cpp/0-strip/cpp.os "
+                    "-o build/cpp-0-strip/cpp.oo"
+                );
+                run_command("build/ld-0-global/ld.oe "
+                    "build/libc-0-oo/libc.oa "
+                    "build/libo-0-oo/libo.oa "
+                    "build/cpp-0-strip/cpp.oo "
+                    "-o build/cpp-0-strip/cpp.oe"
+                );
                 break;
             case 'Q':
             case 'q':
