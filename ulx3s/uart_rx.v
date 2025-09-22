@@ -25,8 +25,8 @@ module uart_rx #(
     reg [11:0] tick;
     reg [3:0] bitcnt;
     reg [7:0] shreg;
-    reg [3:0] inptr, outptr;
-    reg [7:0] fifo [15:0];  // 16 byte buffer
+    reg [7:0] inptr, outptr;
+    reg [7:0] fifo [255:0];  // 256 byte buffer
 
     assign limit = 12'(FREQ_HZ / BAUD_RATE);
     assign endtick = tick == limit;
