@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <ctype.h>
+#include <time.h>
 
 #include <spawn.h>
 #include <__onramp/__pit.h>
@@ -161,7 +163,6 @@ bool run_program(const char* filename, const char *args[]) {
     return true;
 }
 
-// TODO: Move this to a separate executable
 void cat(const char* filename) {
     FILE* f;
     char buf[256];
@@ -203,7 +204,197 @@ void xxd(const char* filename) {
     }
 }
 
-static bool run_command(const char* cmd) {
+static bool copy_file(const char* src_filename, const char* dst_filename) {
+    FILE* src_f;
+    FILE* dst_f;
+    src_f = fopen(src_filename, "rb");
+    if (src_f == NULL) {
+        printf("Unable to open %s\n", src_filename);
+        return false;
+    }
+    dst_f = fopen(dst_filename, "wb");
+    if (dst_f == NULL) {
+        printf("Unable to open %s\n", dst_filename);
+        fclose(src_f);
+        return false;
+    }
+
+    size_t n;
+    uint8_t buf[256];
+    do {
+        n = fread(buf, 1, sizeof(buf), src_f);
+        if (fwrite(buf, 1, n, dst_f) != n) {
+            printf("Unable to write\n");
+            fclose(dst_f);
+            fclose(src_f);
+            return false;
+        }
+    } while (n > 0);
+
+    fclose(dst_f);
+    fclose(src_f);
+
+    return true;
+}
+
+
+static bool run_command(const char *args[], bool show_time);
+
+// Thanks to Haelwenn (lanodan) Monnier for this script parser
+static bool parse_script(FILE* in)
+{
+	bool c_was_space = false;
+    size_t args_buf_i = 0;
+    size_t args_i = 0;
+    char args_buf[4096] = "";
+    const char* args[256];
+    args[0] = &args_buf[0];
+
+	for (;;) {
+		int c = fgetc(in);
+		bool ret = false;
+
+	got_c:
+		if (c == '\\') {
+			c = fgetc(in);
+
+			if(c == '\n') continue;
+
+			fputs("sh-oe: error: Invalid escaped char: ", stdout);
+			fputc(c, stdout);
+			fputs("\n", stdout);
+			fflush(stdout);
+			return false;
+		}
+
+		if (c == EOF || c == '\n' || c == '\r' || c == '#') {
+			if (args_buf_i == 0) {
+				// done
+				if(c == EOF) return 0;
+
+				// empty line
+				if(c != '#') continue;
+
+				for (;;) {
+					c = fgetc(in);
+					if(c == '\n' || c == '\r' || c == EOF) break;
+				}
+
+				goto got_c;
+			}
+
+			if (args_i > 0 || args_buf_i > 0) {
+				args_buf[args_buf_i++] = '\0';
+				args[++args_i] = NULL;
+
+				ret = run_command(args, false);
+				if (!ret) return false;
+			}
+
+			args_buf_i = 0;
+			args_i = 0;
+			c_was_space = false;
+		} else if (isspace(c)) {
+			if (args_buf_i == 0) continue;
+			if (c_was_space) continue;
+
+			if (args_i > 255) {
+				fputs("sh-oe: error: too many arguments\n", stdout);
+				return false;
+			}
+
+			c_was_space = true;
+		} else {
+			if (c_was_space) {
+				args_buf[args_buf_i++] = '\0';
+				args[++args_i] = &args_buf[args_buf_i];
+				c_was_space = false;
+			}
+
+			args_buf[args_buf_i++] = c;
+		}
+	}
+
+	return true;
+}
+
+static bool run_script(const char* filename) {
+    FILE* f = fopen(filename, "rb");
+    bool ret = false;
+    if (f != NULL) {
+        ret = parse_script(f);
+        fclose(f);
+    } else {
+        printf("File not found\n");
+    }
+    return ret;
+}
+
+static void print_help(void) {
+    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp\n");
+}
+
+static bool run_command(const char *args[], bool show_time) {
+
+    time_t start_time, end_time;
+    double elapsed_seconds;
+
+    start_time = clock();
+
+    bool ret = true;
+    const char* ext = strrchr(args[0], '.');
+    if (ext) {
+        ext++;
+        if (strcmp(ext, "oe") == 0) {
+            run_program(args[0], args);
+        } else if (strcmp(ext, "sh") == 0) {
+            run_script(args[0]);
+        }
+    } else {
+        // internal commands
+        if (strcmp(args[0], "set") == 0 || strcmp(args[0], "mkdir") == 0) {
+            // discarded            
+        } else if (strcmp(args[0], "echo") == 0) {
+            for (int i = 1; args[i]; i++)
+                printf("%s ", args[i]);
+            printf("\n");
+        } else if (strcmp(args[0], "onrampvm") == 0) {
+            run_command(&args[1], false);
+        } else if (strcmp(args[0], "exit") == 0) {
+            ret = false;
+        } else if (strcmp(args[0], "time") == 0) {
+            run_command(&args[1], true);
+        } else if (strcmp(args[0], "ls") == 0) {
+            list_files();
+        } else if (strcmp(args[0], "cat") == 0) {
+            if (args[1])
+                cat(args[1]);
+        } else if (strcmp(args[0], "xxd") == 0) {
+            if (args[1])
+                xxd(args[1]);
+        } else if (strcmp(args[0], "rm") == 0) {
+            if (args[1])
+                remove(args[1]);
+        } else if (strcmp(args[0], "rmall") == 0) {
+            if (args[1])
+                remove_files_with_prefix(args[1]);
+        } else if (strcmp(args[0], "cp") == 0) {
+            if (args[1] && args[2])
+                copy_file(args[1], args[2]);
+        } else if (strcmp(args[0], "help") == 0) {
+            print_help();
+        } else printf("Unknown command\n");
+    }
+
+    end_time = clock();
+
+    if (show_time)
+        printf("Time elapsed: %d seconds\n", (end_time - start_time) / CLOCKS_PER_SEC);
+
+    return ret;
+}
+
+static bool run_string_command(const char* cmd) {
     char* buf = strdup(cmd);
     size_t nb_args = 0;
     const char* args[256];
@@ -222,7 +413,8 @@ static bool run_command(const char* cmd) {
 
     args[nb_args++] = NULL;
 
-    bool ret = run_program(args[0], args);
+    bool ret = run_command(args, false);
+
     free(buf);
 
     return ret;
@@ -235,9 +427,9 @@ static void command_prompt(void) {
         fputs(">", stdout);
         fflush(stdout);
         if (read_line(buf, sizeof(buf) - 1)) {
-            if (!buf[0] || buf[0] == '\n')
-                break;
-            run_command(buf);
+            if (buf[0] && buf[0] != '\n')
+                if (!run_string_command(buf))
+                    break;
         }
     }
 }
@@ -245,165 +437,9 @@ static void command_prompt(void) {
 int main(int argc, char *argv[]) {
 
     atexit(exit_handler);
-    printf("Onramp-FPGA OS\n");
+    printf("Onramp-FPGA Shell\n");
 
-    printf("Number of arguments: %d\n", argc);
-    for (int i = 0; i < argc; ++i) {
-        printf("  argv[%d]=%s\n", i, argv[i]);
-    }
-
-    bool quit = false;
-    while (!quit) {
-        printf(
-            "\n"
-            "[l] list files\n"
-            "[p] command prompt\n"
-            "\n"
-            "[0] clean\n"
-            "\n"
-            "[1] build \"ld-0-global/ld.oe\"\n"
-            "[2] build \"ar-0-cat/ar.oe\"\n"
-            "[3] build \"libc-0-oo/libc.oa\"\n"
-            "\n"
-            "[4] build \"libo-0-oo/libo.oa\"\n"
-            "[5] build \"as-0-basic/as.oe\"\n"
-            "[6] build \"as-1-compound/as.oe\"\n"
-            "\n"
-            "[7] build \"cpp-0-strip/cpp.oe\"\n"
-            "\n"
-            "[q] quit\n"
-            "Make a selection...\n"
-        );
-        int c = getchar();
-        printf("\n");
-        switch (c) {
-            case 'L':
-            case 'l':
-                list_files();
-                break;
-            case 'P':
-            case 'p':
-                command_prompt();
-                break;                
-            case '0':
-                remove_files_with_prefix("build/");
-                break;
-            case '1':
-                run_command("hex.oe core/ld/0-global/ld.oe.ohx -o build/ld-0-global/ld.oe");
-                break;
-            case '2':
-                run_command("build/ld-0-global/ld.oe "
-                    "core/libc/0-oo/src/start.oo "
-                    "core/libc/0-oo/src/ctype.oo "
-                    "core/libc/0-oo/src/environ.oo "
-                    "core/libc/0-oo/src/errno.oo "
-                    "core/libc/0-oo/src/malloc.oo "
-                    "core/libc/0-oo/src/malloc_util.oo "
-                    "core/libc/0-oo/src/spawn.oo "
-                    "core/libc/0-oo/src/stdio.oo "
-                    "core/libc/0-oo/src/string.oo "
-                    "core/libo/0-oo/src/libo-error.oo "
-                    "core/libo/0-oo/src/libo-util.oo "
-                    "core/ar/0-cat/ar.oo "
-                    "-o build/ar-0-cat/ar.oe"
-                );
-                break;                
-            case '3':
-                run_command("build/ar-0-cat/ar.oe "
-                    "rc build/libc-0-oo/libc.oa "
-                    "core/libc/0-oo/src/start.oo "
-                    "core/libc/0-oo/src/ctype.oo "
-                    "core/libc/0-oo/src/environ.oo "
-                    "core/libc/0-oo/src/errno.oo "
-                    "core/libc/0-oo/src/malloc.oo "
-                    "core/libc/0-oo/src/malloc_util.oo "
-                    "core/libc/0-oo/src/spawn.oo "
-                    "core/libc/0-oo/src/stdio.oo "
-                    "core/libc/0-oo/src/string.oo"
-                );
-                break;
-            case '4':
-                run_command("build/ar-0-cat/ar.oe "
-                    "rc build/libo-0-oo/libo.oa "
-                    "core/libo/0-oo/src/libo-error.oo "
-                    "core/libo/0-oo/src/libo-util.oo "
-                );
-                break;
-            case '5':
-                run_command("build/ld-0-global/ld.oe "
-                    "-o build/as-0-basic/as.oe "
-                    "build/libc-0-oo/libc.oa "
-                    "build/libo-0-oo/libo.oa "
-                    "core/as/0-basic/as.oo "
-                );
-                break;
-            case '6':
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/emit.os "
-                    "-o build/as-1-compound/emit.oo"
-                );
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/main.os "
-                    "-o build/as-1-compound/main.oo"
-                );
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/op_arithmetic.os "
-                    "-o build/as-1-compound/op_arithmetic.oo"
-                );
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/op_control.os "
-                    "-o build/as-1-compound/op_control.oo"
-                );
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/op_logic.os "
-                    "-o build/as-1-compound/op_logic.oo"
-                );
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/op_memory.os "
-                    "-o build/as-1-compound/op_memory.oo"
-                );
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/opcodes.os "
-                    "-o build/as-1-compound/opcodes.oo"
-                );
-                run_command("build/as-0-basic/as.oe "
-                    "core/as/1-compound/src/parse.os "
-                    "-o build/as-1-compound/parse.oo"
-                );
-                run_command("build/ld-0-global/ld.oe "
-                    "build/libc-0-oo/libc.oa "
-                    "build/libo-0-oo/libo.oa "
-                    "build/as-1-compound/emit.oo "
-                    "build/as-1-compound/main.oo "
-                    "build/as-1-compound/op_arithmetic.oo "
-                    "build/as-1-compound/op_control.oo "
-                    "build/as-1-compound/op_logic.oo "
-                    "build/as-1-compound/op_memory.oo "
-                    "build/as-1-compound/opcodes.oo "
-                    "build/as-1-compound/parse.oo "
-                    "-o build/as-1-compound/as.oe"
-                );
-                break;
-            case '7':
-                run_command("build/as-1-compound/as.oe "
-                    "core/cpp/0-strip/cpp.os "
-                    "-o build/cpp-0-strip/cpp.oo"
-                );
-                run_command("build/ld-0-global/ld.oe "
-                    "build/libc-0-oo/libc.oa "
-                    "build/libo-0-oo/libo.oa "
-                    "build/cpp-0-strip/cpp.oo "
-                    "-o build/cpp-0-strip/cpp.oe"
-                );
-                break;
-            case 'Q':
-            case 'q':
-                quit = true;
-                break;
-            default:
-                printf("Invalid selection\n");
-        }
-    }
+    command_prompt();
 
     printf("Bye!\n");
 
