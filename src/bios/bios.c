@@ -3,6 +3,7 @@
 
 #include "globals.h"
 #include "io.h"
+#include "common.h"
 
 #define RAM_START 0x10000000
 
@@ -77,10 +78,40 @@ int main(void) {
 
     if (is_hardware()) {
         print("Running on hardware\n");
-        receive();
     } else {
         print("Running on the simulator\n");
     }
+
+    // Load the shell from SD card
+    bool is_shell_loaded = false;
+    uint16_t nb_files = fs_get_nb_files(&bios_globals->fs_ctx);
+    for (uint16_t i = 0; i < nb_files; ++i) {
+        fs_file_info_t file_info;
+        if (fs_get_file_info(&bios_globals->fs_ctx, i, &file_info)) {
+            if (strcmp(file_info.name, "shell.oe") == 0) {
+                bool is_load_bypassed = false;
+                if (is_hardware()) {
+                    print("Press a key to bypass the SD card boot process...\n");
+                    unsigned long target_clock = clock() + 4000;
+                    for (;;) {
+                        if (getchar(0)) {
+                            is_load_bypassed = true;
+                            break;
+                        } else if (clock() > target_clock) {
+                            break;
+                        }
+                    }
+                }
+                if (!is_load_bypassed) {
+                    print("Loading the shell from SD card...\n");
+                    is_shell_loaded = fs_read(&bios_globals->fs_ctx, file_info.name, (uint8_t *)RAM_START, 0, file_info.size, NULL);
+                }
+            }
+        }
+    }
+
+    if (!is_shell_loaded)
+        receive();
 
     if (*(unsigned int *)RAM_START != 0x726e4f7e ||
         *(unsigned int *)(RAM_START + 4) != 0x706d617e ||

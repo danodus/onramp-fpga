@@ -11,11 +11,17 @@ pushd ../src/mkfs
 ./build.sh
 popd
 
+pushd ../src/os
+./build.sh
+popd
+
 pushd ../src/ed
 ./build.sh
 popd
 
 $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
+    ../src/os/shell.oe:shell.oe \
+    \
     ../src/hello/hello.ohx:hello.ohx \
     ../src/ed/ed.oe:ed.oe \
     $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe:hex.oe \

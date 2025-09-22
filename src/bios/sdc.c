@@ -19,14 +19,6 @@
 
 int is_hardware(void);
 
-static unsigned long clock(void) {
-    unsigned long ms;
-    ms = *(unsigned int *)(0x30000004);
-    ms <<= 32;
-    ms |= *(unsigned int *)(0x30000000);
-    return ms;
-}
-
 static int msleep(unsigned int msec) {
     unsigned long target = clock() + msec;
     while (clock() < target);

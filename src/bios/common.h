@@ -4,6 +4,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define NULL (void*)0
+
 #define true ((_Bool)1)
 #define false ((_Bool)0)
 #define bool _Bool
@@ -17,5 +19,6 @@ void* memcpy(void* vdest, const void* vsrc, size_t count);
 int strcmp(const char* a, const char* b);
 char* strncpy(char* restrict to, const char* restrict from, size_t count);
 void print(const char* s);
+unsigned long clock(void);
 
 #endif

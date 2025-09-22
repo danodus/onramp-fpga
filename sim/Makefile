@@ -17,7 +17,6 @@ sim: top.v sim_main.cpp
 
 run: sim
 	cd ../src/bios && ./build.sh
-	cd ../src/os && ./build.sh
 	cd ../scripts && ./mkimg.sh
 	obj_dir/Vtop || true
 

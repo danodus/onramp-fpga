@@ -26,6 +26,7 @@ make run ONRAMP_BIN=/path/to/onramp/build/posix/bin
 Generate a SD card image:
 
 ```bash
+export ONRAMP_BIN=/path/to/onramp/build/posix/bin
 cd scripts
 ./mkimg.sh
 cd ..
@@ -36,7 +37,7 @@ Flash the SD card image `sd.img`.
 ```bash
 source /path/to/oss-cad-suite/environment
 cd ulx3s
-make prog run ONRAMP_BIN=/path/to/onramp/build/posix/bin SERIAL=/dev/ttyUSB0
+make prog
 ```
 
 Open a terminal at 115200-N-8-1 and press the enter key.

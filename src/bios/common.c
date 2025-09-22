@@ -45,3 +45,11 @@ void print(const char* s) {
         s++;
     }
 }
+
+unsigned long clock(void) {
+    unsigned long ms;
+    ms = *(unsigned int *)(0x30000004);
+    ms <<= 32;
+    ms |= *(unsigned int *)(0x30000000);
+    return ms;
+}
