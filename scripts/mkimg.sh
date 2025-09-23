@@ -21,10 +21,12 @@ popd
 
 $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     ../src/os/shell.oe:shell.oe \
-    \
-    ../src/scripts/build_toolchain.sh:build_toolchain.sh \
-    ../src/hello/hello.ohx:hello.ohx \
     ../src/ed/ed.oe:ed.oe \
+    \
+    ../extra/build_toolchain.sh:build_toolchain.sh \
+    ../extra/main.c:main.c \
+    ../extra/build.sh:build.sh \
+    \
     $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe:hex.oe \
     \
     $ONRAMP_BIN/../../../core/ld/0-global/build.sh:core/ld/0-global/build.sh \
