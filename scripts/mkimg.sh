@@ -69,6 +69,17 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/cci/0-omc/src/main.os:core/cci/0-omc/src/main.os \
     $ONRAMP_BIN/../../../core/cci/0-omc/src/parse.os:core/cci/0-omc/src/parse.os \
     $ONRAMP_BIN/../../../core/cci/0-omc/src/type.os:core/cci/0-omc/src/type.os \
+    $ONRAMP_BIN/../../../core/cpp/1-omc/build.sh:core/cpp/1-omc/build.sh \
+    $ONRAMP_BIN/../../../core/cpp/1-omc/cpp.c:core/cpp/1-omc/cpp.c \
+    $ONRAMP_BIN/../../../core/cg/0-asm/build.sh:core/cg/0-asm/build.sh \
+    $ONRAMP_BIN/../../../core/cg/0-asm/src/common.h:core/cg/0-asm/src/common.h \
+    $ONRAMP_BIN/../../../core/cg/0-asm/src/instruction.h:core/cg/0-asm/src/instruction.h \
+    $ONRAMP_BIN/../../../core/cg/0-asm/src/main.c:core/cg/0-asm/src/main.c \
+    $ONRAMP_BIN/../../../core/cg/0-asm/src/opcode.h:core/cg/0-asm/src/opcode.h \
+    $ONRAMP_BIN/../../../core/cg/0-asm/src/optimize.h:core/cg/0-asm/src/optimize.h \
+    $ONRAMP_BIN/../../../core/cg/0-asm/src/parse.h:core/cg/0-asm/src/parse.h \
+    $ONRAMP_BIN/../../../core/cg/0-asm/src/register.h:core/cg/0-asm/src/register.h \
+    $ONRAMP_BIN/../../../core/cpp/1-omc/rebuild.sh:core/cpp/1-omc/rebuild.sh \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -77,4 +88,7 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/as-0-basic/as.oe:build/intermediate/as-0-basic/as.oe \
     $ONRAMP_BIN/../../intermediate/as-1-compound/as.oe:build/intermediate/as-1-compound/as.oe \
     $ONRAMP_BIN/../../intermediate/cpp-0-strip/cpp.oe:build/intermediate/cpp-0-strip/cpp.oe \
-    $ONRAMP_BIN/../../intermediate/cci-0-omc/cci.oe:build/intermediate/cci-0-omc/cci.oe
+    $ONRAMP_BIN/../../intermediate/cci-0-omc/cci.oe:build/intermediate/cci-0-omc/cci.oe \
+    $ONRAMP_BIN/../../intermediate/cpp-1-omc-unopt/cpp.oe:build/intermediate/cpp-1-omc-unopt/cpp.oe \
+    $ONRAMP_BIN/../../intermediate/cg-0-asm/cg.oe:build/intermediate/cg-0-asm/cg.oe \
+    $ONRAMP_BIN/../../intermediate/cpp-1-omc/cpp.oe:build/intermediate/cpp-1-omc/cpp.oe
