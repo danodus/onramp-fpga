@@ -57,6 +57,16 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/as/1-compound/src/parse.os:core/as/1-compound/src/parse.os \
     $ONRAMP_BIN/../../../core/cpp/0-strip/build.sh:core/cpp/0-strip/build.sh \
     $ONRAMP_BIN/../../../core/cpp/0-strip/cpp.os:core/cpp/0-strip/cpp.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/build.sh:core/cci/0-omc/build.sh \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/common.os:core/cci/0-omc/src/common.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/compile.os:core/cci/0-omc/src/compile.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/emit.os:core/cci/0-omc/src/emit.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/globals.os:core/cci/0-omc/src/globals.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/lexer.os:core/cci/0-omc/src/lexer.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/locals.os:core/cci/0-omc/src/locals.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/main.os:core/cci/0-omc/src/main.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/parse.os:core/cci/0-omc/src/parse.os \
+    $ONRAMP_BIN/../../../core/cci/0-omc/src/type.os:core/cci/0-omc/src/type.os \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -64,4 +74,5 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/libo-0-oo/libo.oa:build/intermediate/libo-0-oo/libo.oa \
     $ONRAMP_BIN/../../intermediate/as-0-basic/as.oe:build/intermediate/as-0-basic/as.oe \
     $ONRAMP_BIN/../../intermediate/as-1-compound/as.oe:build/intermediate/as-1-compound/as.oe \
-    $ONRAMP_BIN/../../intermediate/cpp-0-strip/cpp.oe:build/intermediate/cpp-0-strip/cpp.oe
+    $ONRAMP_BIN/../../intermediate/cpp-0-strip/cpp.oe:build/intermediate/cpp-0-strip/cpp.oe \
+    $ONRAMP_BIN/../../intermediate/cci-0-omc/cci.oe:build/intermediate/cci-0-omc/cci.oe

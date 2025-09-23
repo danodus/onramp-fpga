@@ -19,3 +19,4 @@ core/as/1-compound/build.sh
 
 echo ====== Build our omC compiler
 core/cpp/0-strip/build.sh
+core/cci/0-omc/build.sh
