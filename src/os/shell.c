@@ -373,8 +373,11 @@ static bool run_command(const char *args[], bool show_time) {
             if (args[1])
                 xxd(args[1]);
         } else if (strcmp(args[0], "rm") == 0) {
-            if (args[1])
-                remove(args[1]);
+            if (args[1]) {
+                // TODO: Use remove() instead when available
+                // remove(args[1]);
+                __sys_unlink(args[1]);
+            }
         } else if (strcmp(args[0], "rmall") == 0) {
             if (args[1])
                 remove_files_with_prefix(args[1]);
