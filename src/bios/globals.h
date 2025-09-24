@@ -4,11 +4,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <config.h>
 #include <fs.h>
 
 #define BIOS_GLOBALS 0x11fc0000  // (32 MiB - 256 KiB)
-
-#define MAX_OPEN_FILES  4
 
 #define IO_BUFFER_SIZE  4096
 

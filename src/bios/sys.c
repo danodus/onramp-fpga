@@ -49,14 +49,22 @@ int sys_fopen(const char* path, bool writeable) {
 
 int sys_fclose(int file_handle) {
     //print("sys_fclose\n");
+
+    // If the file handle is a standard steanm, return immediately
+    if (file_handle < 3)
+        return 0;
+
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     file_t* f = &bios_globals->files[file_handle - 3];
+
+    // If the file is already close, return immediately
+    if (f->filename[0] == '\0')
+        return 0;
 
     // If the I/O buffer is not empty, flush it
     if (f->write_buf.count > 0) {
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        if (!fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, f->write_buf.count))
-            print("sys_fwrite: Unable to write\n");
+        fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, f->write_buf.count);
     }
 
     f->filename[0] = '\0';
@@ -79,7 +87,7 @@ int sys_fread(int handle, void* buffer, unsigned size) {
             fs_context_t* fs_ctx = &bios_globals->fs_ctx;
             size_t nb_read_bytes;
             if (!fs_read(fs_ctx, f->filename, f->read_buf.data, f->read_position, IO_BUFFER_SIZE, &nb_read_bytes)) {
-                print("sys_fread: Unable to read\n");
+                //print("sys_fread: Unable to read\n");
                 return 0;
             }
 
@@ -127,7 +135,7 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
         if (f->write_buf.count == IO_BUFFER_SIZE) {
             fs_context_t* fs_ctx = &bios_globals->fs_ctx;
             if (!fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, IO_BUFFER_SIZE)) {
-                print("sys_fwrite: Unable to write\n");
+                //print("sys_fwrite: Unable to write\n");
                 return 0;
             }
             f->write_buf.count = 0;
@@ -161,7 +169,7 @@ int sys_ftrunc(int handle, unsigned size_low, unsigned size_high) {
         file_t* f = &bios_globals->files[handle - 3]; 
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
         if (!fs_write(fs_ctx, f->filename, (void*)0, size_low, 0)) {
-            print("sys_ftrunc: Unable to write\n");
+            //print("sys_ftrunc: Unable to write\n");
             return -1;
         }
         return 0;

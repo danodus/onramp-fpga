@@ -14,6 +14,7 @@
 #include <spawn.h>
 #include <__onramp/__pit.h>
 
+#include <config.h>
 #include <conio.h>
 
 #define CFG         0x20000000
@@ -25,6 +26,27 @@ int __sys_dopen(const char* path);
 int __sys_dread(int handle, char out_buffer[256]);
 int __sys_stat(const char* path, unsigned output[4]);
 int __sys_unlink(const char* path);
+int __sys_fclose(int file_handle);
+
+bool file_open_table[MAX_OPEN_FILES] = {false};
+
+// TODO: this is a hack until fileno() is available in libc
+int my_fileno(FILE* f) {
+    int *v = (int *)f;
+    return (int)(*v);
+}
+
+FILE* fopen_t(const char* restrict filename, const char* restrict mode) {
+    FILE* file = fopen(filename, mode);
+    if (file != NULL)
+        file_open_table[my_fileno(file) - 3] = true;
+    return file;
+}
+
+int fclose_t(FILE* file) {
+    file_open_table[my_fileno(file) - 3] = false;
+    return fclose(file);
+}
 
 int is_hardware(void) {
     return *(int *)(CFG) & 1;
@@ -110,7 +132,7 @@ bool run_program(const char* filename, const char *args[]) {
         return false;
     }
 
-    FILE* f = fopen(filename, "rb");
+    FILE* f = fopen_t(filename, "rb");
     if (f == NULL) {
         printf("Program not found\n");
         return false;
@@ -119,19 +141,19 @@ bool run_program(const char* filename, const char *args[]) {
     char* program = malloc(program_size);
     if (program == NULL) {
         printf("Out of memory\n");
-        fclose(f);
+        fclose_t(f);
         return false;
     }
 
 
     if (fread(program, 1, program_size, f) != program_size) {
         printf("Unable to read the program\n");
-        fclose(f);
+        fclose_t(f);
         free(program);
         return false;
     };
 
-    fclose(f);
+    fclose_t(f);
 
     // Check if this is an Onramp program
     if (strncmp(program, "~Onr~amp~   ", 12) != 0) {
@@ -158,6 +180,12 @@ bool run_program(const char* filename, const char *args[]) {
     // Run it
     int ret = __onramp_spawn_pit(program, program_size, child_pit, filename);
     
+    // Clean up by forcefully close all remaining open files
+    for (int i = 0; i < MAX_OPEN_FILES; ++i) {
+        if (!file_open_table[i])
+            __sys_fclose(i + 3);
+    }
+
     free(child_pit);
     free(program);
     return true;
@@ -167,7 +195,7 @@ void cat(const char* filename) {
     FILE* f;
     char buf[256];
     char* ss;
-    f = fopen(filename, "rb");
+    f = fopen_t(filename, "rb");
     if (f != NULL) {
         size_t n;
         do {
@@ -175,7 +203,7 @@ void cat(const char* filename) {
             fwrite(buf, 1, n, stdout);
         } while (n > 0);
 
-        fclose(f);
+        fclose_t(f);
     } else {
         printf("file not found\n");
     }
@@ -185,7 +213,7 @@ void xxd(const char* filename) {
     FILE* f;
     uint8_t buf[256];
     char* ss;
-    f = fopen(filename, "rb");
+    f = fopen_t(filename, "rb");
     if (f != NULL) {
         size_t n;
         do {
@@ -198,7 +226,7 @@ void xxd(const char* filename) {
         } while (n > 0);
         printf("\n");
 
-        fclose(f);
+        fclose_t(f);
     } else {
         printf("file not found\n");
     }
@@ -207,15 +235,15 @@ void xxd(const char* filename) {
 static bool copy_file(const char* src_filename, const char* dst_filename) {
     FILE* src_f;
     FILE* dst_f;
-    src_f = fopen(src_filename, "rb");
+    src_f = fopen_t(src_filename, "rb");
     if (src_f == NULL) {
         printf("Unable to open %s\n", src_filename);
         return false;
     }
-    dst_f = fopen(dst_filename, "wb");
+    dst_f = fopen_t(dst_filename, "wb");
     if (dst_f == NULL) {
         printf("Unable to open %s\n", dst_filename);
-        fclose(src_f);
+        fclose_t(src_f);
         return false;
     }
 
@@ -225,14 +253,14 @@ static bool copy_file(const char* src_filename, const char* dst_filename) {
         n = fread(buf, 1, sizeof(buf), src_f);
         if (fwrite(buf, 1, n, dst_f) != n) {
             printf("Unable to write\n");
-            fclose(dst_f);
-            fclose(src_f);
+            fclose_t(dst_f);
+            fclose_t(src_f);
             return false;
         }
     } while (n > 0);
 
-    fclose(dst_f);
-    fclose(src_f);
+    fclose_t(dst_f);
+    fclose_t(src_f);
 
     return true;
 }
@@ -247,8 +275,7 @@ static bool parse_script(FILE* in)
     size_t args_buf_i = 0;
     size_t args_i = 0;
     char args_buf[4096] = "";
-    const char* args[256];
-    args[0] = &args_buf[0];
+    const char* args[256] = {&args_buf[0]};
 
 	for (;;) {
 		int c = fgetc(in);
@@ -319,11 +346,11 @@ static bool parse_script(FILE* in)
 }
 
 static bool run_script(const char* filename) {
-    FILE* f = fopen(filename, "rb");
+    FILE* f = fopen_t(filename, "rb");
     bool ret = false;
     if (f != NULL) {
         ret = parse_script(f);
-        fclose(f);
+        fclose_t(f);
     } else {
         printf("File not found\n");
     }
