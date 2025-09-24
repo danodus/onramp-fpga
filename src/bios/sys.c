@@ -231,6 +231,16 @@ int sys_stat(const char* path, unsigned output[4]) {
     return found ? 0 : 1;
 }
 
+int sys_rename(const char* from, const char* to) {
+    bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
+    fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+
+    if (!fs_rename(fs_ctx, from, to))
+        return 1;
+
+    return 0;
+}
+
 int sys_unlink(const char* path) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;

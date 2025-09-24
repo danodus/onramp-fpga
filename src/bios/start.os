@@ -117,6 +117,15 @@
     add rsp rsp 4
     ret    
 
+=sys_rename1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_rename
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret    
+
 =sys_unlink1
     sub rsp rsp 4       ; save rpp
     stw rpp 0 rsp
@@ -155,7 +164,7 @@
     0x00000000
     ^sys_stat1     ; 13 - stat
     0x00000000
-    0x00000000     ; 14
+    ^sys_rename1   ; 14 - rename
     0x00000000
     0x00000000     ; 15
     0x00000000

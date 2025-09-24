@@ -27,6 +27,7 @@ int __sys_dread(int handle, char out_buffer[256]);
 int __sys_stat(const char* path, unsigned output[4]);
 int __sys_unlink(const char* path);
 int __sys_fclose(int file_handle);
+int __sys_rename(const char* from, const char* to);
 
 bool file_open_table[MAX_OPEN_FILES] = {false};
 
@@ -265,6 +266,14 @@ static bool copy_file(const char* src_filename, const char* dst_filename) {
     return true;
 }
 
+static bool move_file(const char* src_filename, const char* dst_filename) {
+    if (__sys_rename(src_filename, dst_filename)) {
+        printf("File not found\n");
+        return false;
+    }
+    return true;
+}
+
 
 static bool run_command(const char *args[], bool show_time);
 
@@ -358,7 +367,7 @@ static bool run_script(const char* filename) {
 }
 
 static void print_help(void) {
-    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp\n");
+    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv\n");
 }
 
 static bool run_command(const char *args[], bool show_time) {
@@ -411,6 +420,9 @@ static bool run_command(const char *args[], bool show_time) {
         } else if (strcmp(args[0], "cp") == 0) {
             if (args[1] && args[2])
                 copy_file(args[1], args[2]);
+        } else if (strcmp(args[0], "mv") == 0) {
+            if (args[1] && args[2])
+                move_file(args[1], args[2]);
         } else if (strcmp(args[0], "help") == 0) {
             print_help();
         } else printf("Unknown command\n");
