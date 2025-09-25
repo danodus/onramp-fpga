@@ -27,8 +27,22 @@ int sys_time(unsigned out_buffer[3]) {
 
 int sys_fopen(const char* path, bool writeable) {
     //print("sys_fopen\n");
+
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+
+    // Make sure the file exists if not writeable
+    if (!writeable) {
+        //print("sys_fopen: \"");
+        //print(path);
+        if (!fs_file_exists(fs_ctx, path)) {
+            //print("\" not found\n");
+            return -1;
+        }
+        // else {
+        //    print("\" found\n");
+        //}
+    }
 
     for (int i = 0; i < MAX_OPEN_FILES; ++i) {
         file_t* f = &bios_globals->files[i];
@@ -43,6 +57,8 @@ int sys_fopen(const char* path, bool writeable) {
             return 3 + i;
         }
     }
+
+    print("sys_fopen: maximum number of open files reached\n");
 
     return -1;
 }
