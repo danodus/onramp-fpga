@@ -36,5 +36,6 @@ bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_
 bool fs_delete(fs_context_t* ctx, const char* filename);
 bool fs_rename(fs_context_t* ctx, const char* filename, const char* new_filename);
 bool fs_file_exists(fs_context_t* ctx, const char* filename);
+size_t fs_get_file_size(fs_context_t* ctx, const char* filename);
 
 #endif

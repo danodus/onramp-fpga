@@ -22,6 +22,7 @@ typedef struct {
     size_t write_position;
     io_buffer_t read_buf, write_buf;
     size_t read_buf_offset;
+    size_t position;    // read or write position for ftell/fseek
 } file_t;
 
 typedef struct {

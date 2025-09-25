@@ -81,6 +81,24 @@
     add rsp rsp 4
     ret
 
+=sys_fseek1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_fseek
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret
+
+=sys_ftell1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_ftell
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret
+
 =sys_ftrunc1
     sub rsp rsp 4       ; save rpp
     stw rpp 0 rsp
@@ -135,56 +153,66 @@
     add rsp rsp 4
     ret
 
+=sys_missing1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    mov r0 r9           ; first arg is the call number
+    call ^sys_missing
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret
+
 =sys_call_table
     ^sys_exit1     ; 0 - exit
     0x00000000
-    0x00000000     ; 1
-    0x00000000
+    ^sys_missing1  ; 1
+    0x00000001
     ^sys_time1     ; 2 - time
-    0x00000000
+    0x00000002
     ^sys_fopen1    ; 3 - fopen
-    0x00000000
+    0x00000003
     ^sys_fclose1   ; 4 - fclose
-    0x00000000
+    0x00000004
     ^sys_fread1    ; 5 - fread
-    0x00000000
+    0x00000005
     ^sys_fwrite1   ; 6 - fwrite
-    0x00000000
-    0x00000000     ; 7
-    0x00000000
-    0x00000000     ; 8
-    0x00000000
+    0x00000006
+    ^sys_fseek1    ; 7 - fseek
+    0x00000007
+    ^sys_ftell1    ; 8 - ftell
+    0x00000008
     ^sys_ftrunc1   ; 9 - ftrunc
-    0x00000000
+    0x00000009
     ^sys_dopen1    ; 10 - dopen
-    0x00000000
-    0x00000000     ; 11
-    0x00000000
+    0x0000000A
+    ^sys_missing1  ; 11
+    0x0000000B
     ^sys_dread1    ; 12 - dread
-    0x00000000
+    0x0000000C
     ^sys_stat1     ; 13 - stat
-    0x00000000
+    0x0000000D
     ^sys_rename1   ; 14 - rename
-    0x00000000
-    0x00000000     ; 15
-    0x00000000
+    0x0000000E
+    ^sys_missing1  ; 15
+    0x0000000F
     ^sys_unlink1   ; 16 - unlink
-    0x00000000
-    0x00000000     ; 17
-    0x00000000
-    0x00000000     ; 18
-    0x00000000
-    0x00000000     ; 19
-    0x00000000
-    0x00000000     ; 20
-    0x00000000
-    0x00000000     ; 21
-    0x00000000
-    0x00000000     ; 22
-    0x00000000
-    0x00000000     ; 23
-    0x00000000
-    0x00000000     ; 24
-    0x00000000
+    0x00000010
+    ^sys_missing1  ; 17
+    0x00000011
+    ^sys_missing1  ; 18
+    0x00000012
+    ^sys_missing1  ; 19
+    0x00000013
+    ^sys_missing1  ; 20
+    0x00000014
+    ^sys_missing1  ; 21
+    0x00000015
+    0x00000000     ; 22 - debug (not available)
+    0x00000016
+    ^sys_missing1  ; 23
+    0x00000017
+    ^sys_missing1  ; 24
+    0x00000018
 
 

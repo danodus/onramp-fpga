@@ -64,6 +64,7 @@ int sys_fopen(const char* path, bool writeable) {
             f->write_position = 0;
             f->read_buf.count = 0;
             f->write_buf.count = 0;
+            f->position = 0;
 
             return 3 + i;
         }
@@ -130,6 +131,7 @@ int sys_fread(int handle, void* buffer, unsigned size) {
         memcpy(buffer, f->read_buf.data + f->read_buf_offset, size);
         f->read_buf.count -= size;
         f->read_buf_offset += size;
+        f->position += size;
 
         return size;
     } else {
@@ -176,6 +178,7 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
 
         memcpy(f->write_buf.data + f->write_buf.count, buffer, size);
         f->write_buf.count += size;
+        f->position += size;
         return size;
 
     } else {
@@ -186,6 +189,56 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
         }
     }
     return size;
+}
+
+int sys_fseek(int handle, int base, unsigned offset_low, int offset_high) {
+    bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
+    
+    if (handle > 2) {
+
+        if (base > 2)
+            return -1;
+
+        // Sanity check (we don't support negative values yet)
+        if (offset_high != 0) {
+            print("sys_fseek: offset_high not zero (negative?)\nSystem halted\n");
+            for(;;);
+        }
+
+        file_t* f = &bios_globals->files[handle - 3];
+        
+        // If the I/O buffer is not empty, flush it
+        if (f->write_buf.count > 0) {
+            fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+            fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, f->write_buf.count);
+        }
+        
+        // clear buffers
+        f->read_buf.count = 0;
+        f->write_buf.count = 0;
+
+        // set new position
+        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+        size_t file_size = fs_get_file_size(fs_ctx, f->filename);
+        f->position = (base == 0) ? offset_low : (base == 1) ? f->position + offset_low : file_size + offset_low;
+        f->read_position = f->position;
+        f->write_position = f->position;
+
+        return 0;
+    };
+
+    return -1;
+}
+
+int sys_ftell(int handle, unsigned position[2]) {
+    bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
+
+    if (handle > 2) {
+        file_t* f = &bios_globals->files[handle - 3];
+        position[0] = f->position;
+        position[1] = 0;
+    }
+    return 0;
 }
 
 int sys_ftrunc(int handle, unsigned size_low, unsigned size_high) {
@@ -276,4 +329,11 @@ int sys_unlink(const char* path) {
         return 0;
 
     return -1;
+}
+
+int sys_missing(unsigned int call_number) {
+    print("System call not implemented: ");
+    printv(call_number, 10);
+    print("\nSystem halted\n");
+    for(;;);
 }

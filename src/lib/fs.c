@@ -617,3 +617,8 @@ bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_
 bool fs_file_exists(fs_context_t* ctx, const char* filename) {
     return find_file(&ctx->fat, filename) != NULL;
 }
+
+size_t fs_get_file_size(fs_context_t* ctx, const char* filename) {
+    fs_file_info_t* fi = find_file(&ctx->fat, filename);
+    return (fi != NULL) ? fi->size : 0;
+}
