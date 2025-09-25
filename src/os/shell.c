@@ -16,6 +16,7 @@
 
 #include <config.h>
 #include <conio.h>
+#include <crc.h>
 
 #define CFG         0x20000000
 #define LED         0x20001000
@@ -280,6 +281,25 @@ static bool touch(const char* filename) {
     return true;
 }
 
+static bool crc(const char* filename) {
+    // Read in input file to line buffer
+    FILE* f = fopen(filename, "r");
+    if (!f) return EXIT_FAILURE;
+
+    uint32_t checksum_accum = 0xffffffffu;
+    for (;;) {
+        uint8_t v = fgetc(f);
+        if (feof(f))
+            break;
+        checksum_accum = crc_checksum_byte(CRC_POLY_CRC32, checksum_accum, v);
+    }
+
+    fclose(f);
+
+    printf("CRC32: %x\n", checksum_accum);
+
+}
+
 static bool run_command(const char *args[], bool show_time);
 
 // Thanks to Haelwenn (lanodan) Monnier for this script parser
@@ -371,7 +391,7 @@ static bool run_script(const char* filename) {
 }
 
 static void print_help(void) {
-    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv touch ret\n");
+    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv touch ret crc\n");
 }
 
 static bool run_command(const char *args[], bool show_time) {
@@ -432,6 +452,9 @@ static bool run_command(const char *args[], bool show_time) {
                 touch(args[1]);
         } else if (strcmp(args[0], "ret") == 0) {
             printf("Last return value: %d\n", last_ret);
+        } else if (strcmp(args[0], "crc") == 0) {
+            if (args[1])
+                crc(args[1]);
         } else if (strcmp(args[0], "help") == 0) {
             print_help();
         } else printf("Unknown command\n");
