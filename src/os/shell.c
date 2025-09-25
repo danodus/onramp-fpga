@@ -31,6 +31,8 @@ int __sys_rename(const char* from, const char* to);
 
 bool file_open_table[MAX_OPEN_FILES] = {false};
 
+int last_ret = 0;
+
 // TODO: this is a hack until fileno() is available in libc
 int my_fileno(FILE* f) {
     int *v = (int *)f;
@@ -179,7 +181,7 @@ bool run_program(const char* filename, const char *args[]) {
     *(child_pit + __ONRAMP_PIT_ARGS) = (int)args;
 
     // Run it
-    int ret = __onramp_spawn_pit(program, program_size, child_pit, filename);
+    last_ret = __onramp_spawn_pit(program, program_size, child_pit, filename);
     
     // Clean up by forcefully close all remaining open files
     for (int i = 0; i < MAX_OPEN_FILES; ++i) {
@@ -189,7 +191,7 @@ bool run_program(const char* filename, const char *args[]) {
 
     free(child_pit);
     free(program);
-    return true;
+    return (last_ret == 0) ? true : false;
 }
 
 void cat(const char* filename) {
@@ -280,78 +282,77 @@ static bool run_command(const char *args[], bool show_time);
 // Thanks to Haelwenn (lanodan) Monnier for this script parser
 static bool parse_script(FILE* in)
 {
-	bool c_was_space = false;
+    bool c_was_space = false;
     size_t args_buf_i = 0;
     size_t args_i = 0;
     char args_buf[4096] = "";
     const char* args[256] = {&args_buf[0]};
 
-	for (;;) {
-		int c = fgetc(in);
-		bool ret = false;
+    for (;;) {
+        int c = fgetc(in);
 
-	got_c:
-		if (c == '\\') {
-			c = fgetc(in);
+    got_c:
+        if (c == '\\') {
+            c = fgetc(in);
 
-			if(c == '\n') continue;
+            if(c == '\n') continue;
 
-			fputs("sh-oe: error: Invalid escaped char: ", stdout);
-			fputc(c, stdout);
-			fputs("\n", stdout);
-			fflush(stdout);
-			return false;
-		}
+            fputs("sh-oe: error: Invalid escaped char: ", stdout);
+            fputc(c, stdout);
+            fputs("\n", stdout);
+            fflush(stdout);
+            return false;
+        }
 
-		if (c == EOF || c == '\n' || c == '\r' || c == '#') {
-			if (args_buf_i == 0) {
-				// done
-				if(c == EOF) return 0;
+        if (c == EOF || c == '\n' || c == '\r' || c == '#') {
+            if (args_buf_i == 0) {
+                // done
+                if(c == EOF) return true;
 
-				// empty line
-				if(c != '#') continue;
+                // empty line
+                if(c != '#') continue;
 
-				for (;;) {
-					c = fgetc(in);
-					if(c == '\n' || c == '\r' || c == EOF) break;
-				}
+                for (;;) {
+                    c = fgetc(in);
+                    if(c == '\n' || c == '\r' || c == EOF) break;
+                }
 
-				goto got_c;
-			}
+                goto got_c;
+            }
 
-			if (args_i > 0 || args_buf_i > 0) {
-				args_buf[args_buf_i++] = '\0';
-				args[++args_i] = NULL;
+            if (args_i > 0 || args_buf_i > 0) {
+                args_buf[args_buf_i++] = '\0';
+                args[++args_i] = NULL;
 
-				ret = run_command(args, false);
-				if (!ret) return false;
-			}
+                bool ret = run_command(args, false);
+                if (!ret) return false;
+            }
 
-			args_buf_i = 0;
-			args_i = 0;
-			c_was_space = false;
-		} else if (isspace(c)) {
-			if (args_buf_i == 0) continue;
-			if (c_was_space) continue;
+            args_buf_i = 0;
+            args_i = 0;
+            c_was_space = false;
+        } else if (isspace(c)) {
+            if (args_buf_i == 0) continue;
+            if (c_was_space) continue;
 
-			if (args_i > 255) {
-				fputs("sh-oe: error: too many arguments\n", stdout);
-				return false;
-			}
+            if (args_i > 255) {
+                fputs("sh-oe: error: too many arguments\n", stdout);
+                return false;
+            }
 
-			c_was_space = true;
-		} else {
-			if (c_was_space) {
-				args_buf[args_buf_i++] = '\0';
-				args[++args_i] = &args_buf[args_buf_i];
-				c_was_space = false;
-			}
+            c_was_space = true;
+        } else {
+            if (c_was_space) {
+                args_buf[args_buf_i++] = '\0';
+                args[++args_i] = &args_buf[args_buf_i];
+                c_was_space = false;
+            }
 
-			args_buf[args_buf_i++] = c;
-		}
-	}
+            args_buf[args_buf_i++] = c;
+        }
+    }
 
-	return true;
+    return true;
 }
 
 static bool run_script(const char* filename) {
@@ -367,7 +368,7 @@ static bool run_script(const char* filename) {
 }
 
 static void print_help(void) {
-    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv\n");
+    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv ret\n");
 }
 
 static bool run_command(const char *args[], bool show_time) {
@@ -382,9 +383,9 @@ static bool run_command(const char *args[], bool show_time) {
     if (ext) {
         ext++;
         if (strcmp(ext, "oe") == 0) {
-            run_program(args[0], args);
+            ret = run_program(args[0], args);
         } else if (strcmp(ext, "sh") == 0) {
-            run_script(args[0]);
+            ret = run_script(args[0]);
         }
     } else {
         // internal commands
@@ -395,11 +396,11 @@ static bool run_command(const char *args[], bool show_time) {
                 printf("%s ", args[i]);
             printf("\n");
         } else if (strcmp(args[0], "onrampvm") == 0) {
-            run_command(&args[1], false);
+            ret = run_command(&args[1], false);
         } else if (strcmp(args[0], "exit") == 0) {
-            ret = false;
+            exit(0);
         } else if (strcmp(args[0], "time") == 0) {
-            run_command(&args[1], true);
+            ret = run_command(&args[1], true);
         } else if (strcmp(args[0], "ls") == 0) {
             list_files();
         } else if (strcmp(args[0], "cat") == 0) {
@@ -423,6 +424,8 @@ static bool run_command(const char *args[], bool show_time) {
         } else if (strcmp(args[0], "mv") == 0) {
             if (args[1] && args[2])
                 move_file(args[1], args[2]);
+        } else if (strcmp(args[0], "ret") == 0) {
+            printf("Last return value: %d\n", last_ret);
         } else if (strcmp(args[0], "help") == 0) {
             print_help();
         } else printf("Unknown command\n");
@@ -444,6 +447,8 @@ static bool run_string_command(const char* cmd) {
     char* token = strtok(buf, " \n");
 
     while (token) {
+        if (nb_args == 255)
+            break;
         args[nb_args++] = token;
         token = strtok(NULL, " \n");
     }
@@ -463,15 +468,14 @@ static bool run_string_command(const char* cmd) {
 }
 
 static void command_prompt(void) {
-    char buf[256];
+    char buf[1024];
 
     for(;;) {
         fputs(">", stdout);
         fflush(stdout);
         if (read_line(buf, sizeof(buf) - 1)) {
             if (buf[0] && buf[0] != '\n')
-                if (!run_string_command(buf))
-                    break;
+                run_string_command(buf);
         }
     }
 }
