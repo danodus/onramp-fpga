@@ -33,21 +33,15 @@ bool file_open_table[MAX_OPEN_FILES] = {false};
 
 int last_ret = 0;
 
-// TODO: this is a hack until fileno() is available in libc
-int my_fileno(FILE* f) {
-    int *v = (int *)f;
-    return (int)(*v);
-}
-
 FILE* fopen_t(const char* restrict filename, const char* restrict mode) {
     FILE* file = fopen(filename, mode);
     if (file != NULL)
-        file_open_table[my_fileno(file) - 3] = true;
+        file_open_table[fileno(file) - 3] = true;
     return file;
 }
 
 int fclose_t(FILE* file) {
-    file_open_table[my_fileno(file) - 3] = false;
+    file_open_table[fileno(file) - 3] = false;
     return fclose(file);
 }
 
