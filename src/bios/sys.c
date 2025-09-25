@@ -28,6 +28,10 @@ int sys_time(unsigned out_buffer[3]) {
 int sys_fopen(const char* path, bool writeable) {
     //print("sys_fopen\n");
 
+    // Ignore the ./ prefix from the current toolchain
+    if (path[0] == '.' && path[1] == '/')
+        path += 2;
+
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;
 
