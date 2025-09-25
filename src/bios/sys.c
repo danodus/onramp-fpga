@@ -52,12 +52,19 @@ int sys_fopen(const char* path, bool writeable) {
         file_t* f = &bios_globals->files[i];
         if (f->filename[0] == '\0') {
             // empty slot found
+
+            // If the file is writeable and does not exist, create an empty file
+            if (writeable && !fs_file_exists(fs_ctx, path))
+                if (!fs_write(fs_ctx, path, NULL, 0, 0))
+                    return -1;
+
             strncpy(f->filename, path, FS_MAX_FILENAME_LEN);
             f->filename[FS_MAX_FILENAME_LEN] = '\0';
             f->read_position = 0;
             f->write_position = 0;
             f->read_buf.count = 0;
             f->write_buf.count = 0;
+
             return 3 + i;
         }
     }
