@@ -26,9 +26,16 @@ module top(
     output        SDRAM_CASX      // Columns address select
 );
 
+    wire sys_clk, pll_locked;
+    pll pll(
+        .clkin(clk),
+        .clkout0(sys_clk),
+        .locked(pll_locked)
+    );
+
     // Reset
     reg [7:0]	rst_cnt = 0;
-    wire		rst = btn[1] || !(& rst_cnt);
+    wire		rst = btn[1] || !(& rst_cnt) || !pll_locked;
     always @(posedge clk) begin
         rst_cnt <= rst_cnt + {6'd0,rst};
     end
@@ -42,7 +49,7 @@ module top(
 
     // SoC
     soc soc(
-        .i_clk(clk),
+        .i_clk(sys_clk),
         .i_rst(rst),
         // External bus
         .o_ext_addr(ext_addr),
@@ -102,7 +109,7 @@ module top(
     wire [31:0] led_dat_r;
 
     led led_dev(
-        .i_clk(clk),
+        .i_clk(sys_clk),
         .i_rst(rst),
         .i_stb(addr_is_led & ext_stb),
         .i_we(ext_we[0]),
@@ -117,8 +124,10 @@ module top(
     wire uart_ack;
     wire [31:0] uart_dat_r;
 
-    uart uart_dev(
-        .i_clk(clk),
+    uart #(
+        .FREQ_HZ(40_000_000)
+    ) uart_dev(
+        .i_clk(sys_clk),
         .i_rst(rst),
         .i_stb(addr_is_uart & ext_stb),
         .i_we(ext_we),
@@ -137,7 +146,7 @@ module top(
     wire [31:0] spi_dat_r;
 
     spi spi_dev(
-        .i_clk(clk),
+        .i_clk(sys_clk),
         .i_rst(rst),
         .i_addr(ext_addr[3:0]),
         .i_stb(addr_is_spi & ext_stb),
