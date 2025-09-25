@@ -136,6 +136,8 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/cg/0-asm/src/parse.h:core/cg/0-asm/src/parse.h \
     $ONRAMP_BIN/../../../core/cg/0-asm/src/register.h:core/cg/0-asm/src/register.h \
     $ONRAMP_BIN/../../../core/cpp/1-omc/rebuild.sh:core/cpp/1-omc/rebuild.sh \
+    $ONRAMP_BIN/../../../core/ld/1-omc/build.sh:core/ld/1-omc/build.sh \
+    $ONRAMP_BIN/../../../core/ld/1-omc/ld.c:core/ld/1-omc/ld.c \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -148,4 +150,5 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/cpp-1-omc-unopt/cpp.oe:build/intermediate/cpp-1-omc-unopt/cpp.oe \
     $ONRAMP_BIN/../../intermediate/cpp-1-omc-unopt/cpp.os:build/intermediate/cpp-1-omc-unopt/cpp.os \
     $ONRAMP_BIN/../../intermediate/cg-0-asm/cg.oe:build/intermediate/cg-0-asm/cg.oe \
-    $ONRAMP_BIN/../../intermediate/cpp-1-omc/cpp.oe:build/intermediate/cpp-1-omc/cpp.oe
+    $ONRAMP_BIN/../../intermediate/cpp-1-omc/cpp.oe:build/intermediate/cpp-1-omc/cpp.oe \
+    $ONRAMP_BIN/../../intermediate/ld-1-omc/ld.oe:build/intermediate/ld-1-omc/ld.oe
