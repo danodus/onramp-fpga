@@ -270,6 +270,15 @@ static bool move_file(const char* src_filename, const char* dst_filename) {
     return true;
 }
 
+static bool touch(const char* filename) {
+    FILE *f = fopen_t(filename, "wb");
+    if (f == NULL) {
+        printf("Unable to open %s\n", filename);
+        return false;
+    }
+    fclose(f);
+    return true;
+}
 
 static bool run_command(const char *args[], bool show_time);
 
@@ -362,7 +371,7 @@ static bool run_script(const char* filename) {
 }
 
 static void print_help(void) {
-    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv ret\n");
+    printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv touch ret\n");
 }
 
 static bool run_command(const char *args[], bool show_time) {
@@ -418,6 +427,9 @@ static bool run_command(const char *args[], bool show_time) {
         } else if (strcmp(args[0], "mv") == 0) {
             if (args[1] && args[2])
                 move_file(args[1], args[2]);
+        } else if (strcmp(args[0], "touch") == 0) {
+            if (args[1])
+                touch(args[1]);
         } else if (strcmp(args[0], "ret") == 0) {
             printf("Last return value: %d\n", last_ret);
         } else if (strcmp(args[0], "help") == 0) {
