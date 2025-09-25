@@ -146,6 +146,8 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/1-omc/src/malloc.c:core/libc/1-omc/src/malloc.c \
     $ONRAMP_BIN/../../../core/libc/1-omc/src/strrchr.c:core/libc/1-omc/src/strrchr.c \
     $ONRAMP_BIN/../../../core/libc/1-omc/src/strtol.c:core/libc/1-omc/src/strtol.c \
+    $ONRAMP_BIN/../../../core/cc/build.sh:core/cc/build.sh \
+    $ONRAMP_BIN/../../../core/cc/cc.c:core/cc/cc.c \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -160,4 +162,5 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/cg-0-asm/cg.oe:build/intermediate/cg-0-asm/cg.oe \
     $ONRAMP_BIN/../../intermediate/cpp-1-omc/cpp.oe:build/intermediate/cpp-1-omc/cpp.oe \
     $ONRAMP_BIN/../../intermediate/ld-1-omc/ld.oe:build/intermediate/ld-1-omc/ld.oe \
-    $ONRAMP_BIN/../../intermediate/libc-1-omc/libc.oa:build/intermediate/libc-1-omc/libc.oa
+    $ONRAMP_BIN/../../intermediate/libc-1-omc/libc.oa:build/intermediate/libc-1-omc/libc.oa \
+    $ONRAMP_BIN/../../intermediate/cc/cc.oe:build/intermediate/cc/cc.oe \
