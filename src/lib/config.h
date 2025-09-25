@@ -4,6 +4,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define MAX_OPEN_FILES  4       // Maximum number of open files
+#define MAX_OPEN_FILES  12       // Maximum number of open files
 
 #endif
