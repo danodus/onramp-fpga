@@ -71,6 +71,62 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/cci/0-omc/src/type.os:core/cci/0-omc/src/type.os \
     $ONRAMP_BIN/../../../core/cpp/1-omc/build.sh:core/cpp/1-omc/build.sh \
     $ONRAMP_BIN/../../../core/cpp/1-omc/cpp.c:core/cpp/1-omc/cpp.c \
+    \
+    $ONRAMP_BIN/../../../core/libc/common/include/time.h:core/libc/common/include/time.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdalign.h:core/libc/common/include/stdalign.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/semaphore.h:core/libc/common/include/semaphore.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/inttypes.h:core/libc/common/include/inttypes.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdlib.h:core/libc/common/include/stdlib.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdnoreturn.h:core/libc/common/include/stdnoreturn.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/malloc.h:core/libc/common/include/malloc.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/features.h:core/libc/common/include/features.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/limits.h:core/libc/common/include/limits.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/unistd.h:core/libc/common/include/unistd.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stddef.h:core/libc/common/include/stddef.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/wctype.h:core/libc/common/include/wctype.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/fcntl.h:core/libc/common/include/fcntl.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/signal.h:core/libc/common/include/signal.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/spawn.h:core/libc/common/include/spawn.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/setjmp.h:core/libc/common/include/setjmp.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/strings.h:core/libc/common/include/strings.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/sys/time.h:core/libc/common/include/sys/time.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/sys/types.h:core/libc/common/include/sys/types.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/sys/stat.h:core/libc/common/include/sys/stat.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdckdint.h:core/libc/common/include/stdckdint.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/ctype.h:core/libc/common/include/ctype.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__seek.h:core/libc/common/include/__onramp/__seek.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__wint_t.h:core/libc/common/include/__onramp/__wint_t.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__size_t.h:core/libc/common/include/__onramp/__size_t.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__mode_t.h:core/libc/common/include/__onramp/__mode_t.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__time_t.h:core/libc/common/include/__onramp/__time_t.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__fatal.h:core/libc/common/include/__onramp/__fatal.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__null.h:core/libc/common/include/__onramp/__null.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__predef.h:core/libc/common/include/__onramp/__predef.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__bool.h:core/libc/common/include/__onramp/__bool.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__wchar_t.h:core/libc/common/include/__onramp/__wchar_t.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__timespec.h:core/libc/common/include/__onramp/__timespec.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__useconds_t.h:core/libc/common/include/__onramp/__useconds_t.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__pit.h:core/libc/common/include/__onramp/__pit.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__va_list.h:core/libc/common/include/__onramp/__va_list.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__arithmetic.h:core/libc/common/include/__onramp/__arithmetic.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__wchar_limits.h:core/libc/common/include/__onramp/__wchar_limits.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/wchar.h:core/libc/common/include/wchar.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdbool.h:core/libc/common/include/stdbool.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/uchar.h:core/libc/common/include/uchar.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/iso646.h:core/libc/common/include/iso646.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/math.h:core/libc/common/include/math.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/errno.h:core/libc/common/include/errno.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/termios.h:core/libc/common/include/termios.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdbit.h:core/libc/common/include/stdbit.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdio.h:core/libc/common/include/stdio.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdarg.h:core/libc/common/include/stdarg.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/assert.h:core/libc/common/include/assert.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/stdint.h:core/libc/common/include/stdint.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/string.h:core/libc/common/include/string.h \
+    \
+    $ONRAMP_BIN/../../../core/libo/0-oo/include/libo-error.h:core/libo/0-oo/include/libo-error.h \
+    $ONRAMP_BIN/../../../core/libo/0-oo/include/libo-util.h:core/libo/0-oo/include/libo-util.h \
+    \
     $ONRAMP_BIN/../../../core/cg/0-asm/build.sh:core/cg/0-asm/build.sh \
     $ONRAMP_BIN/../../../core/cg/0-asm/src/common.h:core/cg/0-asm/src/common.h \
     $ONRAMP_BIN/../../../core/cg/0-asm/src/instruction.h:core/cg/0-asm/src/instruction.h \
@@ -90,5 +146,6 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/cpp-0-strip/cpp.oe:build/intermediate/cpp-0-strip/cpp.oe \
     $ONRAMP_BIN/../../intermediate/cci-0-omc/cci.oe:build/intermediate/cci-0-omc/cci.oe \
     $ONRAMP_BIN/../../intermediate/cpp-1-omc-unopt/cpp.oe:build/intermediate/cpp-1-omc-unopt/cpp.oe \
+    $ONRAMP_BIN/../../intermediate/cpp-1-omc-unopt/cpp.os:build/intermediate/cpp-1-omc-unopt/cpp.os \
     $ONRAMP_BIN/../../intermediate/cg-0-asm/cg.oe:build/intermediate/cg-0-asm/cg.oe \
     $ONRAMP_BIN/../../intermediate/cpp-1-omc/cpp.oe:build/intermediate/cpp-1-omc/cpp.oe

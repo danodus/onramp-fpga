@@ -23,5 +23,5 @@ core/cci/0-omc/build.sh
 
 echo ====== Build our preprocessor and optimizer
 core/cpp/1-omc/build.sh
-#core/cg/0-asm/build.sh
-#core/cpp/1-omc/rebuild.sh
+core/cg/0-asm/build.sh
+core/cpp/1-omc/rebuild.sh
