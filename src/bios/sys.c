@@ -306,6 +306,7 @@ int sys_stat(const char* path, unsigned output[4]) {
             output[2] = file_info.size; // size_low
             output[3] = 0;              // size_high
             found = true;
+            break;
         }
     }
     return found ? 0 : 1;
