@@ -399,8 +399,8 @@ static bool fs_write_a(fs_file_info_t* file_info, const fs_fat_t* fat, fs_fat_t*
         // find first empty block table index
         block_table_index = find_unused_block_table_index(tmp_fat, file_info, last_block_table_index == 0xFFFF ? 0 : last_block_table_index + 1);
         if (block_table_index == 0xFFFF) {
-            PRINT_DBG("No unused block found\r\n");
-            return false;
+            print("Fatal: No unused block found\r\nSystem halted.\r\n");
+            for (;;);
         }
 
         // Set the last block table entry
