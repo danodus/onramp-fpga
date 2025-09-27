@@ -67,13 +67,13 @@ int main(void) {
 
     // Initialize the SD card
     if (!sdc_init()) {
-        print("Unable to initialize the SD card\n");
-        return 1;
+        print("Unable to initialize the SD card. System halted.\n");
+        for(;;);
     }
 
     if (!fs_init(&bios_globals->fs_ctx)) {
-        print("Invalid FS image\n");
-        return 1;
+        print("Invalid FS image. System halted.\n");
+        for(;;);
     }
 
     if (is_hardware()) {
