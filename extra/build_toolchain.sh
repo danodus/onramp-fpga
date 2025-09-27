@@ -33,3 +33,4 @@ core/cc/build.sh
 
 echo ====== Build the opC toolchain
 core/cci/1-opc/build.sh
+core/libc/2-opc/build.sh
