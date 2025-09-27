@@ -24,7 +24,11 @@ int sys_time(unsigned out_buffer[3]) {
 }
 
 int sys_fopen(const char* path, bool writeable) {
-    //print("sys_fopen\n");
+    print("sys_fopen: ");
+    print(path);
+    if (writeable)
+        print(" (writeable)");
+    print("\r\n");
 
     // Ignore the / and ./ prefixes from the current toolchain
 
@@ -77,6 +81,7 @@ int sys_fopen(const char* path, bool writeable) {
             }
 
             f->position = 0;
+            f->io_time = 0;
 
             return 3 + i;
         }
@@ -103,7 +108,17 @@ int sys_fclose(int file_handle) {
 
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;
 
+    unsigned long t1 = clock();
+
     fs_sync(fs_ctx);
+
+    f->io_time += clock() - t1;        
+
+    print("sys_close: I/O time for \"");
+    print(fs_ctx->fat.file_infos[f->file_index].name);
+    print("\": ");
+    printv(f->io_time, 10);
+    print(" ms\n");    
 
     f->file_index = FS_INVALID_INDEX;
     //print("sys_close: success\n");
@@ -114,14 +129,14 @@ int sys_fread(int handle, void* buffer, unsigned size) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
 
     if (handle > 2) {
-        //print("sys_fread called\n");
-
         file_t* f = &bios_globals->files[handle - 3];
 
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
         size_t nb_read_bytes;
+        unsigned long t1 = clock();
         if (!fs_read(fs_ctx, f->file_index, buffer, f->position, size, &nb_read_bytes))
             return 0;
+        f->io_time += clock() - t1;
         f->position += nb_read_bytes;
         return nb_read_bytes;
     } else {
@@ -147,8 +162,10 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
 
         file_t* f = &bios_globals->files[handle - 3];
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+        unsigned long t1 = clock();        
         if (!fs_write(fs_ctx, f->file_index, buffer, f->position, size))
             return 0;
+        f->io_time += clock() - t1;
         f->position += size;
         return size;
 

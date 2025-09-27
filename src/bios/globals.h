@@ -14,6 +14,7 @@
 typedef struct {
     uint16_t file_index;
     size_t position;    // read or write position for ftell/fseek
+    unsigned long io_time;
 } file_t;
 
 typedef struct {
