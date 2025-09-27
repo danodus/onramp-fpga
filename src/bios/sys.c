@@ -28,7 +28,11 @@ int sys_time(unsigned out_buffer[3]) {
 int sys_fopen(const char* path, bool writeable) {
     //print("sys_fopen\n");
 
-    // Ignore the ./ prefix from the current toolchain
+    // Ignore the / and ./ prefixes from the current toolchain
+
+    if (path[0] == '/')
+        path++;
+
     if (path[0] == '.' && path[1] == '/')
         path += 2;
 
