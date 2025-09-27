@@ -24,6 +24,7 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     ../src/ed/ed.oe:ed.oe \
     \
     ../extra/build_toolchain.sh:build_toolchain.sh \
+    ../extra/build-ccargs:build-ccargs \
     ../extra/main.c:main.c \
     ../extra/build.sh:build.sh \
     \

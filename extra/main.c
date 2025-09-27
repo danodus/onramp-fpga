@@ -1,5 +1,6 @@
-// omc
-int puts(const char* s);
+// omC
+
+#include <stdio.h>
 
 int main(void) {
 	puts("Hello, world!\n");
