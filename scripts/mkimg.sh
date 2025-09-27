@@ -149,6 +149,35 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/1-omc/src/strtol.c:core/libc/1-omc/src/strtol.c \
     $ONRAMP_BIN/../../../core/cc/build.sh:core/cc/build.sh \
     $ONRAMP_BIN/../../../core/cc/cc.c:core/cc/cc.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/build.sh:core/cci/1-opc/build.sh \
+    $ONRAMP_BIN/../../../core/cci/1-opc/build-ccargs:core/cci/1-opc/build-ccargs \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/common.c:core/cci/1-opc/src/common.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/common.h:core/cci/1-opc/src/common.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/compile.c:core/cci/1-opc/src/compile.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/compile.h:core/cci/1-opc/src/compile.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/emit.c:core/cci/1-opc/src/emit.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/emit.h:core/cci/1-opc/src/emit.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/global.c:core/cci/1-opc/src/global.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/global.h:core/cci/1-opc/src/global.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/lexer.c:core/cci/1-opc/src/lexer.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/lexer.h:core/cci/1-opc/src/lexer.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/locals.c:core/cci/1-opc/src/locals.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/locals.h:core/cci/1-opc/src/locals.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/main.c:core/cci/1-opc/src/main.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/member.c:core/cci/1-opc/src/member.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/member.h:core/cci/1-opc/src/member.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/parse-decl.c:core/cci/1-opc/src/parse-decl.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/parse-decl.h:core/cci/1-opc/src/parse-decl.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/parse-expr.c:core/cci/1-opc/src/parse-expr.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/parse-expr.h:core/cci/1-opc/src/parse-expr.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/parse-stmt.c:core/cci/1-opc/src/parse-stmt.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/parse-stmt.h:core/cci/1-opc/src/parse-stmt.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/record.c:core/cci/1-opc/src/record.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/record.h:core/cci/1-opc/src/record.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/type.c:core/cci/1-opc/src/type.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/type.h:core/cci/1-opc/src/type.h \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/types.c:core/cci/1-opc/src/types.c \
+    $ONRAMP_BIN/../../../core/cci/1-opc/src/types.h:core/cci/1-opc/src/types.h \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -165,3 +194,4 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/ld-1-omc/ld.oe:build/intermediate/ld-1-omc/ld.oe \
     $ONRAMP_BIN/../../intermediate/libc-1-omc/libc.oa:build/intermediate/libc-1-omc/libc.oa \
     $ONRAMP_BIN/../../intermediate/cc/cc.oe:build/intermediate/cc/cc.oe \
+    $ONRAMP_BIN/../../intermediate/cci-1-opc/cci.oe:build/intermediate/cci-1-opc/cci.oe \

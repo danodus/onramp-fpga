@@ -30,3 +30,6 @@ echo ====== Build the rest of the omC toolchain
 core/ld/1-omc/build.sh
 core/libc/1-omc/build.sh
 core/cc/build.sh
+
+echo ====== Build the opC toolchain
+core/cci/1-opc/build.sh
