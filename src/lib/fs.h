@@ -7,7 +7,7 @@
 #include <sdc.h>
 
 #define FS_MAX_FILENAME_LEN 63      // maximum filename length (excluding the terminating null byte)
-#define FS_MAX_NB_FILES     256
+#define FS_MAX_NB_FILES     512
 #define FS_MAX_NB_BLOCKS    (6*1024*1024 / SDC_BLOCK_LEN)       // maximum number of blocks supported by the FS
 
 typedef struct {
