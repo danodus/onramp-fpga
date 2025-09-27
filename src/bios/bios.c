@@ -57,6 +57,12 @@ static char* uitoa(unsigned int value, char* result, int base)
 
 int main(void) {
 
+    // TODO: Is there a way to use static assert instead?
+    if (BIOS_GLOBALS + sizeof(bios_globals_t) > 0x12000000) {
+        print("BIOS globals too large. System halted.\n");
+        for(;;);
+    }
+
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     for (int i = 0; i < MAX_OPEN_FILES; ++i) {
         file_t* f = &bios_globals->files[i];
@@ -71,7 +77,7 @@ int main(void) {
         for(;;);
     }
 
-    if (!fs_init(&bios_globals->fs_ctx)) {
+    if (!fs_mount(&bios_globals->fs_ctx)) {
         print("Invalid FS image. System halted.\n");
         for(;;);
     }

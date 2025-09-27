@@ -68,29 +68,34 @@ int main(int argc, char *argv[]) {
     }
     printf("SD card image initialized\r\n");
 
+    fs_context_t* fs_ctx = malloc(sizeof(fs_context_t));
+
     // Format the SD card
     printf("Formatting the SD card image...\r\n");
-    if (!fs_format(false)) {
+    if (!fs_format(fs_ctx, false)) {
         printf("Unable to format the SD card image \r\n");
+        free(fs_ctx);
         sdc_img_dispose();
         return 1;
     }
     printf("SD card image formatted\r\n");
 
-    fs_context_t fs_ctx;
-    if (!fs_init(&fs_ctx)) {
+    if (!fs_mount(fs_ctx)) {
         printf("Unable to mount the FS\r\n");
+        free(fs_ctx);
         sdc_img_dispose();
         return 1;
     }
 
     bool success = true;
     for (int arg = 2; arg < argc; arg++) {
-        if (!add_file(&fs_ctx, argv[arg])) {
+        if (!add_file(fs_ctx, argv[arg])) {
             success = false;
             break;
         }
     }
+
+    free(fs_ctx);
 
     sdc_img_dispose();
 
