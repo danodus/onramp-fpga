@@ -215,6 +215,19 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-unicode.c:core/libo/1-opc/src/libo-unicode.c \
     $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-util.c:core/libo/1-opc/src/libo-util.c \
     $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-vector.c:core/libo/1-opc/src/libo-vector.c \
+    $ONRAMP_BIN/../../../core/ld/2-full/build.sh:core/ld/2-full/build.sh \
+    $ONRAMP_BIN/../../../core/ld/2-full/build-ccargs:core/ld/2-full/build-ccargs \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/common.c:core/ld/2-full/src/common.c \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/common.h:core/ld/2-full/src/common.h \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/emit.c:core/ld/2-full/src/emit.c \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/emit.h:core/ld/2-full/src/emit.h \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/label.c:core/ld/2-full/src/label.c \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/label.h:core/ld/2-full/src/label.h \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/main.c:core/ld/2-full/src/main.c \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/parse.c:core/ld/2-full/src/parse.c \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/parse.h:core/ld/2-full/src/parse.h \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/symbol.c:core/ld/2-full/src/symbol.c \
+    $ONRAMP_BIN/../../../core/ld/2-full/src/symbol.h:core/ld/2-full/src/symbol.h \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -236,3 +249,4 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/libc-1-omc/strtol.oo:build/intermediate/libc-1-omc/strtol.oo \
     $ONRAMP_BIN/../../intermediate/libc-2-opc/libc.oa:build/intermediate/libc-2-opc/libc.oa \
     $ONRAMP_BIN/../../intermediate/libo-1-opc/libo.oa:build/intermediate/libo-1-opc/libo.oa \
+    $ONRAMP_BIN/../../intermediate/ld-2-full/ld.oe:build/intermediate/ld-2-full/ld.oe \
