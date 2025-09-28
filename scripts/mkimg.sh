@@ -198,6 +198,23 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/stubs.c:core/libc/2-opc/src/stubs.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/syscalls.os:core/libc/2-opc/src/syscalls.os \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/system.c:core/libc/2-opc/src/system.c \
+    $ONRAMP_BIN/../../../core/libo/1-opc/build.sh:core/libo/1-opc/build.sh \
+    $ONRAMP_BIN/../../../core/libo/1-opc/build-ccargs:core/libo/1-opc/build-ccargs \
+    $ONRAMP_BIN/../../../core/libo/1-opc/include/libo-error.h:core/libo/1-opc/include/libo-error.h \
+    $ONRAMP_BIN/../../../core/libo/1-opc/include/libo-reader.h:core/libo/1-opc/include/libo-reader.h \
+    $ONRAMP_BIN/../../../core/libo/1-opc/include/libo-string.h:core/libo/1-opc/include/libo-string.h \
+    $ONRAMP_BIN/../../../core/libo/1-opc/include/libo-table.h:core/libo/1-opc/include/libo-table.h \
+    $ONRAMP_BIN/../../../core/libo/1-opc/include/libo-unicode.h:core/libo/1-opc/include/libo-unicode.h \
+    $ONRAMP_BIN/../../../core/libo/1-opc/include/libo-util.h:core/libo/1-opc/include/libo-util.h \
+    $ONRAMP_BIN/../../../core/libo/1-opc/include/libo-vector.h:core/libo/1-opc/include/libo-vector.h \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-data.os:core/libo/1-opc/src/libo-data.os \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-error.c:core/libo/1-opc/src/libo-error.c \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-reader.c:core/libo/1-opc/src/libo-reader.c \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-string.c:core/libo/1-opc/src/libo-string.c \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-table.c:core/libo/1-opc/src/libo-table.c \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-unicode.c:core/libo/1-opc/src/libo-unicode.c \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-util.c:core/libo/1-opc/src/libo-util.c \
+    $ONRAMP_BIN/../../../core/libo/1-opc/src/libo-vector.c:core/libo/1-opc/src/libo-vector.c \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -218,3 +235,4 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/libc-1-omc/malloc.oo:build/intermediate/libc-1-omc/malloc.oo \
     $ONRAMP_BIN/../../intermediate/libc-1-omc/strtol.oo:build/intermediate/libc-1-omc/strtol.oo \
     $ONRAMP_BIN/../../intermediate/libc-2-opc/libc.oa:build/intermediate/libc-2-opc/libc.oa \
+    $ONRAMP_BIN/../../intermediate/libo-1-opc/libo.oa:build/intermediate/libo-1-opc/libo.oa \
