@@ -1,1 +1,1 @@
-build/intermediate/cc/cc.oe @build-ccargs main.c -o main.oo
+build/intermediate/cc/cc.oe @build-ccargs main.c -o main.oe
