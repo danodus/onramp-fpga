@@ -50,7 +50,7 @@ module top(
 
     // SoC
     soc #(
-        .FREQ_HZ(25_000_000)
+        .FREQ_HZ(50_000_000)
     ) soc(
         .i_clk(sys_clk),
         .i_clk_sdram(sdram_clk),
@@ -129,7 +129,7 @@ module top(
     wire [31:0] uart_dat_r;
 
     uart #(
-        .FREQ_HZ(25_000_000)
+        .FREQ_HZ(50_000_000)
     ) uart_dev(
         .i_clk(sys_clk),
         .i_rst(rst),

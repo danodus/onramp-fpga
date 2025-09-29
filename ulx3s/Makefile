@@ -5,7 +5,7 @@ SRC =  top.v pll.v ../rtl/div.v ../rtl/or32.v ../rtl/sdram.v ../rtl/cache_contro
 #TOOLPREFIX = /opt/oss-cad-suite/bin/
 TOOLPREFIX =
 
-PNRFLAGS = --85k --package CABGA381 --speed 6 --lpf ulx3s.lpf
+PNRFLAGS = --85k --package CABGA381 --speed 6 --lpf ulx3s.lpf --randomize-seed --timing-allow-fail
 
 DEFINES = -DSDRAM
 
