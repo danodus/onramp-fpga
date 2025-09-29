@@ -16,6 +16,8 @@
 // Include model header, generated from Verilating "top.v"
 #include "Vtop.h"
 
+#define SDRAM_MEM_SIZE (32*1024*1024/2)
+
 double sc_time_stamp()
 {
     return 0.0;
@@ -117,6 +119,19 @@ int main(int argc, char **argv, char **env)
 
     std::deque<uint8_t> keys;
 
+    uint16_t *sdram_mem = new uint16_t[SDRAM_MEM_SIZE];
+    uint32_t sdram_rows[4] = {0, 0, 0, 0};  // 2^13 = 8192 rows per bank
+    uint32_t sdram_col = 0; // 2^9 = 512 columns
+    uint32_t sdram_addr = 0;
+    uint8_t burst_counter = 0;
+
+    int delay_burst = 0;
+    bool write_sdram = false;
+    bool read_sdram = false;    
+
+    for (size_t i = 0; i < SDRAM_MEM_SIZE; ++i)
+        sdram_mem[i] = 0x0000;
+
     // Set Vtop's input signals
     top->i_rst = 1;
 
@@ -137,6 +152,79 @@ int main(int argc, char **argv, char **env)
         }
 
         top->clk = !top->clk;
+
+        // if negedge clk sdram
+        if (!top->clk) {
+
+            if (!top->sdram_cs_n_o) {
+                // activate
+                uint32_t sdram_bank = top->sdram_ba_o;
+                if (!top->sdram_ras_n_o && top->sdram_cas_n_o && top->sdram_we_n_o) {
+                    sdram_rows[sdram_bank] = top->sdram_a_o;
+                    //printf("ACT bank=%d, row=%d\r\n", sdram_bank, sdram_rows[sdram_bank]);
+                }
+                uint32_t sdram_row = sdram_rows[sdram_bank];
+                if (top->sdram_ras_n_o && !top->sdram_cas_n_o) {
+                    // read or write
+                    sdram_col = top->sdram_a_o & 0x1FF;
+                    sdram_addr = 8192 * 512 * sdram_bank + 512 * sdram_row + sdram_col;
+                    assert(sdram_addr < 8192 * 512 * 4);
+                    if (!top->sdram_we_n_o) {
+                        // Write
+                        //printf("WRITE bank=%d, row=%d, col=%d (addr=0x%x), mask=%d\r\n", sdram_bank, sdram_row, sdram_col, sdram_addr*2, ~top->sdram_dqm_o & 0x03);
+                        burst_counter = 0;
+                        delay_burst = 0;
+                        write_sdram = true;
+                    } else {
+                        // Read
+                        //printf("READ bank=%d, row=%d, col=%d (addr=0x%x)\r\n", sdram_bank, sdram_row, sdram_col, sdram_addr*2);
+                        burst_counter = 0;
+                        delay_burst = 3;
+                        read_sdram = true;
+                    }
+                }
+
+                if (top->sdram_ras_n_o && top->sdram_cas_n_o && !top->sdram_we_n_o) {
+                    // end of burst
+                    //printf("EOB\n");
+                    write_sdram = false;
+                    //read_sdram = false;
+                }
+            }
+
+            uint32_t addr = sdram_addr + burst_counter;
+            assert(addr < 8192 * 512 * 4);
+            uint8_t mask = ~top->sdram_dqm_o & 0x03;
+
+            if (write_sdram) {
+                //printf("Write %x at addr %x (%d), mask=%x\r\n", top->sdram_dq_io, addr*2, burst_counter, mask);
+                switch (mask) {
+                    case 0:
+                        break;
+                    case 1:
+                        sdram_mem[addr] = (sdram_mem[addr] & 0xFF00) | (top->sdram_dq_io & 0x00FF);
+                        break;
+                    case 2:
+                        sdram_mem[addr] = (sdram_mem[addr] & 0x00FF) | (top->sdram_dq_io & 0xFF00);
+                        break;
+                    case 3:
+                        sdram_mem[addr] = top->sdram_dq_io;
+                        break;
+                } 
+            } else if (read_sdram) {
+                //printf("Read at addr %x (%d), mask=%x (%x)\r\n", addr*2, burst_counter, mask, sdram_mem[addr]);
+                top->sdram_dq_io = sdram_mem[addr];
+            }
+
+            if (read_sdram || write_sdram) {
+                if (delay_burst == 0) {
+                    if (burst_counter < 127)
+                        burst_counter++;
+                } else {
+                    delay_burst--;
+                }
+            }
+        }
 
         // if posedge clk
         if (top->clk) {

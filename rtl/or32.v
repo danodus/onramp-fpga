@@ -28,6 +28,7 @@
 module or32(
     input               i_rst,
     input               i_clk,
+    input               i_ce,
     output reg [31:0]   o_addr,
     output reg [31:0]   o_dat_w,
     output reg [3:0]    o_we,
@@ -92,7 +93,7 @@ module or32(
             regs[`RPP] <= 32'h00000000;
             regs[`RIP] <= 32'h00000000;
             div_start <= 1'b0;
-        end else begin
+        end else if (i_ce) begin
             case (state)
                 FETCH: begin
                     o_addr <= regs[`RIP];

@@ -26,10 +26,11 @@ module top(
     output        SDRAM_CASX      // Columns address select
 );
 
-    wire sys_clk, pll_locked;
+    wire sys_clk, sdram_clk, pll_locked;
     pll pll(
         .clkin(clk),
-        .clkout0(sys_clk),
+        .clkout0(sdram_clk),
+        .clkout1(sys_clk),
         .locked(pll_locked)
     );
 
@@ -49,9 +50,10 @@ module top(
 
     // SoC
     soc #(
-        .FREQ_HZ(40_000_000)
+        .FREQ_HZ(25_000_000)
     ) soc(
         .i_clk(sys_clk),
+        .i_clk_sdram(sdram_clk),
         .i_rst(rst),
         // External bus
         .o_ext_addr(ext_addr),
@@ -127,7 +129,7 @@ module top(
     wire [31:0] uart_dat_r;
 
     uart #(
-        .FREQ_HZ(40_000_000)
+        .FREQ_HZ(25_000_000)
     ) uart_dev(
         .i_clk(sys_clk),
         .i_rst(rst),

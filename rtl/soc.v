@@ -7,6 +7,7 @@ module soc #(
     parameter FREQ_HZ = 25_000_000
 ) (
     input i_clk,
+    input i_clk_sdram,
     input i_rst,
     // External bus
     output [15:0] o_ext_addr,
@@ -29,6 +30,8 @@ module soc #(
     output        SDRAM_CAS         // Columns address select
 `endif
 );
+
+    wire ce;
 
     // SBA Simple Bus Architecture
     wire		sba_rst = i_rst;
@@ -61,6 +64,7 @@ module soc #(
     or32 or32(
         .i_rst(sba_rst),
         .i_clk(sba_clk),
+        .i_ce(ce),
         .o_addr(sba_addr),
         .o_dat_w(sba_dat_w),
         .o_we(sba_we),
@@ -101,51 +105,94 @@ module soc #(
 
     // SDRAM
 
-    wire [24:0] sdram_addr = sba_addr[24:0];
-    wire sdram_busy;
-    wire sdram_stb = addr_is_ram & sba_stb;
-    reg sdram_pending;
+    wire ram_stb = addr_is_ram & sba_stb;
 
-    always @(posedge i_clk)
-        if (i_rst) sdram_pending <= 0;
-        else if (sdram_stb & sdram_busy) sdram_pending <= 1;
-        else if (sdram_pending & ~sdram_busy) sdram_pending <= 0;
+    reg  [1:0]  cntrl0_user_command_register;
+    wire [15:0] cntrl0_user_input_data;
+    wire [15:0] sys_DOUT;
+    wire        sys_rd_data_valid;
+    wire        sys_wr_data_valid;
+    wire [1:0]  sys_cmd_ack;
+    reg         crw = 1'b0;
+    wire [17:0] waddr;
 
-    reg sdram_done;
-    always @(posedge i_clk)
-        if (i_rst) sdram_done <= 0;
-        else if (sdram_stb & ~sdram_busy) sdram_done <= 1;
-        else if (sdram_done & ~sdram_busy) sdram_done <= 0;
+    reg [22:0] sys_addr;
 
-    wire sdram_go = ((sdram_stb & ~sdram_busy) | (sdram_pending));
-    wire [3:0] sdram_wmask = sdram_go? sba_we : 4'b0;
-    wire sdram_rd = (sdram_go &~ (|sba_we));
-    assign ram_ack = (sdram_pending & ~sdram_busy) | (sdram_done & ~sdram_busy);
+    always @(*) begin
+        sys_addr = 23'hxxxxx;
+        case(cntrl0_user_command_register)
+            2'b01: sys_addr = {waddr[16:0], 6'b000000};    // write 256bytes
+            2'b11: sys_addr = {sba_addr[24:8], 6'b000000}; // read 256bytes	
+        endcase
+    end
 
-    sdram SDRAM(
-        .clk(i_clk),
-        .resetn(~i_rst),
-        .wmask(sdram_wmask),
-        .rd(sdram_rd),
-        .addr(sdram_addr),
-        .din(sba_dat_w),
-        .dout(ram_dat_r),
-        .busy(sdram_busy),
-        .sd_clk(SDRAM_CLK),        // Clock for SDRAM chip
-        .sd_cke(SDRAM_CKE),        // Clock enabled
-        .sd_d(SDRAM_D),          // Bidirectional data lines to/from SDRAM
-        .sd_addr(SDRAM_ADDR),       // Address bus, multiplexed, 13 bits
-        .sd_ba(SDRAM_BA),         // Bank select wires for 4 banks
-        .sd_dqm(SDRAM_DQM),        // Byte mask
-        .sd_cs(SDRAM_CS),         // Chip select
-        .sd_we(SDRAM_WE),         // Write enable
-        .sd_ras(SDRAM_RAS),        // Row address select
-        .sd_cas(SDRAM_CAS)        // Columns address select
+    SDRAM_16bit SDR
+    (
+        .sys_CLK(i_clk_sdram),				    // clock
+        .sys_CMD(cntrl0_user_command_register),	// 00=nop, 01 = write 256 bytes, 10=read 32 bytes, 11=read 256 bytes
+        .sys_ADDR(sys_addr),	                // word address
+        .sys_DIN(cntrl0_user_input_data),		// data input
+        .sys_DOUT(sys_DOUT),					// data output
+        .sys_rd_data_valid(sys_rd_data_valid),	// data valid read
+        .sys_wr_data_valid(sys_wr_data_valid),	// data valid write
+        .sys_cmd_ack(sys_cmd_ack),			    // command acknowledged
+        
+        .sdr_n_CS_WE_RAS_CAS({SDRAM_CS, SDRAM_WE, SDRAM_RAS, SDRAM_CAS}),			// SDRAM #CS, #WE, #RAS, #CAS
+        .sdr_BA(SDRAM_BA),					// SDRAM bank address
+        .sdr_ADDR(SDRAM_ADDR),				// SDRAM address
+        .sdr_DATA(SDRAM_D),	    			// SDRAM data
+        .sdr_DQM(SDRAM_DQM)					// SDRAM DQM
     );
+
+    wire ddr_rd;
+    wire ddr_wr;
+
+    cache_controller cache_ctrl 
+    (
+        // Interface with the CPU
+        .addr(sba_addr[25:0]), 
+        .dout(ram_dat_r), 
+        .din(sba_dat_w), 
+        .clk(i_clk),
+        .mreq(ram_stb), 
+        .wmask(sba_we),
+        .ce(ce),
+
+        // Interface with SDRAM
+        .ddr_din(sys_DOUT), 
+        .ddr_dout(cntrl0_user_input_data), 
+        .ddr_clk(i_clk_sdram), 
+        .ddr_rd(ddr_rd), 
+        .ddr_wr(ddr_wr),
+        .waddr(waddr),
+        .cache_write_data(crw && sys_rd_data_valid), // read DDR, write to cache
+        .cache_read_data(crw && sys_wr_data_valid),
+
+        // Control
+        .flush(1'b0),
+        .clear(1'b0)
+    );
+
+    reg nop;
+    always @(posedge i_clk_sdram) begin
+        nop <= sys_cmd_ack == 2'b00;
+        if (ddr_wr) cntrl0_user_command_register <= 2'b01;		// write 256 bytes cache
+        else if(ddr_rd) cntrl0_user_command_register <= 2'b11;	// read 256 bytes cache
+        else cntrl0_user_command_register <= 2'b00;
+        
+        if (nop) case (sys_cmd_ack)
+            2'b01, 2'b11: crw <= 1'b1;	// cache read/write			
+        endcase
+    end
+
+    assign ram_ack = 1'b1;
+
+    assign SDRAM_CKE = 1'b1;
+    assign SDRAM_CLK = ~i_clk_sdram;
 
 `else // SDRAM
 
-    // 32 MiB of BRAM preloaded with the OS shell
+    // 32 MiB of BRAM
     
     reg [31:0] BRAM[32*1024*1024/4];
     wire bram_stb = addr_is_ram & sba_stb;
@@ -163,6 +210,8 @@ module soc #(
         if (bram_stb) bram_ack <= 1;
         else bram_ack <= 0;
     assign ram_ack = bram_ack;
+
+    assign ce = 1'b1;
 
 `endif // SDRAM
 
