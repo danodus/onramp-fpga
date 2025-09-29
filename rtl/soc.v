@@ -3,7 +3,9 @@
 
 `default_nettype none
 
-module soc(
+module soc #(
+    parameter FREQ_HZ = 25_000_000
+) (
     input i_clk,
     input i_rst,
     // External bus
@@ -173,7 +175,9 @@ module soc(
     // Timer
     wire [31:0] timer_dat_r;
     wire timer_ack;
-    timer timer(
+    timer #(
+        .FREQ_HZ(FREQ_HZ)
+    ) timer(
         .i_clk(i_clk),
         .i_rst(i_rst),
         .i_addr(sba_addr[3:0]),

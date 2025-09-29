@@ -48,7 +48,9 @@ module top(
     wire [31:0] ext_dat_w, ext_dat_r;
 
     // SoC
-    soc soc(
+    soc #(
+        .FREQ_HZ(40_000_000)
+    ) soc(
         .i_clk(sys_clk),
         .i_rst(rst),
         // External bus

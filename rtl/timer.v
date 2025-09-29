@@ -26,7 +26,7 @@ module timer #(
             counter <= 16'd0;
             milliseconds <= 64'd0;
         end else begin
-            if (counter >= 16'(FREQ_HZ / 1_000)) begin
+            if (counter == 16'(FREQ_HZ / 1_000 - 1)) begin
                 milliseconds <= milliseconds + 64'd1;
                 counter <= 16'd0;
             end else begin
