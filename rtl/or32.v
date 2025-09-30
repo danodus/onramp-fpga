@@ -38,18 +38,16 @@ module or32(
 );
 
 
-    localparam FETCH      = 4'd0;
-    localparam FETCH_WAIT = 4'd1;
-    localparam EXECUTE    = 4'd2;
-    localparam LOAD       = 4'd3;
-    localparam LOAD_WAIT  = 4'd4;
-    localparam STORE      = 4'd5;
-    localparam STORE_WAIT = 4'd6;
-    localparam DIV_WAIT   = 4'd7;
+    localparam FETCH      = 3'd0;
+    localparam FETCH_WAIT = 3'd1;
+    localparam EXECUTE    = 3'd2;
+    localparam LOAD       = 3'd3;
+    localparam STORE      = 3'd4;
+    localparam DIV        = 3'd5;
 
     reg [31:0] regs[16];
 
-    reg [3:0] state;
+    reg [2:0] state;
 
     reg [31:0] instr;
     wire [7:0] opcode = instr[7:0];
@@ -109,41 +107,129 @@ module or32(
                     end
                 end
                 EXECUTE: begin
-                    state <= FETCH;
                     if (opcode[7:4] == 4'h7) begin
+                        state <= FETCH;
                         case (opcode[3:0])
-                            `OP_ADD:
+                            `OP_ADD: begin
                                 regs[arg1[3:0]] <= arg2_val + arg3_val;
-                            `OP_SUB:
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
+                            `OP_SUB: begin
                                 regs[arg1[3:0]] <= arg2_val - arg3_val;
-                            `OP_MUL:
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
+                            `OP_MUL: begin
                                 regs[arg1[3:0]] <= arg2_val * arg3_val;
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
                             `OP_DIV: begin
                                 div_a <= arg2_val;
                                 div_b <= arg3_val;
                                 div_start <= 1'b1;
-                                state <= DIV_WAIT;
+                                state <= DIV;
                             end
-                            `OP_AND:
+                            `OP_AND: begin
                                 regs[arg1[3:0]] <= arg2_val & arg3_val;
-                            `OP_OR:
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
+                            `OP_OR: begin
                                 regs[arg1[3:0]] <= arg2_val | arg3_val;
-                            `OP_SHL:
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
+                            `OP_SHL: begin
                                 regs[arg1[3:0]] <= arg2_val << arg3_val;
-                            `OP_SHRU:
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
+                            `OP_SHRU: begin
                                 regs[arg1[3:0]] <= arg2_val >> arg3_val;
-                            `OP_LDW:
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
+                            `OP_LDW, `OP_LDB: begin
+                                o_addr <= {addr[31:2], 2'b0};
+                                o_stb <= 1'b1;
                                 state <= LOAD;
-                            `OP_LDB:
-                                state <= LOAD;
-                            `OP_STW:
+                            end
+                            `OP_STW, `OP_STB: begin
+                                o_addr <= {addr[31:2], 2'b0};
+                                if (opcode[3:0] == `OP_STB) begin
+                                    case (addr[1:0])
+                                        2'b00: begin
+                                            o_dat_w <= {24'd0, arg1_val[7:0]};
+                                            o_we <= 4'b0001;
+                                        end
+                                        2'b01: begin
+                                            o_dat_w <= {16'd0, arg1_val[7:0], 8'd0};
+                                            o_we <= 4'b0010;
+                                        end
+                                        2'b10: begin
+                                            o_dat_w <= {8'd0, arg1_val[7:0], 16'd0};
+                                            o_we <= 4'b0100;
+                                        end
+                                        2'b11: begin
+                                            o_dat_w <= {arg1_val[7:0], 24'd0};
+                                            o_we <= 4'b1000;
+                                        end
+                                    endcase
+                                end else begin
+                                    o_dat_w <= arg1_val;
+                                    o_we <= 4'b1111;
+                                end
+                                o_stb <= 1'b1;
                                 state <= STORE;
-                            `OP_STB:
-                                state <= STORE;
-                            `OP_IMS:
+                            end
+                            `OP_IMS: begin
                                 regs[arg1[3:0]] <= {regs[arg1[3:0]][15:0], arg3, arg2}; 
-                            `OP_LTU:
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
+                            `OP_LTU: begin
                                 regs[arg1[3:0]] <= arg2_val < arg3_val ? 32'd1 : 32'd0;
+                                if (arg1[3:0] != `RIP) begin
+                                    o_addr <= regs[`RIP];
+                                    regs[`RIP] <= next_ip;
+                                    o_stb <= 1'b1;
+                                    state <= FETCH_WAIT;
+                                end
+                            end
                             `OP_JZ:
                                 if (arg1_val == 32'd0)
                                     regs[`RIP] <= regs[`RIP] + {{{14{arg3[7]}}, arg3, arg2}, 2'b00};
@@ -153,11 +239,6 @@ module or32(
                     end
                 end
                 LOAD: begin
-                    o_addr <= {addr[31:2], 2'b0};
-                    o_stb <= 1'b1;
-                    state <= LOAD_WAIT;
-                end
-                LOAD_WAIT: begin
                     o_stb <= 1'b0;
                     if (i_ack) begin
                         if (opcode[3:0] == `OP_LDB) begin
@@ -174,41 +255,13 @@ module or32(
                     end
                 end
                 STORE: begin
-                    o_addr <= {addr[31:2], 2'b0};
-                    if (opcode[3:0] == `OP_STB) begin
-                        case (addr[1:0])
-                            2'b00: begin
-                                o_dat_w <= {24'd0, arg1_val[7:0]};
-                                o_we <= 4'b0001;
-                            end
-                            2'b01: begin
-                                o_dat_w <= {16'd0, arg1_val[7:0], 8'd0};
-                                o_we <= 4'b0010;
-                            end
-                            2'b10: begin
-                                o_dat_w <= {8'd0, arg1_val[7:0], 16'd0};
-                                o_we <= 4'b0100;
-                            end
-                            2'b11: begin
-                                o_dat_w <= {arg1_val[7:0], 24'd0};
-                                o_we <= 4'b1000;
-                            end
-                        endcase
-                    end else begin
-                        o_dat_w <= arg1_val;
-                        o_we <= 4'b1111;
-                    end
-                    o_stb <= 1'b1;
-                    state <= STORE_WAIT;
-                end
-                STORE_WAIT: begin
                     o_stb <= 1'b0;
                     if (i_ack) begin
                         o_we <= 4'h0;
                         state <= FETCH;
                     end
                 end
-                DIV_WAIT: begin
+                DIV: begin
                     div_start <= 1'b0;
                     if (div_done) begin
                         regs[arg1[3:0]] <= div_val;
