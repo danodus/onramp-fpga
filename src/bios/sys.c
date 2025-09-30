@@ -52,16 +52,30 @@ int sys_fopen(const char* path, bool writeable) {
 
     for (int i = 0; i < MAX_OPEN_FILES; ++i) {
         file_t* f = &bios_globals->files[i];
-        if (f->filename[0] == '\0') {
+        if (f->file_index == FS_INVALID_INDEX) {
             // empty slot found
 
             // If the file is writeable and does not exist, create an empty file
-            if (writeable && !fs_file_exists(fs_ctx, path))
-                if (!fs_write(fs_ctx, path, NULL, 0, 0))
+            if (writeable) {
+                f->file_index = fs_find_file(fs_ctx, path);
+                if (f->file_index == FS_INVALID_INDEX) {
+                    // The file does not exist, create a new one
+                    if ((f->file_index = fs_create_file(fs_ctx, path)) == FS_INVALID_INDEX) {
+                        //print("sys_fopen: cannot create new file\n");
+                        return -1;
+                    }
+                    if (!fs_write(fs_ctx, f->file_index, NULL, 0, 0)) {
+                        //print("sys_fopen: cannot write empty file\n");
+                        return -1;
+                    }
+                }
+            } else {
+                if ((f->file_index = fs_find_file(fs_ctx, path)) == FS_INVALID_INDEX) {
+                    //print("sys_open: cannot open existing file\n");
                     return -1;
+                }
+            }
 
-            strncpy(f->filename, path, FS_MAX_FILENAME_LEN);
-            f->filename[FS_MAX_FILENAME_LEN] = '\0';
             f->read_position = 0;
             f->write_position = 0;
             f->read_buf.count = 0;
@@ -72,7 +86,7 @@ int sys_fopen(const char* path, bool writeable) {
         }
     }
 
-    print("sys_fopen: maximum number of open files reached\n");
+    //print("sys_fopen: maximum number of open files reached\n");
 
     return -1;
 }
@@ -88,16 +102,20 @@ int sys_fclose(int file_handle) {
     file_t* f = &bios_globals->files[file_handle - 3];
 
     // If the file is already close, return immediately
-    if (f->filename[0] == '\0')
+    if (f->file_index == FS_INVALID_INDEX)
         return 0;
+
+    fs_context_t* fs_ctx = &bios_globals->fs_ctx;
 
     // If the I/O buffer is not empty, flush it
     if (f->write_buf.count > 0) {
-        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, f->write_buf.count);
+        fs_write(fs_ctx, f->file_index, f->write_buf.data, f->write_position, f->write_buf.count);
     }
 
-    f->filename[0] = '\0';
+    fs_sync(fs_ctx);
+
+    f->file_index = FS_INVALID_INDEX;
+    //print("sys_close: success\n");
     return 0;
 }
 
@@ -116,7 +134,7 @@ int sys_fread(int handle, void* buffer, unsigned size) {
         if (f->read_buf.count == 0) {
             fs_context_t* fs_ctx = &bios_globals->fs_ctx;
             size_t nb_read_bytes;
-            if (!fs_read(fs_ctx, f->filename, f->read_buf.data, f->read_position, IO_BUFFER_SIZE, &nb_read_bytes)) {
+            if (!fs_read(fs_ctx, f->file_index, f->read_buf.data, f->read_position, IO_BUFFER_SIZE, &nb_read_bytes)) {
                 //print("sys_fread: Unable to read\n");
                 return 0;
             }
@@ -157,7 +175,7 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
     if (handle > 2) {
         //print("sys_fwrite called\n");
 
-        file_t* f = &bios_globals->files[handle - 3];        
+        file_t* f = &bios_globals->files[handle - 3];
 
         // 1. If the I/O buffer is full, flush it
         // 2. Fill the I/O buffer as much as possible based on the user request
@@ -165,7 +183,7 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
         // If the I/O buffer is full, flush it
         if (f->write_buf.count == IO_BUFFER_SIZE) {
             fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-            if (!fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, IO_BUFFER_SIZE)) {
+            if (!fs_write(fs_ctx, f->file_index, f->write_buf.data, f->write_position, IO_BUFFER_SIZE)) {
                 //print("sys_fwrite: Unable to write\n");
                 return 0;
             }
@@ -198,6 +216,8 @@ int sys_fseek(int handle, int base, unsigned offset_low, int offset_high) {
     
     if (handle > 2) {
 
+        //print("sys_fseek\n");
+
         if (base > 2)
             return -1;
 
@@ -212,7 +232,7 @@ int sys_fseek(int handle, int base, unsigned offset_low, int offset_high) {
         // If the I/O buffer is not empty, flush it
         if (f->write_buf.count > 0) {
             fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-            fs_write(fs_ctx, f->filename, f->write_buf.data, f->write_position, f->write_buf.count);
+            fs_write(fs_ctx, f->file_index, f->write_buf.data, f->write_position, f->write_buf.count);
         }
         
         // clear buffers
@@ -221,8 +241,13 @@ int sys_fseek(int handle, int base, unsigned offset_low, int offset_high) {
 
         // set new position
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        size_t file_size = fs_get_file_size(fs_ctx, f->filename);
-        f->position = (base == 0) ? offset_low : (base == 1) ? f->position + offset_low : file_size + offset_low;
+        fs_file_info_t file_info;
+        if (!fs_get_file_info(fs_ctx, f->file_index, &file_info)) {
+            //print("sys_fseek: get file info failed\n");
+            return -1;
+        }
+        f->position = (base == 0) ? offset_low : (base == 1) ? f->position + offset_low : file_info.size + offset_low;
+
         f->read_position = f->position;
         f->write_position = f->position;
 
@@ -250,7 +275,7 @@ int sys_ftrunc(int handle, unsigned size_low, unsigned size_high) {
         //print("sys_ftrunc called\n");
         file_t* f = &bios_globals->files[handle - 3]; 
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-        if (!fs_write(fs_ctx, f->filename, (void*)0, size_low, 0)) {
+        if (!fs_write(fs_ctx, f->file_index, (void*)0, size_low, 0)) {
             //print("sys_ftrunc: Unable to write\n");
             return -1;
         }

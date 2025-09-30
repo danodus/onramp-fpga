@@ -66,7 +66,7 @@ int main(void) {
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
     for (int i = 0; i < MAX_OPEN_FILES; ++i) {
         file_t* f = &bios_globals->files[i];
-        f->filename[0] = '\0';
+        f->file_index = FS_INVALID_INDEX;
     }
 
     print("BIOS: Initialized\n");
@@ -90,29 +90,26 @@ int main(void) {
 
     // Load the shell from SD card
     bool is_shell_loaded = false;
-    uint16_t nb_files = fs_get_nb_files(&bios_globals->fs_ctx);
-    for (uint16_t i = 0; i < nb_files; ++i) {
-        fs_file_info_t file_info;
-        if (fs_get_file_info(&bios_globals->fs_ctx, i, &file_info)) {
-            if (strcmp(file_info.name, "shell.oe") == 0) {
-                bool is_load_bypassed = false;
-                if (is_hardware()) {
-                    print("Press a key to bypass the SD card boot process...\n");
-                    unsigned long target_clock = clock() + 4000;
-                    for (;;) {
-                        if (getchar(0)) {
-                            is_load_bypassed = true;
-                            break;
-                        } else if (clock() > target_clock) {
-                            break;
-                        }
-                    }
-                }
-                if (!is_load_bypassed) {
-                    print("Loading the shell from SD card...\n");
-                    is_shell_loaded = fs_read(&bios_globals->fs_ctx, file_info.name, (uint8_t *)RAM_START, 0, file_info.size, NULL);
+    uint16_t file_index = fs_find_file(&bios_globals->fs_ctx, "shell.oe");
+    if (file_index != FS_INVALID_INDEX) {
+        bool is_load_bypassed = false;
+        if (is_hardware()) {
+            print("Press a key to bypass the SD card boot process...\n");
+            unsigned long target_clock = clock() + 4000;
+            for (;;) {
+                if (getchar(0)) {
+                    is_load_bypassed = true;
+                    break;
+                } else if (clock() > target_clock) {
+                    break;
                 }
             }
+        }
+        if (!is_load_bypassed) {
+            print("Loading the shell from SD card...\n");
+            fs_file_info_t file_info;
+            fs_get_file_info(&bios_globals->fs_ctx, file_index, &file_info);
+            is_shell_loaded = fs_read(&bios_globals->fs_ctx, file_index, (uint8_t *)RAM_START, 0, file_info.size, NULL);
         }
     }
 

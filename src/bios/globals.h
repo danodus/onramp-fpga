@@ -17,7 +17,7 @@ typedef struct {
 } io_buffer_t;
 
 typedef struct {
-    char filename[FS_MAX_FILENAME_LEN + 1];
+    uint16_t file_index;
     size_t read_position;
     size_t write_position;
     io_buffer_t read_buf, write_buf;

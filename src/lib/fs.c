@@ -230,6 +230,8 @@ bool fs_format(fs_context_t* ctx, bool quick) {
         PRINT_DBG("Unable to write FAT\r\n");
         return false;
     }
+
+    ctx->is_dirty = false;
     
     return true;
 }
@@ -239,6 +241,8 @@ bool fs_mount(fs_context_t* ctx) {
         PRINT_DBG("Unable to read FAT\r\n");
         return false;
     }
+
+    ctx->is_dirty = false;
 
     return true;
 }
@@ -280,13 +284,10 @@ bool fs_delete(fs_context_t* ctx, const char* filename) {
     // clear file info entry
     file_info->name[0] = '\0'; 
 
-    // write FAT
-    if (!write_fat(&ctx->tmp_fat)) {
-        // unable to write FAT
-        return false;
-    }
-
     ctx->fat = ctx->tmp_fat;
+    ctx->is_dirty = true;
+    fs_sync(ctx);
+
     return true;
 }
 
@@ -302,17 +303,14 @@ bool fs_rename(fs_context_t* ctx, const char* filename, const char* new_filename
     strncpy(file_info->name, new_filename, FS_MAX_FILENAME_LEN);
     file_info->name[FS_MAX_FILENAME_LEN] = '\0';
 
-    // write FAT
-    if (!write_fat(&ctx->tmp_fat)) {
-        // unable to write FAT
-        return false;
-    }
-
     ctx->fat = ctx->tmp_fat;
+    ctx->is_dirty = true;
+    fs_sync(ctx);
+
     return true;
 }
 
-static bool fs_read_a(fs_file_info_t* file_info, const fs_fat_t* fat, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes) {
+static bool fs_read_a(const fs_file_info_t* file_info, const fs_fat_t* fat, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes) {
 
     // Sanity check
     if (current_pos % SDC_BLOCK_LEN) {
@@ -432,20 +430,19 @@ static bool fs_write_a(fs_file_info_t* file_info, const fs_fat_t* fat, fs_fat_t*
     return true;
 }
 
-bool fs_read(fs_context_t* ctx, const char* filename, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes) {
+bool fs_read(fs_context_t* ctx, uint16_t file_index, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes) {
+
+    if (file_index == FS_INVALID_INDEX)
+        return false;
+
+    fs_file_info_t *file_info = &ctx->fat.file_infos[file_index];
 
     PRINT_DBG("filename: ");
-    PRINT_DBG(filename);
+    PRINT_DBG(file_info->name);
     PRINT_DBG("\r\n");
     PRINTV_DBG("current_pos: ", current_pos);
     PRINTV_DBG("nb_bytes: ", nb_bytes);
 
-    fs_file_info_t *file_info = find_file(&ctx->fat, filename);
-
-    if (!file_info) {
-        PRINT_DBG("File not found\r\n");
-        return false;
-    }    
 
     // If the current position is aligned to a sector, read in a single operation
     if (current_pos % SDC_BLOCK_LEN == 0) {
@@ -504,46 +501,22 @@ bool fs_read(fs_context_t* ctx, const char* filename, uint8_t* buf, size_t curre
     return true;
 }
 
-bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_t current_pos, size_t nb_bytes) {
+bool fs_write(fs_context_t* ctx, uint16_t file_index, const uint8_t* buf, size_t current_pos, size_t nb_bytes) {
+
+    if (file_index == FS_INVALID_INDEX)
+        return false;
+
+    ctx->tmp_fat = ctx->fat;
+    fs_file_info_t *file_info = &ctx->tmp_fat.file_infos[file_index];
 
     PRINT_DBG("fs_write\r\n");
     PRINT_DBG("filename: ");
-    PRINT_DBG(filename);
+    PRINT_DBG(file_info->name);
     PRINT_DBG("\r\n");
     PRINTV_DBG("current_pos: ", current_pos);
-    PRINTV_DBG("nb_bytes: ", nb_bytes);    
-
-    ctx->tmp_fat = ctx->fat;
-    fs_file_info_t *file_info = find_file(&ctx->tmp_fat, filename);
-
-    bool is_new_file = false;
+    PRINTV_DBG("nb_bytes: ", nb_bytes);
     
-    if (!file_info) {
-        PRINT_DBG("New file\r\n");
-        // find empty file entry
-        uint16_t file_index = 0;
-        bool found = false;
-        for (file_index = 0; file_index < FS_MAX_NB_FILES; ++file_index) {
-            if (!ctx->tmp_fat.file_infos[file_index].name[0]) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            PRINT_DBG("Too many files\r\n");
-            return false;
-        }
-        file_info = &ctx->tmp_fat.file_infos[file_index];
-        strncpy(file_info->name, filename, FS_MAX_FILENAME_LEN);
-        file_info->name[FS_MAX_FILENAME_LEN] = '\0';
-        file_info->first_block_table_index = 0xFFFF;
-        file_info->size = 0;
-        is_new_file = true;
-    } else {
-        // update the file
-        PRINT_DBG("Update file\r\n");
-    }
-
+    bool is_new_file = file_info->size == 0;
 
     // If the current position is aligned to a sector, do everything in a single operation
     if (current_pos % SDC_BLOCK_LEN == 0) {
@@ -599,15 +572,11 @@ bool fs_write(fs_context_t* ctx, const char* filename, const uint8_t* buf, size_
         }
     }
 
-    if (!write_fat(&ctx->tmp_fat)) {
-        PRINT_DBG("Unable to write FAT\r\n");
-        return false;
-    }
-
     PRINTV_DBG("Final size: ", file_info->size);
 
     // The operation is successful, we keep this FAT
     ctx->fat = ctx->tmp_fat;
+    ctx->is_dirty = true;
         
     return true;
 }
@@ -619,4 +588,50 @@ bool fs_file_exists(fs_context_t* ctx, const char* filename) {
 size_t fs_get_file_size(fs_context_t* ctx, const char* filename) {
     fs_file_info_t* fi = find_file(&ctx->fat, filename);
     return (fi != NULL) ? fi->size : 0;
+}
+
+bool fs_sync(fs_context_t* ctx) {
+    if (ctx->is_dirty) {
+        if (!write_fat(&ctx->fat)) {
+            PRINT_DBG("Unable to write FAT\r\n");
+            return false;
+        }
+        ctx->is_dirty = false;
+    }
+    return true;
+}
+
+uint16_t fs_find_file(fs_context_t* ctx, const char* filename) {
+
+    for (uint16_t i = 0; i < FS_MAX_NB_FILES; ++i) {
+        if (strncmp(ctx->fat.file_infos[i].name, filename, FS_MAX_FILENAME_LEN) == 0)
+            return i;
+    }
+    return FS_INVALID_INDEX;
+}
+
+uint16_t fs_create_file(fs_context_t* ctx, const char* filename) {
+    fs_file_info_t *file_info;
+    // find empty file entry
+    uint16_t file_index = 0;
+    bool found = false;
+    for (file_index = 0; file_index < FS_MAX_NB_FILES; ++file_index) {
+        if (!ctx->fat.file_infos[file_index].name[0]) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        PRINT_DBG("Too many files\r\n");
+        return FS_INVALID_INDEX;
+    }
+    file_info = &ctx->fat.file_infos[file_index];
+    strncpy(file_info->name, filename, FS_MAX_FILENAME_LEN);
+    file_info->name[FS_MAX_FILENAME_LEN] = '\0';
+    file_info->first_block_table_index = 0xFFFF;
+    file_info->size = 0;
+
+    ctx->is_dirty = true;
+
+    return file_index;
 }

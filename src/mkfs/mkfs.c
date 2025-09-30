@@ -33,21 +33,30 @@ bool add_file(fs_context_t* fs_ctx, const char* filepath) {
 
     printf("Adding file %s...\n", dstpath);
 
+    uint16_t file_index = fs_create_file(fs_ctx, dstpath);
+    if (file_index == FS_INVALID_INDEX) {
+        printf("Unable to create %s\n", dstpath);
+        fclose(f);
+        free(path);
+        return false;
+    }
+
     uint8_t buf[512];
     size_t total_size = 0;
     for (;;) {
         size_t n = fread(buf, 1, sizeof(buf), f);
         if (n <= 0)
             break;
-        if (!fs_write(fs_ctx, dstpath, buf, total_size, n)) {
+        if (!fs_write(fs_ctx, file_index, buf, total_size, n)) {
             printf("Unable to write %s\n", dstpath);
             fclose(f);
             free(path);
             return false;
         }
-
         total_size += n;
-    }   
+    }
+
+    fs_sync(fs_ctx);
 
     fclose(f);
     free(path);
