@@ -228,6 +228,59 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/ld/2-full/src/parse.h:core/ld/2-full/src/parse.h \
     $ONRAMP_BIN/../../../core/ld/2-full/src/symbol.c:core/ld/2-full/src/symbol.c \
     $ONRAMP_BIN/../../../core/ld/2-full/src/symbol.h:core/ld/2-full/src/symbol.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/build.sh:core/cci/2-full/build.sh \
+    $ONRAMP_BIN/../../../core/cci/2-full/build-ccargs:core/cci/2-full/build-ccargs \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/arithmetic.c:core/cci/2-full/src/arithmetic.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/arithmetic.h:core/cci/2-full/src/arithmetic.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/block.c:core/cci/2-full/src/block.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/block.h:core/cci/2-full/src/block.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/common.c:core/cci/2-full/src/common.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/common.h:core/cci/2-full/src/common.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/emit.c:core/cci/2-full/src/emit.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/emit.h:core/cci/2-full/src/emit.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/enum.c:core/cci/2-full/src/enum.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/enum.h:core/cci/2-full/src/enum.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/function.c:core/cci/2-full/src/function.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/function.h:core/cci/2-full/src/function.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/generate_ops.c:core/cci/2-full/src/generate_ops.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/generate_ops.h:core/cci/2-full/src/generate_ops.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/generate_stmt.c:core/cci/2-full/src/generate_stmt.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/generate_stmt.h:core/cci/2-full/src/generate_stmt.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/generate.c:core/cci/2-full/src/generate.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/generate.h:core/cci/2-full/src/generate.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/instruction.c:core/cci/2-full/src/instruction.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/instruction.h:core/cci/2-full/src/instruction.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/lexer.c:core/cci/2-full/src/lexer.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/lexer.h:core/cci/2-full/src/lexer.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/main.c:core/cci/2-full/src/main.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/node.c:core/cci/2-full/src/node.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/node.h:core/cci/2-full/src/node.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/optimize_asm.c:core/cci/2-full/src/optimize_asm.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/optimize_asm.h:core/cci/2-full/src/optimize_asm.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/optimize_tree.c:core/cci/2-full/src/optimize_tree.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/optimize_tree.h:core/cci/2-full/src/optimize_tree.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/options.c:core/cci/2-full/src/options.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/options.h:core/cci/2-full/src/options.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_decl.c:core/cci/2-full/src/parse_decl.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_decl.h:core/cci/2-full/src/parse_decl.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_expr.c:core/cci/2-full/src/parse_expr.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_expr.h:core/cci/2-full/src/parse_expr.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_init.c:core/cci/2-full/src/parse_init.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_init.h:core/cci/2-full/src/parse_init.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_stmt.c:core/cci/2-full/src/parse_stmt.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/parse_stmt.h:core/cci/2-full/src/parse_stmt.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/record.c:core/cci/2-full/src/record.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/record.h:core/cci/2-full/src/record.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/scope.c:core/cci/2-full/src/scope.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/scope.h:core/cci/2-full/src/scope.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/strings.c:core/cci/2-full/src/strings.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/strings.h:core/cci/2-full/src/strings.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/symbol.c:core/cci/2-full/src/symbol.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/symbol.h:core/cci/2-full/src/symbol.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/token.c:core/cci/2-full/src/token.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/token.h:core/cci/2-full/src/token.h \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/type.c:core/cci/2-full/src/type.c \
+    $ONRAMP_BIN/../../../core/cci/2-full/src/type.h:core/cci/2-full/src/type.h \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -250,3 +303,4 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/libc-2-opc/libc.oa:build/intermediate/libc-2-opc/libc.oa \
     $ONRAMP_BIN/../../intermediate/libo-1-opc/libo.oa:build/intermediate/libo-1-opc/libo.oa \
     $ONRAMP_BIN/../../intermediate/ld-2-full/ld.oe:build/intermediate/ld-2-full/ld.oe \
+    $ONRAMP_BIN/../../intermediate/cci-2-full/cci.oe:build/intermediate/cci-2-full/cci.oe \

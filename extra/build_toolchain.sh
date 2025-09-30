@@ -38,3 +38,4 @@ core/libc/2-opc/build.sh
 echo ====== Build the full C compiler
 core/libo/1-opc/build.sh
 core/ld/2-full/build.sh
+core/cci/2-full/build.sh
