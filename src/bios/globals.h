@@ -7,7 +7,7 @@
 #include <config.h>
 #include <fs.h>
 
-#define BIOS_GLOBALS 0x11fc0000  // (32 MiB - 256 KiB)
+#define BIOS_GLOBALS 0x11f80000  // (32 MiB - 512 KiB)
 
 #define IO_BUFFER_SIZE  4096
 
