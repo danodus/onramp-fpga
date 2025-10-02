@@ -12,7 +12,7 @@ clean:
 	rm -f sd.img
 
 sim: top.v sim_main.cpp
-	$(VERILATOR) -cc --exe $(CFLAGS) $(LDFLAGS) top.v sim_main.cpp $(DEFINES) -I../rtl sdram.v bram32bit.v bram_true2p_2clk.v --trace -Wno-NULLPORT -Wno-PINMISSING -Wno-WIDTHEXPAND -Wno-CASEINCOMPLETE -Wno-WIDTHTRUNC -Wno-MULTIDRIVEN
+	$(VERILATOR) -cc --exe $(CFLAGS) $(LDFLAGS) top.v sim_main.cpp $(DEFINES) -I../rtl --trace -Wno-NULLPORT -Wno-PINMISSING
 	$(MAKE) -j 4 -C obj_dir -f Vtop.mk
 
 run: sim

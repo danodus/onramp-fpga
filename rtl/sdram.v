@@ -59,7 +59,7 @@
 `define RFB 11			// refresh bit = floor(log2(CLK*`tREF/(2^RowBits)))
 
 
-module SDRAM_16bit(
+module sdram(
         input sys_CLK,						// clock
         input [1:0]sys_CMD,					// 00=nop, 01 = write WR2 bytes, 10=read RD1 bytes, 11=read RD2 bytes
         input [`RowBits+`BankBits+`ColBits-`PitchBits-1:0]sys_ADDR,			// word address, multiple of 2^PitchBits words
@@ -80,7 +80,7 @@ module SDRAM_16bit(
     reg [(1<<`BankBits)-1:0]actBank = 0;
     reg [2:0]STATE = 0;
     reg [2:0]RET;		// return state
-    reg [6:0]DLY;		// delay
+    reg [7:0]DLY;		// delay
     reg [15:0]counter = 0;	// refresh counter
     reg rfsh = 1;			// refresh bit
     reg [`ColBits-`PitchBits-1:0]colAddr;

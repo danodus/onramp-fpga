@@ -113,7 +113,6 @@ module soc #(
     wire        sys_rd_data_valid;
     wire        sys_wr_data_valid;
     wire [1:0]  sys_cmd_ack;
-    reg         crw = 1'b0;
     wire [17:0] waddr;
 
     reg [22:0] sys_addr;
@@ -123,11 +122,12 @@ module soc #(
         case(cntrl0_user_command_register)
             2'b01: sys_addr = {waddr[16:0], 6'b000000};    // write 256bytes
             2'b11: sys_addr = {sba_addr[24:8], 6'b000000}; // read 256bytes	
+            default: begin
+            end
         endcase
     end
 
-    SDRAM_16bit SDR
-    (
+    sdram sdram(
         .sys_CLK(i_clk_sdram),				    // clock
         .sys_CMD(cntrl0_user_command_register),	// 00=nop, 01 = write 256 bytes, 10=read 32 bytes, 11=read 256 bytes
         .sys_ADDR(sys_addr),	                // word address
@@ -147,8 +147,7 @@ module soc #(
     wire ddr_rd;
     wire ddr_wr;
 
-    cache_controller cache_ctrl 
-    (
+    cache_controller cache_ctrl(
         // Interface with the CPU
         .addr(sba_addr[25:0]), 
         .dout(ram_dat_r), 
@@ -165,24 +164,18 @@ module soc #(
         .ddr_rd(ddr_rd), 
         .ddr_wr(ddr_wr),
         .waddr(waddr),
-        .cache_write_data(crw && sys_rd_data_valid), // read DDR, write to cache
-        .cache_read_data(crw && sys_wr_data_valid),
+        .cache_write_data(sys_rd_data_valid), // read DDR, write to cache
+        .cache_read_data(sys_wr_data_valid),
 
         // Control
         .flush(1'b0),
         .clear(1'b0)
     );
 
-    reg nop;
     always @(posedge i_clk_sdram) begin
-        nop <= sys_cmd_ack == 2'b00;
         if (ddr_wr) cntrl0_user_command_register <= 2'b01;		// write 256 bytes cache
         else if(ddr_rd) cntrl0_user_command_register <= 2'b11;	// read 256 bytes cache
         else cntrl0_user_command_register <= 2'b00;
-        
-        if (nop) case (sys_cmd_ack)
-            2'b01, 2'b11: crw <= 1'b1;	// cache read/write			
-        endcase
     end
 
     assign ram_ack = 1'b1;
