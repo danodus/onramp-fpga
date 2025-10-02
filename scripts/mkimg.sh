@@ -310,6 +310,37 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/cpp/2-full/src/strings.h:core/cpp/2-full/src/strings.h \
     $ONRAMP_BIN/../../../core/cpp/2-full/src/token.c:core/cpp/2-full/src/token.c \
     $ONRAMP_BIN/../../../core/cpp/2-full/src/token.h:core/cpp/2-full/src/token.h \
+    $ONRAMP_BIN/../../../core/libc/3-full/build.sh:core/libc/3-full/build.sh \
+    \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/start.oo:build/intermediate/libc-2-opc/start.oo \
+    $ONRAMP_BIN/../../intermediate/libc-1-omc/strtol.oo:build/intermediate/libc-1-omc/strtol.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/assert.oo:build/intermediate/libc-2-opc/assert.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/ctype.oo:build/intermediate/libc-2-opc/ctype.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/environ.oo:build/intermediate/libc-2-opc/environ.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/float.oo:build/intermediate/libc-2-opc/float.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/format.oo:build/intermediate/libc-2-opc/format.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/llong.oo:build/intermediate/libc-2-opc/llong.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/multibyte.oo:build/intermediate/libc-2-opc/multibyte.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/posixio.oo:build/intermediate/libc-2-opc/posixio.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/setjmp.oo:build/intermediate/libc-2-opc/setjmp.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/stdbit.oo:build/intermediate/libc-2-opc/stdbit.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/stdio.oo:build/intermediate/libc-2-opc/stdio.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/stdlib.oo:build/intermediate/libc-2-opc/stdlib.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/string.oo:build/intermediate/libc-2-opc/string.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/strings.oo:build/intermediate/libc-2-opc/strings.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/syscalls.oo:build/intermediate/libc-2-opc/syscalls.oo \
+    $ONRAMP_BIN/../../intermediate/libc-2-opc/system.oo:build/intermediate/libc-2-opc/system.oo \
+    \
+    $ONRAMP_BIN/../../../core/libc/3-full/build-ccargs:core/libc/3-full/build-ccargs \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/atexit.c:core/libc/3-full/src/atexit.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/bsearch.c:core/libc/3-full/src/bsearch.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/malloc.c:core/libc/3-full/src/malloc.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/qsort.c:core/libc/3-full/src/qsort.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/rand.c:core/libc/3-full/src/rand.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/signal.c:core/libc/3-full/src/signal.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/stdbit_llong.c:core/libc/3-full/src/stdbit_llong.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/stdlib_3.c:core/libc/3-full/src/stdlib_3.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/time.c:core/libc/3-full/src/time.c \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -334,3 +365,4 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/ld-2-full/ld.oe:build/intermediate/ld-2-full/ld.oe \
     $ONRAMP_BIN/../../intermediate/cci-2-full/cci.oe:build/intermediate/cci-2-full/cci.oe \
     $ONRAMP_BIN/../../intermediate/cpp-2-full/cpp.oe:build/intermediate/cpp-2-full/cpp.oe \
+    $ONRAMP_BIN/../../intermediate/libc-3-full/libc.oa:build/intermediate/libc-3-full/libc.oa \

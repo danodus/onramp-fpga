@@ -42,3 +42,4 @@ core/cci/2-full/build.sh
 
 echo ====== Build the rest of the C toolchain
 core/cpp/2-full/build.sh
+core/libc/3-full/build.sh
