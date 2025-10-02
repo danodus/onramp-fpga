@@ -78,6 +78,10 @@ int main(int argc, char *argv[]) {
     printf("SD card image initialized\r\n");
 
     fs_context_t* fs_ctx = malloc(sizeof(fs_context_t));
+    if (fs_ctx == NULL) {
+        printf("Out of memory\r\n");
+        return 1;
+    }
 
     // Format the SD card
     printf("Formatting the SD card image...\r\n");
