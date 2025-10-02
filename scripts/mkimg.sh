@@ -281,6 +281,35 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/cci/2-full/src/token.h:core/cci/2-full/src/token.h \
     $ONRAMP_BIN/../../../core/cci/2-full/src/type.c:core/cci/2-full/src/type.c \
     $ONRAMP_BIN/../../../core/cci/2-full/src/type.h:core/cci/2-full/src/type.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/build.sh:core/cpp/2-full/build.sh \
+    $ONRAMP_BIN/../../../core/cpp/2-full/build-ccargs:core/cpp/2-full/build-ccargs \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/common.c:core/cpp/2-full/src/common.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/common.h:core/cpp/2-full/src/common.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/directive.c:core/cpp/2-full/src/directive.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/directive.h:core/cpp/2-full/src/directive.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/emit.c:core/cpp/2-full/src/emit.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/emit.h:core/cpp/2-full/src/emit.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/expression.c:core/cpp/2-full/src/expression.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/expression.h:core/cpp/2-full/src/expression.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/file.c:core/cpp/2-full/src/file.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/file.h:core/cpp/2-full/src/file.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/hideset.c:core/cpp/2-full/src/hideset.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/hideset.h:core/cpp/2-full/src/hideset.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/lexer.c:core/cpp/2-full/src/lexer.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/lexer.h:core/cpp/2-full/src/lexer.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/macro.c:core/cpp/2-full/src/macro.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/macro.h:core/cpp/2-full/src/macro.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/main.c:core/cpp/2-full/src/main.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/options.c:core/cpp/2-full/src/options.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/options.h:core/cpp/2-full/src/options.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/preprocess.c:core/cpp/2-full/src/preprocess.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/preprocess.h:core/cpp/2-full/src/preprocess.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/stream.c:core/cpp/2-full/src/stream.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/stream.h:core/cpp/2-full/src/stream.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/strings.c:core/cpp/2-full/src/strings.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/strings.h:core/cpp/2-full/src/strings.h \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/token.c:core/cpp/2-full/src/token.c \
+    $ONRAMP_BIN/../../../core/cpp/2-full/src/token.h:core/cpp/2-full/src/token.h \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -304,3 +333,4 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/libo-1-opc/libo.oa:build/intermediate/libo-1-opc/libo.oa \
     $ONRAMP_BIN/../../intermediate/ld-2-full/ld.oe:build/intermediate/ld-2-full/ld.oe \
     $ONRAMP_BIN/../../intermediate/cci-2-full/cci.oe:build/intermediate/cci-2-full/cci.oe \
+    $ONRAMP_BIN/../../intermediate/cpp-2-full/cpp.oe:build/intermediate/cpp-2-full/cpp.oe \

@@ -39,3 +39,6 @@ echo ====== Build the full C compiler
 core/libo/1-opc/build.sh
 core/ld/2-full/build.sh
 core/cci/2-full/build.sh
+
+echo ====== Build the rest of the C toolchain
+core/cpp/2-full/build.sh
