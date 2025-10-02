@@ -341,6 +341,17 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/3-full/src/stdbit_llong.c:core/libc/3-full/src/stdbit_llong.c \
     $ONRAMP_BIN/../../../core/libc/3-full/src/stdlib_3.c:core/libc/3-full/src/stdlib_3.c \
     $ONRAMP_BIN/../../../core/libc/3-full/src/time.c:core/libc/3-full/src/time.c \
+    $ONRAMP_BIN/../../../core/as/2-full/build.sh:core/as/2-full/build.sh \
+    $ONRAMP_BIN/../../../core/as/2-full/build-ccargs:core/as/2-full/build-ccargs \
+    $ONRAMP_BIN/../../../core/as/2-full/src/common.c:core/as/2-full/src/common.c \
+    $ONRAMP_BIN/../../../core/as/2-full/src/common.h:core/as/2-full/src/common.h \
+    $ONRAMP_BIN/../../../core/as/2-full/src/emit.c:core/as/2-full/src/emit.c \
+    $ONRAMP_BIN/../../../core/as/2-full/src/emit.h:core/as/2-full/src/emit.h \
+    $ONRAMP_BIN/../../../core/as/2-full/src/main.c:core/as/2-full/src/main.c \
+    $ONRAMP_BIN/../../../core/as/2-full/src/opcodes.c:core/as/2-full/src/opcodes.c \
+    $ONRAMP_BIN/../../../core/as/2-full/src/opcodes.h:core/as/2-full/src/opcodes.h \
+    $ONRAMP_BIN/../../../core/as/2-full/src/parse.c:core/as/2-full/src/parse.c \
+    $ONRAMP_BIN/../../../core/as/2-full/src/parse.h:core/as/2-full/src/parse.h \
     \
     $ONRAMP_BIN/../../intermediate/ld-0-global/ld.oe:build/intermediate/ld-0-global/ld.oe \
     $ONRAMP_BIN/../../intermediate/ar-0-cat/ar.oe:build/intermediate/ar-0-cat/ar.oe \
@@ -366,3 +377,4 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/cci-2-full/cci.oe:build/intermediate/cci-2-full/cci.oe \
     $ONRAMP_BIN/../../intermediate/cpp-2-full/cpp.oe:build/intermediate/cpp-2-full/cpp.oe \
     $ONRAMP_BIN/../../intermediate/libc-3-full/libc.oa:build/intermediate/libc-3-full/libc.oa \
+    $ONRAMP_BIN/../../intermediate/as-2-full/as.oe:build/intermediate/as-2-full/as.oe \
