@@ -24,6 +24,7 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     ../src/ed/ed.oe:ed.oe \
     \
     ../extra/build_toolchain.sh:build_toolchain.sh \
+    ../extra/rebuild_toolchain.sh:rebuild_toolchain.sh \
     ../extra/build-ccargs:build-ccargs \
     ../extra/main.c:main.c \
     ../extra/build.sh:build.sh \
@@ -378,3 +379,85 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../intermediate/cpp-2-full/cpp.oe:build/intermediate/cpp-2-full/cpp.oe \
     $ONRAMP_BIN/../../intermediate/libc-3-full/libc.oa:build/intermediate/libc-3-full/libc.oa \
     $ONRAMP_BIN/../../intermediate/as-2-full/as.oe:build/intermediate/as-2-full/as.oe \
+    \
+    $ONRAMP_BIN/../../../core/libc/common/build.sh:core/libc/common/build.sh \
+    $ONRAMP_BIN/../../../core/libc/3-full/rebuild.sh:core/libc/3-full/rebuild.sh \
+    $ONRAMP_BIN/../../../core/libc/3-full/rebuild-ccargs:core/libc/3-full/rebuild-ccargs \
+    $ONRAMP_BIN/../../../core/libo/1-opc/rebuild.sh:core/libo/1-opc/rebuild.sh \
+    $ONRAMP_BIN/../../../core/libo/1-opc/rebuild-ccargs:core/libo/1-opc/rebuild-ccargs \
+    $ONRAMP_BIN/../../../core/cc/rebuild.sh:core/cc/rebuild.sh \
+    $ONRAMP_BIN/../../../core/ld/2-full/rebuild.sh:core/ld/2-full/rebuild.sh \
+    $ONRAMP_BIN/../../../core/ld/2-full/rebuild-ccargs:core/ld/2-full/rebuild-ccargs \
+    $ONRAMP_BIN/../../../core/as/2-full/rebuild.sh:core/as/2-full/rebuild.sh \
+    $ONRAMP_BIN/../../../core/as/2-full/rebuild-ccargs:core/as/2-full/rebuild-ccargs \
+    $ONRAMP_BIN/../../../core/cci/2-full/rebuild.sh:core/cci/2-full/rebuild.sh \
+    $ONRAMP_BIN/../../../core/cci/2-full/rebuild-ccargs:core/cci/2-full/rebuild-ccargs \
+    $ONRAMP_BIN/../../../core/cpp/2-full/rebuild.sh:core/cpp/2-full/rebuild.sh \
+    $ONRAMP_BIN/../../../core/cpp/2-full/rebuild-ccargs:core/cpp/2-full/rebuild-ccargs \
+    $ONRAMP_BIN/../../../core/hex/1-c89/build.sh:core/hex/1-c89/build.sh \
+    $ONRAMP_BIN/../../../core/hex/1-c89/hex.c:core/hex/1-c89/hex.c \
+    \
+    $ONRAMP_BIN/../../output/bin/cpp.oe:build/output/bin/cpp.oe \
+    $ONRAMP_BIN/../../output/bin/cci.oe:build/output/bin/cci.oe \
+    $ONRAMP_BIN/../../output/bin/ld.oe.od:build/output/bin/ld.oe.od \
+    $ONRAMP_BIN/../../output/bin/ld.oe:build/output/bin/ld.oe \
+    $ONRAMP_BIN/../../output/bin/hex.oe.od:build/output/bin/hex.oe.od \
+    $ONRAMP_BIN/../../output/bin/cc.oe:build/output/bin/cc.oe \
+    $ONRAMP_BIN/../../output/bin/as.oe.od:build/output/bin/as.oe.od \
+    $ONRAMP_BIN/../../output/bin/cpp.oe.od:build/output/bin/cpp.oe.od \
+    $ONRAMP_BIN/../../output/bin/cci.oe.od:build/output/bin/cci.oe.od \
+    $ONRAMP_BIN/../../output/bin/as.oe:build/output/bin/as.oe \
+    $ONRAMP_BIN/../../output/bin/hex.oe:build/output/bin/hex.oe \
+    $ONRAMP_BIN/../../output/bin/ar.oe:build/output/bin/ar.oe \
+    $ONRAMP_BIN/../../output/bin/cc.oe.od:build/output/bin/cc.oe.od \
+    $ONRAMP_BIN/../../output/include/time.h:build/output/include/time.h \
+    $ONRAMP_BIN/../../output/include/stdalign.h:build/output/include/stdalign.h \
+    $ONRAMP_BIN/../../output/include/semaphore.h:build/output/include/semaphore.h \
+    $ONRAMP_BIN/../../output/include/inttypes.h:build/output/include/inttypes.h \
+    $ONRAMP_BIN/../../output/include/stdlib.h:build/output/include/stdlib.h \
+    $ONRAMP_BIN/../../output/include/stdnoreturn.h:build/output/include/stdnoreturn.h \
+    $ONRAMP_BIN/../../output/include/malloc.h:build/output/include/malloc.h \
+    $ONRAMP_BIN/../../output/include/features.h:build/output/include/features.h \
+    $ONRAMP_BIN/../../output/include/limits.h:build/output/include/limits.h \
+    $ONRAMP_BIN/../../output/include/unistd.h:build/output/include/unistd.h \
+    $ONRAMP_BIN/../../output/include/stddef.h:build/output/include/stddef.h \
+    $ONRAMP_BIN/../../output/include/wctype.h:build/output/include/wctype.h \
+    $ONRAMP_BIN/../../output/include/fcntl.h:build/output/include/fcntl.h \
+    $ONRAMP_BIN/../../output/include/signal.h:build/output/include/signal.h \
+    $ONRAMP_BIN/../../output/include/spawn.h:build/output/include/spawn.h \
+    $ONRAMP_BIN/../../output/include/setjmp.h:build/output/include/setjmp.h \
+    $ONRAMP_BIN/../../output/include/strings.h:build/output/include/strings.h \
+    $ONRAMP_BIN/../../output/include/sys/time.h:build/output/include/sys/time.h \
+    $ONRAMP_BIN/../../output/include/sys/types.h:build/output/include/sys/types.h \
+    $ONRAMP_BIN/../../output/include/sys/stat.h:build/output/include/sys/stat.h \
+    $ONRAMP_BIN/../../output/include/ctype.h:build/output/include/ctype.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__seek.h:build/output/include/__onramp/__seek.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__wint_t.h:build/output/include/__onramp/__wint_t.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__size_t.h:build/output/include/__onramp/__size_t.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__mode_t.h:build/output/include/__onramp/__mode_t.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__time_t.h:build/output/include/__onramp/__time_t.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__fatal.h:build/output/include/__onramp/__fatal.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__null.h:build/output/include/__onramp/__null.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__predef.h:build/output/include/__onramp/__predef.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__bool.h:build/output/include/__onramp/__bool.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__wchar_t.h:build/output/include/__onramp/__wchar_t.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__timespec.h:build/output/include/__onramp/__timespec.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__useconds_t.h:build/output/include/__onramp/__useconds_t.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__pit.h:build/output/include/__onramp/__pit.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__va_list.h:build/output/include/__onramp/__va_list.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__arithmetic.h:build/output/include/__onramp/__arithmetic.h \
+    $ONRAMP_BIN/../../output/include/__onramp/__wchar_limits.h:build/output/include/__onramp/__wchar_limits.h \
+    $ONRAMP_BIN/../../output/include/wchar.h:build/output/include/wchar.h \
+    $ONRAMP_BIN/../../output/include/stdbool.h:build/output/include/stdbool.h \
+    $ONRAMP_BIN/../../output/include/uchar.h:build/output/include/uchar.h \
+    $ONRAMP_BIN/../../output/include/iso646.h:build/output/include/iso646.h \
+    $ONRAMP_BIN/../../output/include/math.h:build/output/include/math.h \
+    $ONRAMP_BIN/../../output/include/errno.h:build/output/include/errno.h \
+    $ONRAMP_BIN/../../output/include/termios.h:build/output/include/termios.h \
+    $ONRAMP_BIN/../../output/include/stdbit.h:build/output/include/stdbit.h \
+    $ONRAMP_BIN/../../output/include/stdio.h:build/output/include/stdio.h \
+    $ONRAMP_BIN/../../output/include/stdarg.h:build/output/include/stdarg.h \
+    $ONRAMP_BIN/../../output/include/assert.h:build/output/include/assert.h \
+    $ONRAMP_BIN/../../output/include/stdint.h:build/output/include/stdint.h \
+    $ONRAMP_BIN/../../output/include/string.h:build/output/include/string.h \
+    $ONRAMP_BIN/../../output/lib/libc.oa:build/output/lib/libc.oa \
