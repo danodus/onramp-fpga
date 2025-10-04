@@ -43,6 +43,23 @@ static char *uitoa(unsigned int value, char* result, int base)
     return result;
 }
 
+static void* memcpy_fast(void* vdest, const void* vsrc, size_t count) {
+    if ((size_t)vdest & 0x3 ||
+        (size_t)vsrc & 0x3 ||
+        count & 0x3) {
+            print("memcpy_fast: parameter not word aligned\r\n");
+            return NULL;
+        }
+    count >>= 2;
+    uint32_t* start = vdest;
+    const uint32_t* src = (const uint32_t*)vsrc;
+    uint32_t* dest = (uint32_t*)vdest;
+    uint32_t* end = dest + count;
+    while (dest != end)
+        *dest++ = *src++;
+    return start;
+}
+
 static int strncmp(const char* a, const char* b, size_t n) {
     const char* end = a + n;
     for (;;) {
@@ -271,7 +288,9 @@ bool fs_get_file_info(fs_context_t* ctx, uint16_t file_index, fs_file_info_t* fi
 }
 
 bool fs_delete(fs_context_t* ctx, const char* filename) {
-    ctx->tmp_fat = ctx->fat;
+    //ctx->tmp_fat = ctx->fat;
+    memcpy_fast(&ctx->tmp_fat, &ctx->fat, sizeof(fs_fat_t));
+
 
     fs_file_info_t *file_info = find_file(&ctx->tmp_fat, filename);
     if (!file_info) {
@@ -284,7 +303,8 @@ bool fs_delete(fs_context_t* ctx, const char* filename) {
     // clear file info entry
     file_info->name[0] = '\0'; 
 
-    ctx->fat = ctx->tmp_fat;
+    //ctx->fat = ctx->tmp_fat;
+    memcpy_fast(&ctx->fat, &ctx->tmp_fat, sizeof(fs_fat_t));
     ctx->is_dirty = true;
     fs_sync(ctx);
 
@@ -292,7 +312,8 @@ bool fs_delete(fs_context_t* ctx, const char* filename) {
 }
 
 bool fs_rename(fs_context_t* ctx, const char* filename, const char* new_filename) {
-    ctx->tmp_fat = ctx->fat;
+    //ctx->tmp_fat = ctx->fat;
+    memcpy_fast(&ctx->tmp_fat, &ctx->fat, sizeof(fs_fat_t));
 
     fs_file_info_t *file_info = find_file(&ctx->tmp_fat, filename);
     if (!file_info) {
@@ -303,7 +324,8 @@ bool fs_rename(fs_context_t* ctx, const char* filename, const char* new_filename
     strncpy(file_info->name, new_filename, FS_MAX_FILENAME_LEN);
     file_info->name[FS_MAX_FILENAME_LEN] = '\0';
 
-    ctx->fat = ctx->tmp_fat;
+    //ctx->fat = ctx->tmp_fat;
+    memcpy_fast(&ctx->fat, &ctx->tmp_fat, sizeof(fs_fat_t));
     ctx->is_dirty = true;
     fs_sync(ctx);
 
@@ -506,7 +528,9 @@ bool fs_write(fs_context_t* ctx, uint16_t file_index, const uint8_t* buf, size_t
     if (file_index == FS_INVALID_INDEX)
         return false;
 
-    ctx->tmp_fat = ctx->fat;
+    //ctx->tmp_fat = ctx->fat;
+    memcpy_fast(&ctx->tmp_fat, &ctx->fat, sizeof(fs_fat_t));
+
     fs_file_info_t *file_info = &ctx->tmp_fat.file_infos[file_index];
 
     PRINT_DBG("fs_write\r\n");
@@ -575,7 +599,8 @@ bool fs_write(fs_context_t* ctx, uint16_t file_index, const uint8_t* buf, size_t
     PRINTV_DBG("Final size: ", file_info->size);
 
     // The operation is successful, we keep this FAT
-    ctx->fat = ctx->tmp_fat;
+    //ctx->fat = ctx->tmp_fat;
+    memcpy_fast(&ctx->fat, &ctx->tmp_fat, sizeof(fs_fat_t));
     ctx->is_dirty = true;
         
     return true;
