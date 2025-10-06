@@ -386,15 +386,15 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libo/1-opc/rebuild.sh:core/libo/1-opc/rebuild.sh \
     $ONRAMP_BIN/../../../core/libo/1-opc/rebuild-ccargs:core/libo/1-opc/rebuild-ccargs \
     $ONRAMP_BIN/../../../core/cc/rebuild.sh:core/cc/rebuild.sh \
-    $ONRAMP_BIN/../../../core/ld/2-full/rebuild.sh:core/ld/2-full/rebuild.sh \
-    $ONRAMP_BIN/../../../core/ld/2-full/rebuild-ccargs:core/ld/2-full/rebuild-ccargs \
-    $ONRAMP_BIN/../../../core/as/2-full/rebuild.sh:core/as/2-full/rebuild.sh \
-    $ONRAMP_BIN/../../../core/as/2-full/rebuild-ccargs:core/as/2-full/rebuild-ccargs \
-    $ONRAMP_BIN/../../../core/cci/2-full/rebuild.sh:core/cci/2-full/rebuild.sh \
-    $ONRAMP_BIN/../../../core/cci/2-full/rebuild-ccargs:core/cci/2-full/rebuild-ccargs \
-    $ONRAMP_BIN/../../../core/cpp/2-full/rebuild.sh:core/cpp/2-full/rebuild.sh \
-    $ONRAMP_BIN/../../../core/cpp/2-full/rebuild-ccargs:core/cpp/2-full/rebuild-ccargs \
-    $ONRAMP_BIN/../../../core/hex/1-c89/build.sh:core/hex/1-c89/build.sh \
+    ../extra/core/ld/2-full/rebuild.sh:core/ld/2-full/rebuild.sh \
+    ../extra/core/ld/2-full/rebuild-ccargs:core/ld/2-full/rebuild-ccargs \
+    ../extra/core/as/2-full/rebuild.sh:core/as/2-full/rebuild.sh \
+    ../extra/core/as/2-full/rebuild-ccargs:core/as/2-full/rebuild-ccargs \
+    ../extra/core/cci/2-full/rebuild.sh:core/cci/2-full/rebuild.sh \
+    ../extra/core/cci/2-full/rebuild-ccargs:core/cci/2-full/rebuild-ccargs \
+    ../extra/core/cpp/2-full/rebuild.sh:core/cpp/2-full/rebuild.sh \
+    ../extra/core/cpp/2-full/rebuild-ccargs:core/cpp/2-full/rebuild-ccargs \
+    ../extra/core/hex/1-c89/build.sh:core/hex/1-c89/build.sh \
     $ONRAMP_BIN/../../../core/hex/1-c89/hex.c:core/hex/1-c89/hex.c \
     \
     $ONRAMP_BIN/../../output/bin/cpp.oe:build/output/bin/cpp.oe \

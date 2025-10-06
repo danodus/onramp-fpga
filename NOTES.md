@@ -110,4 +110,4 @@ With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_ti
 
 # Next Steps
 
-- Continue the bootstrap process...
+- Optimize the file system to reduce the build time.

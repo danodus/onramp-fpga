@@ -1,0 +1,8 @@
+-with-cpp=build/intermediate/cpp-2-full/cpp.oe
+-with-cci=build/intermediate/cci-2-full/cci.oe
+-with-as=build/output/bin/as.oe
+-with-ld=build/output/bin/ld.oe
+-Ibuild/output/include
+-Icore/libo/1-opc/include
+-O
+-g
