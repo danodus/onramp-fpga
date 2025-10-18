@@ -10,7 +10,7 @@ module soc #(
     input i_clk_sdram,
     input i_rst,
     // External bus
-    output [15:0] o_ext_addr,
+    output [27:0] o_ext_addr,
     output        o_ext_stb,
     output [3:0]  o_ext_we,
     input         i_ext_ack,
@@ -209,7 +209,7 @@ module soc #(
 `endif // SDRAM
 
     // External bus
-    assign o_ext_addr  = sba_addr[15:0];
+    assign o_ext_addr  = sba_addr[27:0];
     assign o_ext_dat_w = sba_dat_w;
     assign o_ext_we    = sba_we;
     assign o_ext_stb   = addr_is_ext & sba_stb;

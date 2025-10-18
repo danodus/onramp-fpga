@@ -5,6 +5,8 @@
 #include "io.h"
 #include "common.h"
 
+#include <conio.h>
+
 #define RAM_START 0x10000000
 
 static void receive(void) {
@@ -59,11 +61,18 @@ int main(void) {
 
     // TODO: Is there a way to use static assert instead?
     if (BIOS_GLOBALS + sizeof(bios_globals_t) > 0x12000000) {
-        print("BIOS globals too large. System halted.\n");
+        // BIOS globals too large. System halted.
         for(;;);
     }
 
     bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
+    if (is_hardware()) {
+        conio_init(&bios_globals->conio_ctx);
+        print("Running on hardware\n");
+    } else {
+        print("Running on the simulator\n");
+    }
+
     for (int i = 0; i < MAX_OPEN_FILES; ++i) {
         file_t* f = &bios_globals->files[i];
         f->file_index = FS_INVALID_INDEX;
@@ -80,12 +89,6 @@ int main(void) {
     if (!fs_mount(&bios_globals->fs_ctx)) {
         print("Invalid FS image. System halted.\n");
         for(;;);
-    }
-
-    if (is_hardware()) {
-        print("Running on hardware\n");
-    } else {
-        print("Running on the simulator\n");
     }
 
     // Load the shell from SD card

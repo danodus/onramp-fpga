@@ -3,8 +3,8 @@
 
 #include "sdc.h"
 
-#define SPI_RW  0x20003000
-#define SPI_CTR 0x20003004
+#define SPI_RW  0x23000000
+#define SPI_CTR 0x23000004
 
 #define SPI_SS 0x1
 #define SPI_SCK 0x2

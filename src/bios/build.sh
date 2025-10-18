@@ -9,6 +9,6 @@ fi
 
 CC="$ONRAMP_BIN/onrampvm $ONRAMP_BIN/../share/onramp/bin/cc.oe"
 
-eval $CC -nostdlib -nostdinc -g -I ../lib start.os common.c io.c sdc.c ../lib/fs.c sys.c bios.c -o bios.oe
+eval $CC -nostdlib -nostdinc -g -I ../lib start.os common.c io.c sdc.c ../lib/fs.c ../lib/conio.c ../lib/kbd.c sys.c bios.c -o bios.oe
 hexdump -v -e '1/4 "%08x\n"' bios.oe > bios.hex
 python3 ../../scripts/disassemble.py bios.oe > bios.lst

@@ -15,11 +15,11 @@
 #include <__onramp/__pit.h>
 
 #include <config.h>
-#include <conio.h>
+#include <read.h>
 #include <crc.h>
 
 #define CFG         0x20000000
-#define LED         0x20001000
+#define LED         0x21000000
 
 extern unsigned* __process_info_table;
 

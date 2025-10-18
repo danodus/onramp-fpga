@@ -6,6 +6,7 @@
 
 #include <config.h>
 #include <fs.h>
+#include <conio.h>
 
 #define BIOS_GLOBALS 0x11f80000  // (32 MiB - 512 KiB)
 
@@ -27,6 +28,7 @@ typedef struct {
 
 typedef struct {
     fs_context_t fs_ctx;
+    conio_context_t conio_ctx;
 
     // Files
     file_t files[MAX_OPEN_FILES];

@@ -6,7 +6,7 @@
 module top (
     input  logic        clk,
     input  logic        i_rst,
-    output logic [15:0] o_ext_addr,
+    output logic [27:0] o_ext_addr,
     output logic        o_ext_stb,
     output logic [3:0]  o_ext_we,
     input  logic        i_ext_ack,

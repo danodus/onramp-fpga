@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include <conio.h>
+#include <read.h>
 
 char* lines[2000], line[BUFSIZ];
 int a1, a2, a3, last_line, curr_line;

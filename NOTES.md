@@ -6,7 +6,7 @@ The memory map is the following:
 | ------ | ----------- |
 | 0x00000000-0x0FFFFFFF | ROM with the BIOS (64 KiB) |
 | 0x10000000-0x1FFFFFFF | RAM with the operating system (32 MiB) |
-| 0x20000000-0x2000FFFF | External BUS |
+| 0x20000000-0x2FFFFFFF | External BUS |
 | 0x30000000-0x3000000F | Timer |
 
 ## External Bus
@@ -30,9 +30,11 @@ On the ULX3S, the external bus has the following memory-mapped devices:
 | Address | Description |
 | ------- | ----------- |
 | 0x20000000 | Configuration |
-| 0x20001000 | LEDs |
-| 0x20002000 | UART |
-| 0x20003000 | SPI SD Card |
+| 0x21000000 | LEDs |
+| 0x22000000 | UART |
+| 0x23000000 | SPI SD Card |
+| 0x24000000 | PS/2 |
+| 0x25000000 | VDU |
 
 ## Timer
 
@@ -103,6 +105,10 @@ Num | Description
 A file system is provided in the BIOS.  Directories are not yet supported.
 
 With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_time` therefore this system call *must* be implemented.
+
+# Build Time
+
+Using the following Onramp to reduce build time: https://github.com/danodus/onramp/tree/reduce_build_time
 
 # Known Issues
 
