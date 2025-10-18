@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <termios.h>
+#include <sys/types.h>
 
 /*** defines ***/
 
@@ -31,9 +32,18 @@ enum editor_key {
 /*** data ***/
 
 typedef struct {
+    int size;
+    char* chars;
+} erow_t;
+
+typedef struct {
     int cx, cy;
+    int row_off;
+    int col_off;
     int screen_rows;
     int screen_cols;
+    int num_rows;
+    erow_t *rows;
     struct termios orig_termios;
 } editor_config_t;
 
@@ -149,6 +159,104 @@ void enable_raw_mode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &raw);
 }
 
+/*** libc additions ***/
+
+#define MIN_LINE_SIZE 4
+#define DEFAULT_LINE_SIZE 128
+
+ssize_t getdelim(char** bufptr, size_t* n, int delim, FILE* fp) {
+    if (fp == NULL || bufptr == NULL || n == NULL)
+        return -1;
+    char* buf = *bufptr;
+    if (buf == NULL || *n < MIN_LINE_SIZE) {
+        buf = (char*)realloc(*bufptr, DEFAULT_LINE_SIZE);
+        if (buf == NULL)
+            return -1;
+        *bufptr = buf;
+        *n = DEFAULT_LINE_SIZE;
+    }
+
+    size_t numbytes = *n;
+    char* ptr = buf;
+    int cont = 1;
+    int ch;
+    while (cont) {
+        // fill buffer
+        while (--numbytes > 0) {
+            if ((ch = getc(fp)) == EOF) {
+                cont = 0;
+                break;
+            } else {
+                *ptr++ = ch;
+                if (ch == delim) {
+                    cont = 0;
+                    break;
+                }
+            }
+        }
+
+        if (cont) {
+            // buffer is too small so reallocate a larger buffer
+            int pos = ptr - buf;
+            size_t newsize = (*n << 1);
+            buf = realloc(buf, newsize);
+            if (buf == NULL) {
+                cont = 0;
+                break;
+            }
+
+            // continue in a new buffer
+            *bufptr = buf;
+            *n = newsize;
+            ptr = buf + pos;
+            numbytes = newsize - pos;
+        }
+    }
+
+    // if no input data, return failure
+    if (ptr == buf)
+        return -1;
+
+    // nul-terminate
+    *ptr = '\0';
+    return (ssize_t)(ptr - buf);
+}
+
+ssize_t getline(char** lptr, size_t* n, FILE* fp) {
+    return getdelim(lptr, n, '\n', fp);
+}
+
+/*** row operations ***/
+
+void editor_append_row(char* s, size_t len) {
+    E.rows = realloc(E.rows, sizeof(erow_t) * (E.num_rows + 1));
+    
+    int at = E.num_rows;
+    E.rows[at].size = len;
+    E.rows[at].chars = malloc(len + 1);
+    memcpy(E.rows[at].chars, s, len);
+    E.rows[at].chars[len] = '\0';
+    E.num_rows++;
+}
+
+/*** file i/o ***/
+
+void editor_open(char* filename) {
+    FILE* fp = fopen(filename, "r");
+    if (!fp) die("fopen");
+
+    char* line = NULL;
+    size_t line_cap = 0;
+    ssize_t line_len;
+    while ((line_len = getline(&line, &line_cap, fp)) != -1) {
+        while (line_len > 0 && (line[line_len - 1] == '\n' || line[line_len - 1] == '\r'))
+            line_len--;
+        editor_append_row(line, line_len);
+    }
+    free(line);
+    fclose(fp);
+}
+
 /*** append buffer ***/
 
 typedef struct {
@@ -174,22 +282,41 @@ void ab_free(abuf_t* ab) {
 
 /*** output ***/
 
+void editor_scroll() {
+    if (E.cy < E.row_off)
+        E.row_off = E.cy;
+    if (E.cy >= E.row_off + E.screen_rows)
+        E.row_off = E.cy - E.screen_rows + 1;
+    if (E.cx < E.col_off)
+        E.col_off = E.cx;
+    if (E.cx >= E.col_off + E.screen_cols)
+        E.col_off = E.cx - E.screen_cols + 1;
+}
+
 void editor_draw_rows(abuf_t* ab) {
     int y;
     for (y = 0; y < E.screen_rows; y++) {
-        if (y == E.screen_rows / 3) {
-            char welcome[80];
-            int welcome_len = snprintf(welcome, sizeof(welcome), "Onramp-FPGA editor -- version %s", ED_VERSION);
-            if (welcome_len > E.screen_cols) welcome_len = E.screen_cols;
-            int padding = (E.screen_cols - welcome_len) / 2;
-            if (padding) {
+        int file_row = y + E.row_off;
+        if (file_row >= E.num_rows) {
+            if (E.num_rows == 0 && y == E.screen_rows / 3) {
+                char welcome[80];
+                int welcome_len = snprintf(welcome, sizeof(welcome), "Onramp-FPGA editor -- version %s", ED_VERSION);
+                if (welcome_len > E.screen_cols) welcome_len = E.screen_cols;
+                int padding = (E.screen_cols - welcome_len) / 2;
+                if (padding) {
+                    ab_append(ab, "~", 1);
+                    padding--;
+                }
+                while (padding--) ab_append(ab, " ", 1);
+                ab_append(ab, welcome, welcome_len);
+            } else {
                 ab_append(ab, "~", 1);
-                padding--;
             }
-            while (padding--) ab_append(ab, " ", 1);
-            ab_append(ab, welcome, welcome_len);
         } else {
-            ab_append(ab, "~", 1);
+            int len = E.rows[file_row].size - E.col_off;
+            if (len < 0) len = 0;
+            if (len > E.screen_cols) len = E.screen_cols;
+            ab_append(ab, &E.rows[file_row].chars[E.col_off], len);
         }
 
         ab_append(ab, "\x1b[K", 3);
@@ -199,6 +326,8 @@ void editor_draw_rows(abuf_t* ab) {
 }
 
 void editor_refresh_screen() {
+    editor_scroll();
+
     abuf_t ab = ABUF_INIT;
 
     ab_append(&ab, "\x1b[?25l", 6);
@@ -207,7 +336,7 @@ void editor_refresh_screen() {
     editor_draw_rows(&ab);
 
     char buf[32];
-    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.row_off) + 1, (E.cx - E.col_off) + 1);
     ab_append(&ab, buf, strlen(buf));
 
     ab_append(&ab, "\x1b[?25h", 6);
@@ -219,24 +348,43 @@ void editor_refresh_screen() {
 /*** input ***/
 
 void editor_move_cursor(int key) {
+    erow_t* row = NULL;
+    if (E.cy < E.num_rows)
+        row = &E.rows[E.cy];
+
     switch (key) {
         case ARROW_LEFT:
-            if (E.cx != 0)
+            if (E.cx != 0) {
                 E.cx--;
+            } else if (E.cy > 0) {
+                E.cy--;
+                E.cx = E.rows[E.cy].size;
+            }
             break;
         case ARROW_RIGHT:
-            if (E.cx != E.screen_cols - 1)
+            if (row && E.cx < row->size) {
                 E.cx++;
+            } else if (row && E.cx == row->size) {
+                E.cy++;
+                E.cx = 0;
+            }
             break;
         case ARROW_UP:
             if (E.cy != 0)
                 E.cy--;
             break;
         case ARROW_DOWN:
-            if (E.cy != E.screen_rows - 1)
+            if (E.cy != E.num_rows)
                 E.cy++;
             break;
     }
+
+    row = NULL;
+    if (E.cy < E.num_rows)
+        row = &E.rows[E.cy];
+    int row_len = row ? row->size : 0;
+    if (E.cx > row_len)
+        E.cx = row_len;
 }
 
 void editor_process_keypress() {
@@ -254,12 +402,21 @@ void editor_process_keypress() {
             break;
 
         case END_KEY:
-            E.cx = E.screen_cols - 1;
+            if (E.cy < E.num_rows)
+                E.cx = E.rows[E.cy].size;
             break;
 
         case PAGE_UP:
         case PAGE_DOWN:
             {
+                if (c == PAGE_UP) {
+                    E.cy = E.row_off;
+                } else if (c == PAGE_DOWN) {
+                    E.cy = E.row_off + E.screen_rows - 1;
+                    if (E.cy > E.num_rows)
+                        E.cy = E.num_rows;
+                }
+
                 int times = E.screen_rows;
                 while (times--)
                     editor_move_cursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
@@ -280,14 +437,21 @@ void editor_process_keypress() {
 void init_editor() {
     E.cx = 0;
     E.cy = 0;
+    E.row_off = 0;
+    E.col_off = 0;
+    E.num_rows = 0;
+    E.rows = NULL;
 
     if (get_window_size(&E.screen_rows, &E.screen_cols) == -1)
         die("get_window_size");
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
     enable_raw_mode();
     init_editor();
+    if (argc >= 2) {
+        editor_open(argv[1]);
+    }
 
     while (1) {
         editor_refresh_screen();
