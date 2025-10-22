@@ -26,8 +26,8 @@ int is_hardware(void) {
 void putchar(char c) {
     if (is_hardware()) {
         bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
-        while((*((int *)UART_STATUS) & UART_TX_READY) == 0);
-        *((int *)UART_DATA) = c;
+        // while((*((int *)UART_STATUS) & UART_TX_READY) == 0);
+        // *((int *)UART_DATA) = c;
         conio_putch(&bios_globals->conio_ctx, c);
     } else {
         *(int *)(SIM_TX) = c;
@@ -40,14 +40,14 @@ char getchar(int blocking) {
         bios_globals_t* bios_globals = (bios_globals_t*)BIOS_GLOBALS;
         int rx_ready;
         do {
-            rx_ready = (*((int *)UART_STATUS) & UART_RX_READY);
-            if (rx_ready) {
-                c = *((int *)UART_DATA);
-            } else {
+            // rx_ready = (*((int *)UART_STATUS) & UART_RX_READY);
+            // if (rx_ready) {
+            //     c = *((int *)UART_DATA);
+            // } else {
                 rx_ready = conio_kbhit(&bios_globals->conio_ctx);
                 if (rx_ready)
                     c = conio_getch(&bios_globals->conio_ctx);
-            }
+            // }
         } while (!rx_ready && blocking);
         return rx_ready ? c : 0;
     } else {
