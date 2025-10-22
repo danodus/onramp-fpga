@@ -121,6 +121,7 @@ int editor_read_key() {
     }
 }
 
+/*
 int get_cursor_position(int* rows, int* cols) {
     char buf[32];
     char* t;
@@ -146,10 +147,16 @@ int get_cursor_position(int* rows, int* cols) {
     *cols = atoi(t);
     return 0;
 }
+*/
 
 int get_window_size(int* rows, int* cols) {
-    write_all(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12);
-    return get_cursor_position(rows, cols);
+    // write_all(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12);
+    // return get_cursor_position(rows, cols);
+    *rows = 60;
+    // TODO: Fix issue with 80 cols
+    //*cols = 80;
+    *cols = 79;
+    return 0;
 }
 
 void disable_raw_mode() {
@@ -379,7 +386,7 @@ void editor_draw_rows(abuf_t* ab) {
 }
 
 void editor_draw_status_bar(abuf_t* ab) {
-    ab_append(ab, "\x1b[7m", 4);
+    //ab_append(ab, "\x1b[7m", 4);
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s - %d lines",
         E.filename ? E.filename : "[No Name]", E.num_rows);
@@ -396,7 +403,7 @@ void editor_draw_status_bar(abuf_t* ab) {
         }
         len++;
     }
-    ab_append(ab, "\x1b[m", 3);
+    //ab_append(ab, "\x1b[m", 3);
     ab_append(ab, "\r\n", 2);
 }
 
