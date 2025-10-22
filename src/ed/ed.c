@@ -4,16 +4,19 @@
 /*** includes ***/
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <termios.h>
+#include <time.h>
 #include <sys/types.h>
 
 /*** defines ***/
 
 #define ED_VERSION "0.0.1"
+#define KILO_TAB_STOP 8
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -33,17 +36,23 @@ enum editor_key {
 
 typedef struct {
     int size;
+    int rsize;
     char* chars;
+    char* render;
 } erow_t;
 
 typedef struct {
     int cx, cy;
+    int rx;
     int row_off;
     int col_off;
     int screen_rows;
     int screen_cols;
     int num_rows;
-    erow_t *rows;
+    erow_t* rows;
+    char* filename;
+    char statusmsg[80];
+    time_t statusmsg_time;
     struct termios orig_termios;
 } editor_config_t;
 
@@ -228,6 +237,39 @@ ssize_t getline(char** lptr, size_t* n, FILE* fp) {
 
 /*** row operations ***/
 
+int editor_row_cx_to_rx(erow_t* row, int cx) {
+    int rx = 0;
+    int j;
+    for (j = 0; j < cx; j++) {
+        if (row->chars[j] == '\t')
+            rx += (KILO_TAB_STOP - 1) - (rx % KILO_TAB_STOP);
+        rx++;
+    }
+    return rx;
+}
+
+void editor_update_row(erow_t* row) {
+    int tabs = 0;
+    int j;
+    for (j = 0; j < row->size; j++)
+        if (row->chars[j] == '\t') tabs++;;
+
+    free(row->render);
+    row->render = malloc(row->size + tabs*(KILO_TAB_STOP - 1) + 1);
+
+    int idx = 0;
+    for (j = 0; j < row->size; j++) {
+        if (row->chars[j] == '\t') {
+            row->render[idx++] = ' ';
+            while (idx % KILO_TAB_STOP != 0) row->render[idx++] = ' ';
+        } else {
+            row->render[idx++] = row->chars[j];
+        }
+    }
+    row->render[idx] = '\0';
+    row->rsize = idx;
+}
+
 void editor_append_row(char* s, size_t len) {
     E.rows = realloc(E.rows, sizeof(erow_t) * (E.num_rows + 1));
     
@@ -236,12 +278,19 @@ void editor_append_row(char* s, size_t len) {
     E.rows[at].chars = malloc(len + 1);
     memcpy(E.rows[at].chars, s, len);
     E.rows[at].chars[len] = '\0';
+
+    E.rows[at].rsize = 0;
+    E.rows[at].render = NULL;
+    editor_update_row(&E.rows[at]);
+
     E.num_rows++;
 }
 
 /*** file i/o ***/
 
 void editor_open(char* filename) {
+    free(E.filename);
+    E.filename = strdup(filename);
     FILE* fp = fopen(filename, "r");
     if (!fp) die("fopen");
 
@@ -283,14 +332,19 @@ void ab_free(abuf_t* ab) {
 /*** output ***/
 
 void editor_scroll() {
+    E.rx = 0;
+    if (E.cy < E.num_rows) {
+        E.rx = editor_row_cx_to_rx(&E.rows[E.cy], E.cx);
+    }
+
     if (E.cy < E.row_off)
         E.row_off = E.cy;
     if (E.cy >= E.row_off + E.screen_rows)
         E.row_off = E.cy - E.screen_rows + 1;
-    if (E.cx < E.col_off)
-        E.col_off = E.cx;
-    if (E.cx >= E.col_off + E.screen_cols)
-        E.col_off = E.cx - E.screen_cols + 1;
+    if (E.rx < E.col_off)
+        E.col_off = E.rx;
+    if (E.rx >= E.col_off + E.screen_cols)
+        E.col_off = E.rx - E.screen_cols + 1;
 }
 
 void editor_draw_rows(abuf_t* ab) {
@@ -313,16 +367,45 @@ void editor_draw_rows(abuf_t* ab) {
                 ab_append(ab, "~", 1);
             }
         } else {
-            int len = E.rows[file_row].size - E.col_off;
+            int len = E.rows[file_row].rsize - E.col_off;
             if (len < 0) len = 0;
             if (len > E.screen_cols) len = E.screen_cols;
-            ab_append(ab, &E.rows[file_row].chars[E.col_off], len);
+            ab_append(ab, &E.rows[file_row].render[E.col_off], len);
         }
 
         ab_append(ab, "\x1b[K", 3);
-        if (y < E.screen_rows - 1)
-            ab_append(ab, "\r\n", 2);
+        ab_append(ab, "\r\n", 2);
     }
+}
+
+void editor_draw_status_bar(abuf_t* ab) {
+    ab_append(ab, "\x1b[7m", 4);
+    char status[80], rstatus[80];
+    int len = snprintf(status, sizeof(status), "%.20s - %d lines",
+        E.filename ? E.filename : "[No Name]", E.num_rows);
+    int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d",
+        E.cy + 1, E.num_rows);
+    if (len > E.screen_cols) len = E.screen_cols;
+    ab_append(ab, status, len);
+    while (len < E.screen_cols) {
+        if (E.screen_cols - len == rlen) {
+            ab_append(ab, rstatus, rlen);
+            break;
+        } else {
+            ab_append(ab, " ", 1);
+        }
+        len++;
+    }
+    ab_append(ab, "\x1b[m", 3);
+    ab_append(ab, "\r\n", 2);
+}
+
+void editor_draw_message_bar(abuf_t* ab) {
+    ab_append(ab, "\x1b[K", 3);
+    int msglen = strlen(E.statusmsg);
+    if (msglen > E.screen_cols) msglen = E.screen_cols;
+    if (msglen && time(NULL) - E.statusmsg_time < 5)
+        ab_append(ab, E.statusmsg, msglen);
 }
 
 void editor_refresh_screen() {
@@ -334,15 +417,25 @@ void editor_refresh_screen() {
     ab_append(&ab, "\x1b[H", 3);
 
     editor_draw_rows(&ab);
+    editor_draw_status_bar(&ab);
+    editor_draw_message_bar(&ab);
 
     char buf[32];
-    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.row_off) + 1, (E.cx - E.col_off) + 1);
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.row_off) + 1, (E.rx - E.col_off) + 1);
     ab_append(&ab, buf, strlen(buf));
 
     ab_append(&ab, "\x1b[?25h", 6);
 
     write_all(STDOUT_FILENO, ab.b, ab.len);
     ab_free(&ab);
+}
+
+void editor_set_status_message(const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(E.statusmsg, sizeof(E.statusmsg), fmt, ap);
+    va_end(ap);
+    E.statusmsg_time = time(NULL);
 }
 
 /*** input ***/
@@ -437,13 +530,18 @@ void editor_process_keypress() {
 void init_editor() {
     E.cx = 0;
     E.cy = 0;
+    E.rx = 0;
     E.row_off = 0;
     E.col_off = 0;
     E.num_rows = 0;
     E.rows = NULL;
+    E.filename = NULL;
+    E.statusmsg[0] = '\0';
+    E.statusmsg_time = 0;
 
     if (get_window_size(&E.screen_rows, &E.screen_cols) == -1)
         die("get_window_size");
+    E.screen_rows -= 2;
 }
 
 int main(int argc, char* argv[]) {
@@ -452,6 +550,8 @@ int main(int argc, char* argv[]) {
     if (argc >= 2) {
         editor_open(argv[1]);
     }
+
+    editor_set_status_message("HELP: CRTL-Q = quit");
 
     while (1) {
         editor_refresh_screen();
