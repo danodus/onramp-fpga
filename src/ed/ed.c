@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
+// Ref.: Build your own text editor booklet (https://viewsourcecode.org/snaptoken/kilo/index.html)
+
 /*** includes ***/
 
 #include <stdio.h>
@@ -9,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <fcntl.h>
 #include <termios.h>
 #include <time.h>
 #include <sys/types.h>
@@ -16,11 +19,13 @@
 /*** defines ***/
 
 #define ED_VERSION "0.0.1"
-#define KILO_TAB_STOP 8
+#define ED_TAB_STOP 8
+#define ED_QUIT_TIMES 3
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 enum editor_key {
+    BACKSPACE = 127,
     ARROW_LEFT = 1000,
     ARROW_RIGHT,
     ARROW_UP,
@@ -50,6 +55,7 @@ typedef struct {
     int screen_cols;
     int num_rows;
     erow_t* rows;
+    int dirty;
     char* filename;
     char statusmsg[80];
     time_t statusmsg_time;
@@ -57,6 +63,12 @@ typedef struct {
 } editor_config_t;
 
 editor_config_t E;
+
+/*** prototypes ***/
+
+void editor_set_status_message(const char* fmt, ...);
+void editor_refresh_screen();
+char* editor_prompt(char* prompt);
 
 /*** terminal ***/
 
@@ -249,7 +261,7 @@ int editor_row_cx_to_rx(erow_t* row, int cx) {
     int j;
     for (j = 0; j < cx; j++) {
         if (row->chars[j] == '\t')
-            rx += (KILO_TAB_STOP - 1) - (rx % KILO_TAB_STOP);
+            rx += (ED_TAB_STOP - 1) - (rx % ED_TAB_STOP);
         rx++;
     }
     return rx;
@@ -262,13 +274,13 @@ void editor_update_row(erow_t* row) {
         if (row->chars[j] == '\t') tabs++;;
 
     free(row->render);
-    row->render = malloc(row->size + tabs*(KILO_TAB_STOP - 1) + 1);
+    row->render = malloc(row->size + tabs * (ED_TAB_STOP - 1) + 1);
 
     int idx = 0;
     for (j = 0; j < row->size; j++) {
         if (row->chars[j] == '\t') {
             row->render[idx++] = ' ';
-            while (idx % KILO_TAB_STOP != 0) row->render[idx++] = ' ';
+            while (idx % ED_TAB_STOP != 0) row->render[idx++] = ' ';
         } else {
             row->render[idx++] = row->chars[j];
         }
@@ -277,10 +289,12 @@ void editor_update_row(erow_t* row) {
     row->rsize = idx;
 }
 
-void editor_append_row(char* s, size_t len) {
+void editor_insert_row(int at, char* s, size_t len) {
+    if (at < 0 || at > E.num_rows) return;
+
     E.rows = realloc(E.rows, sizeof(erow_t) * (E.num_rows + 1));
-    
-    int at = E.num_rows;
+    memmove(&E.rows[at + 1], &E.rows[at], sizeof(erow_t) * (E.num_rows - at));
+
     E.rows[at].size = len;
     E.rows[at].chars = malloc(len + 1);
     memcpy(E.rows[at].chars, s, len);
@@ -291,9 +305,110 @@ void editor_append_row(char* s, size_t len) {
     editor_update_row(&E.rows[at]);
 
     E.num_rows++;
+    E.dirty = 1;
+}
+
+void editor_free_row(erow_t* row) {
+    free(row->render);
+    free(row->chars);
+}
+
+void editor_del_row(int at) {
+    if (at < 0 || at >= E.num_rows) return;
+    editor_free_row(&E.rows[at]);
+    memmove(&E.rows[at], &E.rows[at + 1], sizeof(erow_t) * (E.num_rows - at - 1));
+    E.num_rows--;
+    E.dirty = 1;
+}
+
+void editor_row_insert_char(erow_t* row, int at, int c) {
+    if (at < 0 || at > row->size) at = row->size;
+    row->chars = realloc(row->chars, row->size + 2);
+    memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1);
+    row->size++;
+    row->chars[at] = c;
+    editor_update_row(row);
+    E.dirty = 1;
+}
+
+void editor_row_append_string(erow_t* row, char* s, size_t len) {
+    row->chars = realloc(row->chars, row->size + len + 1);
+    memcpy(&row->chars[row->size], s, len);
+    row->size += len;
+    row->chars[row->size] = '\0';
+    editor_update_row(row);
+    E.dirty = 1;
+}
+
+void editor_row_del_char(erow_t* row, int at) {
+    if (at < 0 || at >= row->size) return;
+    memmove(&row->chars[at], &row->chars[at + 1], row->size - at);
+    row->size--;
+    editor_update_row(row);
+    E.dirty = 1;
+}
+
+/*** editor operations */
+
+void editor_insert_char(int c) {
+    if (E.cy == E.num_rows) {
+        editor_insert_row(E.num_rows, "", 0);
+    }
+    editor_row_insert_char(&E.rows[E.cy], E.cx, c);
+    E.cx++;
+}
+
+void editor_insert_new_line() {
+    if (E.cx == 0) {
+        editor_insert_row(E.cy, "", 0);
+    } else {
+        erow_t* row = &E.rows[E.cy];
+        editor_insert_row(E.cy + 1, &row->chars[E.cx], row->size - E.cx);
+        row = &E.rows[E.cy];
+        row->size = E.cx;
+        row->chars[row->size] = '\0';
+        editor_update_row(row);
+    }
+    E.cy++;
+    E.cx = 0;
+}
+
+void editor_del_char() {
+    if (E.cy == E.num_rows) return;
+    if (E.cx == 0 && E.cy == 0) return;
+
+    erow_t* row = &E.rows[E.cy];
+    if (E.cx > 0) {
+        editor_row_del_char(row, E.cx - 1);
+        E.cx--;
+    } else {
+        E.cx = E.rows[E.cy - 1].size;
+        editor_row_append_string(&E.rows[E.cy - 1], row->chars, row->size);
+        editor_del_row(E.cy);
+        E.cy--;
+    }
 }
 
 /*** file i/o ***/
+
+char* editor_rows_to_string(int* buflen) {
+    int totlen = 0;
+    int j;
+    for (j = 0; j < E.num_rows; j++)
+        totlen += E.rows[j].size + 1;
+    *buflen = totlen;
+
+    char* buf = malloc(totlen);
+    char* p = buf;
+    for (j = 0; j < E.num_rows; j++) {
+        memcpy(p, E.rows[j].chars, E.rows[j].size);
+        p += E.rows[j].size;
+        *p = '\n';
+        p++;
+    }
+
+    return buf;
+}
 
 void editor_open(char* filename) {
     free(E.filename);
@@ -307,10 +422,36 @@ void editor_open(char* filename) {
     while ((line_len = getline(&line, &line_cap, fp)) != -1) {
         while (line_len > 0 && (line[line_len - 1] == '\n' || line[line_len - 1] == '\r'))
             line_len--;
-        editor_append_row(line, line_len);
+        editor_insert_row(E.num_rows, line, line_len);
     }
     free(line);
     fclose(fp);
+    E.dirty = 0;
+}
+
+void editor_save() {
+    if (E.filename == NULL) {
+        E.filename = editor_prompt("Save as: %s (ESC to cancel)");
+        if (E.filename == NULL) {
+            editor_set_status_message("Save aborted");
+            return;
+        }
+    }
+
+    int len;
+    char* buf = editor_rows_to_string(&len);
+
+    int fd = open(E.filename, O_RDWR | O_CREAT, 0644);
+    if (fd != -1) {
+        write_all(fd, buf, len);
+        close(fd);
+        free(buf);
+        E.dirty = 0;
+        editor_set_status_message("%d bytes written to disk", len);
+        return;
+    }
+    free(buf);
+    editor_set_status_message("Can't save!");
 }
 
 /*** append buffer ***/
@@ -388,8 +529,9 @@ void editor_draw_rows(abuf_t* ab) {
 void editor_draw_status_bar(abuf_t* ab) {
     //ab_append(ab, "\x1b[7m", 4);
     char status[80], rstatus[80];
-    int len = snprintf(status, sizeof(status), "%.20s - %d lines",
-        E.filename ? E.filename : "[No Name]", E.num_rows);
+    int len = snprintf(status, sizeof(status), "%.20s - %d lines %s",
+        E.filename ? E.filename : "[No Name]", E.num_rows,
+        E.dirty ? "(modified)" : "");
     int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d",
         E.cy + 1, E.num_rows);
     if (len > E.screen_cols) len = E.screen_cols;
@@ -447,6 +589,40 @@ void editor_set_status_message(const char* fmt, ...) {
 
 /*** input ***/
 
+char* editor_prompt(char* prompt) {
+    size_t bufsize = 128;
+    char* buf = malloc(bufsize);
+
+    size_t buflen = 0;
+    buf[0] = '\0';
+
+    while (1) {
+        editor_set_status_message(prompt, buf);
+        editor_refresh_screen();
+
+        int c = editor_read_key();
+        if (c == DEL_KEY || c == CTRL_KEY('h') || c == BACKSPACE) {
+            if (buflen != 0) buf[--buflen] = '\0';
+        } else if (c == '\x1b') {
+            editor_set_status_message("");
+            free(buf);
+            return NULL;
+        } else if (c == '\r') {
+            if (buflen != 0) {
+                editor_set_status_message("");
+                return buf;
+            }
+        } else if (!iscntrl(c) && c < 128) {
+            if (buflen == bufsize - 1) {
+                bufsize *= 2;
+                buf = realloc(buf, bufsize);
+            }
+            buf[buflen++] = c;
+            buf[buflen] = '\0';
+        }
+    }
+}
+
 void editor_move_cursor(int key) {
     erow_t* row = NULL;
     if (E.cy < E.num_rows)
@@ -488,13 +664,28 @@ void editor_move_cursor(int key) {
 }
 
 void editor_process_keypress() {
+    static int quit_times = ED_QUIT_TIMES;
+
     int c = editor_read_key();
 
     switch (c) {
+        case '\r':
+            editor_insert_new_line();
+            break;
+            
         case CTRL_KEY('q'):
+            if (E.dirty && quit_times > 0) {
+                editor_set_status_message("WARNING! File has unsaved changes. Press CTRL-Q %d more times to quit.", quit_times);
+                quit_times--;
+                return;
+            }
             write_all(STDOUT_FILENO, "\x1b[2J", 4);
             write_all(STDOUT_FILENO, "\x1b[H", 3);
             exit(0);
+            break;
+
+        case CTRL_KEY('s'):
+            editor_save();
             break;
 
         case HOME_KEY:
@@ -504,6 +695,13 @@ void editor_process_keypress() {
         case END_KEY:
             if (E.cy < E.num_rows)
                 E.cx = E.rows[E.cy].size;
+            break;
+
+        case BACKSPACE:
+        case CTRL_KEY('h'):
+        case DEL_KEY:
+            if (c == DEL_KEY) editor_move_cursor(ARROW_RIGHT);
+            editor_del_char();
             break;
 
         case PAGE_UP:
@@ -529,7 +727,17 @@ void editor_process_keypress() {
         case ARROW_RIGHT:
             editor_move_cursor(c);
             break;
+
+        case CTRL_KEY('l'):
+        case '\x1b':
+            break;
+
+        default:
+            editor_insert_char(c);
+            break;
     }
+
+    quit_times = ED_QUIT_TIMES;
 }
 
 /*** init ***/
@@ -542,6 +750,7 @@ void init_editor() {
     E.col_off = 0;
     E.num_rows = 0;
     E.rows = NULL;
+    E.dirty = 0;
     E.filename = NULL;
     E.statusmsg[0] = '\0';
     E.statusmsg_time = 0;
@@ -558,7 +767,7 @@ int main(int argc, char* argv[]) {
         editor_open(argv[1]);
     }
 
-    editor_set_status_message("HELP: CRTL-Q = quit");
+    editor_set_status_message("HELP: CTRL-S = save | CTRL-Q = quit");
 
     while (1) {
         editor_refresh_screen();
