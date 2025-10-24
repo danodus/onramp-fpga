@@ -1,10 +1,14 @@
 // Copyright (c) 2025 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
+// Ref.: ANSI terminal in Xark's Xosera (https://github.com/XarkLabs/Xosera)
+
 #include "conio.h"
 #include "vdu.h"
 
 #define DEBUG 0
+
+#define CTRL_KEY(k) ((k) & 0x1f)
 
 #if DEBUG
 #include <stdio.h>
@@ -49,7 +53,7 @@ void conio_init(conio_context_t* ctx) {
     print("------------\nconio_init\n");
 #endif
     kbd_init(&ctx->kbd_ctx);
-    ctx->kbd_last_char = 0;
+    ctx->kbd_last_char[0] = 0;
     ctx->td.state = ANSI_STATE_NORMAL;
 
     conio_clrscr(ctx);
@@ -130,6 +134,20 @@ static void ansi_process_csi(conio_context_t* ctx, char cdata) {
                         *(int *)(VDU_CURSOR_ON) = 0x1;
                     }
                 }
+            }
+            break;
+        case 'J':
+            // VT:  <CSI>2J ED  erase whole screen
+            switch (num_z) {
+                case 2: {
+                    int* fb;
+                    fb = (int *)VDU_FB;
+                    for (int i = 0; i < VDU_SCREEN_WIDTH * VDU_SCREEN_HEIGHT / 2; ++i) {
+                        *fb = 0x0F000F00;
+                        fb++;
+                    }
+                }
+                break;
             }
             break;
         case 'K':
@@ -267,25 +285,68 @@ void conio_putch(conio_context_t* ctx, char c) {
 }
 
 int conio_kbhit(conio_context_t* ctx) {
-    if (ctx->kbd_last_char)
+    if (ctx->kbd_last_char[0])
         return 1;
-    ctx->kbd_last_char = kbd_get_char(&ctx->kbd_ctx, 0);
-    return ctx->kbd_last_char != 0;
+    
+    int c = kbd_get_char(&ctx->kbd_ctx, 0);
+    switch (c) {
+        case KBD_UP:
+        case KBD_DOWN:
+        case KBD_LEFT:
+        case KBD_RIGHT:
+        case KBD_HOME:
+        case KBD_END:
+            ctx->kbd_last_char[0] = '\x1b';
+            ctx->kbd_last_char[1] = '[';
+            ctx->kbd_last_char[2] = (c == KBD_UP) ? 'A' : (c == KBD_DOWN) ? 'B' : (c == KBD_RIGHT) ? 'C' : (c == KBD_LEFT) ? 'D' : (c == KBD_HOME) ? 'H' : 'F';
+            ctx->kbd_last_char[3] = 0;
+            break;
+        case KBD_DELETE:
+        case KBD_PAGE_UP:
+        case KBD_PAGE_DOWN:
+            ctx->kbd_last_char[0] = '\x1b';
+            ctx->kbd_last_char[1] = '[';
+            ctx->kbd_last_char[2] = (c == KBD_PAGE_UP) ? '5' : (c == KBD_PAGE_DOWN) ? '6' : '3';
+            ctx->kbd_last_char[3] = '~';
+            break;
+        case KBD_CTRL_Q:
+            ctx->kbd_last_char[0] = CTRL_KEY('q');
+            ctx->kbd_last_char[1] = 0;
+            break;
+        case KBD_CTRL_S:
+            ctx->kbd_last_char[0] = CTRL_KEY('s');
+            ctx->kbd_last_char[1] = 0;
+            break;
+        default:
+            ctx->kbd_last_char[0] = c;
+            ctx->kbd_last_char[1] = 0;
+    }
+    return ctx->kbd_last_char[0] != 0;
 }
 
 int conio_getch(conio_context_t* ctx) {
     int c;
+    // if a character sequence is set
+    if (ctx->kbd_last_char[0]) {
+        // get the next character
+        c = ctx->kbd_last_char[0];
+        // move the remaining characters in sequence
+        for (int i = 0; i < MAX_CHAR_SEQ_LEN - 1; i++)
+            ctx->kbd_last_char[i] = ctx->kbd_last_char[i + 1];
+        return c;
+    }
+    // no character sequence, get a new one
     while (!conio_kbhit(ctx));
-    c = ctx->kbd_last_char;
-    ctx->kbd_last_char = 0;
+    c = ctx->kbd_last_char[0];
+    // move the remaining characters in sequence
+    for (int i = 0; i < MAX_CHAR_SEQ_LEN - 1; i++)
+        ctx->kbd_last_char[i] = ctx->kbd_last_char[i + 1];    
     return c;
 }
 
 int conio_getche(conio_context_t* ctx) {
-    int c;
-    while (!conio_kbhit(ctx));
-    c = ctx->kbd_last_char;
-    ctx->kbd_last_char = 0;
-    conio_putch(ctx, c);
+    int c = conio_getch(ctx);
+    if (c)
+        conio_putch(ctx, c);
     return c;
 }

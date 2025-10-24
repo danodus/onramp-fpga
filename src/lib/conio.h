@@ -7,6 +7,7 @@
 #include "kbd.h"
 
 #define MAX_CSI_PARMS   16
+#define MAX_CHAR_SEQ_LEN   8
 
 enum {
     ANSI_STATE_NORMAL,
@@ -24,7 +25,7 @@ typedef struct {
 typedef struct {
     kbd_context_t kbd_ctx;
     int curpos;
-    int kbd_last_char;
+    int kbd_last_char[MAX_CHAR_SEQ_LEN];
     ansiterm_data_t td;
 } conio_context_t;
 

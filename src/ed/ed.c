@@ -607,7 +607,7 @@ char* editor_prompt(char* prompt) {
             editor_set_status_message("");
             free(buf);
             return NULL;
-        } else if (c == '\r') {
+        } else if (c == '\r' || c == '\n') {
             if (buflen != 0) {
                 editor_set_status_message("");
                 return buf;
@@ -670,6 +670,7 @@ void editor_process_keypress() {
 
     switch (c) {
         case '\r':
+        case '\n':
             editor_insert_new_line();
             break;
             

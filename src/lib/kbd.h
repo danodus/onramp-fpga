@@ -40,6 +40,7 @@
 
 #define KBD_CTRL_K      0x8242
 #define KBD_CTRL_Q      0x8215
+#define KBD_CTRL_S      0x821B
 
 typedef struct {
     int brk, modifier, shift, control;
