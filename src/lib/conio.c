@@ -308,6 +308,7 @@ int conio_kbhit(conio_context_t* ctx) {
             ctx->kbd_last_char[1] = '[';
             ctx->kbd_last_char[2] = (c == KBD_PAGE_UP) ? '5' : (c == KBD_PAGE_DOWN) ? '6' : '3';
             ctx->kbd_last_char[3] = '~';
+            ctx->kbd_last_char[4] = 0;
             break;
         case KBD_CTRL_Q:
             ctx->kbd_last_char[0] = CTRL_KEY('q');
