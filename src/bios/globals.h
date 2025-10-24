@@ -10,19 +10,9 @@
 
 #define BIOS_GLOBALS 0x11f80000  // (32 MiB - 512 KiB)
 
-#define IO_BUFFER_SIZE  4096
-
-typedef struct {
-    uint8_t data[IO_BUFFER_SIZE];
-    size_t count;
-} io_buffer_t;
 
 typedef struct {
     uint16_t file_index;
-    size_t read_position;
-    size_t write_position;
-    io_buffer_t read_buf, write_buf;
-    size_t read_buf_offset;
     size_t position;    // read or write position for ftell/fseek
 } file_t;
 

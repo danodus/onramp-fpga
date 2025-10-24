@@ -76,10 +76,6 @@ int sys_fopen(const char* path, bool writeable) {
                 }
             }
 
-            f->read_position = 0;
-            f->write_position = 0;
-            f->read_buf.count = 0;
-            f->write_buf.count = 0;
             f->position = 0;
 
             return 3 + i;
@@ -107,11 +103,6 @@ int sys_fclose(int file_handle) {
 
     fs_context_t* fs_ctx = &bios_globals->fs_ctx;
 
-    // If the I/O buffer is not empty, flush it
-    if (f->write_buf.count > 0) {
-        fs_write(fs_ctx, f->file_index, f->write_buf.data, f->write_position, f->write_buf.count);
-    }
-
     fs_sync(fs_ctx);
 
     f->file_index = FS_INVALID_INDEX;
@@ -127,33 +118,12 @@ int sys_fread(int handle, void* buffer, unsigned size) {
 
         file_t* f = &bios_globals->files[handle - 3];
 
-        // 1. If the I/O buffer is empty, fill it to its maximum capacity
-        // 2. Empty the I/O buffer as much as possible based on the user request
-
-        // Fill the I/O buffer if empty
-        if (f->read_buf.count == 0) {
-            fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-            size_t nb_read_bytes;
-            if (!fs_read(fs_ctx, f->file_index, f->read_buf.data, f->read_position, IO_BUFFER_SIZE, &nb_read_bytes)) {
-                //print("sys_fread: Unable to read\n");
-                return 0;
-            }
-
-            f->read_buf.count += nb_read_bytes;
-            f->read_position += nb_read_bytes;
-            f->read_buf_offset = 0;
-        }
-
-        // Empty the I/O buffer
-        if (size > f->read_buf.count)
-            size = f->read_buf.count;
-
-        memcpy(buffer, f->read_buf.data + f->read_buf_offset, size);
-        f->read_buf.count -= size;
-        f->read_buf_offset += size;
-        f->position += size;
-
-        return size;
+        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+        size_t nb_read_bytes;
+        if (!fs_read(fs_ctx, f->file_index, buffer, f->position, size, &nb_read_bytes))
+            return 0;
+        f->position += nb_read_bytes;
+        return nb_read_bytes;
     } else {
         // stdin
         if (size >= 1) {
@@ -176,28 +146,9 @@ int sys_fwrite(int handle, const void* buffer, unsigned size) {
         //print("sys_fwrite called\n");
 
         file_t* f = &bios_globals->files[handle - 3];
-
-        // 1. If the I/O buffer is full, flush it
-        // 2. Fill the I/O buffer as much as possible based on the user request
-        
-        // If the I/O buffer is full, flush it
-        if (f->write_buf.count == IO_BUFFER_SIZE) {
-            fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-            if (!fs_write(fs_ctx, f->file_index, f->write_buf.data, f->write_position, IO_BUFFER_SIZE)) {
-                //print("sys_fwrite: Unable to write\n");
-                return 0;
-            }
-            f->write_buf.count = 0;
-            f->write_position += IO_BUFFER_SIZE;
-        }
-
-        // Fill the I/O buffer as much as possible based on the user request
-        size_t r = IO_BUFFER_SIZE - f->write_buf.count;
-        if (size > r)
-            size = r;
-
-        memcpy(f->write_buf.data + f->write_buf.count, buffer, size);
-        f->write_buf.count += size;
+        fs_context_t* fs_ctx = &bios_globals->fs_ctx;
+        if (!fs_write(fs_ctx, f->file_index, buffer, f->position, size))
+            return 0;
         f->position += size;
         return size;
 
@@ -229,15 +180,6 @@ int sys_fseek(int handle, int base, unsigned offset_low, int offset_high) {
 
         file_t* f = &bios_globals->files[handle - 3];
         
-        // If the I/O buffer is not empty, flush it
-        if (f->write_buf.count > 0) {
-            fs_context_t* fs_ctx = &bios_globals->fs_ctx;
-            fs_write(fs_ctx, f->file_index, f->write_buf.data, f->write_position, f->write_buf.count);
-        }
-        
-        // clear buffers
-        f->read_buf.count = 0;
-        f->write_buf.count = 0;
 
         // set new position
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
@@ -248,8 +190,6 @@ int sys_fseek(int handle, int base, unsigned offset_low, int offset_high) {
         }
         f->position = (base == 0) ? offset_low : (base == 1) ? f->position + offset_low : file_info.size + offset_low;
 
-        f->read_position = f->position;
-        f->write_position = f->position;
 
         return 0;
     };
