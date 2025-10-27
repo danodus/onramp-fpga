@@ -8,7 +8,7 @@
 
 #define FS_MAX_FILENAME_LEN 63      // maximum filename length (excluding the terminating null byte)
 #define FS_MAX_NB_FILES     768
-#define FS_MAX_NB_BLOCKS    (16*1024*1024 / SDC_BLOCK_LEN)       // maximum number of blocks supported by the FS
+#define FS_MAX_NB_BLOCKS    (20*1024*1024 / SDC_BLOCK_LEN)       // maximum number of blocks supported by the FS
 
 #define FS_INVALID_INDEX    0xFFFF   
 
