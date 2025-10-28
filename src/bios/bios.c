@@ -111,7 +111,7 @@ int main(void) {
         if (!is_load_bypassed) {
             print("Loading the shell from SD card...\n");
             fs_file_info_t file_info;
-            fs_get_file_info(&bios_globals->fs_ctx, file_index, &file_info);
+            fs_get_file_info(&bios_globals->fs_ctx, file_index, &file_info, true);
             is_shell_loaded = fs_read(&bios_globals->fs_ctx, file_index, (uint8_t *)RAM_START, 0, file_info.size, NULL);
         }
     }

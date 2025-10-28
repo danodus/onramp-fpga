@@ -184,7 +184,7 @@ int sys_fseek(int handle, int base, unsigned offset_low, int offset_high) {
         // set new position
         fs_context_t* fs_ctx = &bios_globals->fs_ctx;
         fs_file_info_t file_info;
-        if (!fs_get_file_info(fs_ctx, f->file_index, &file_info)) {
+        if (!fs_get_file_info(fs_ctx, f->file_index, &file_info, true)) {
             //print("sys_fseek: get file info failed\n");
             return -1;
         }
@@ -246,7 +246,7 @@ int sys_dread(int handle, char out_buffer[256]) {
     }
 
     fs_file_info_t file_info;
-    if (!fs_get_file_info(fs_ctx, bios_globals->dir_file_index, &file_info))
+    if (!fs_get_file_info(fs_ctx, bios_globals->dir_file_index, &file_info, false))
         return 1;
 
     for (size_t i = 0; i < sizeof(file_info.name); ++i)
@@ -265,7 +265,7 @@ int sys_stat(const char* path, unsigned output[4]) {
     bool found = false;
     for (uint16_t i = 0; i < nb_files; ++i) {
         fs_file_info_t file_info;
-        if (!fs_get_file_info(fs_ctx, i, &file_info))
+        if (!fs_get_file_info(fs_ctx, i, &file_info, false))
             break;
         if (strcmp(file_info.name, path) == 0) {
             output[0] = 0;              // type = file

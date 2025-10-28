@@ -273,10 +273,10 @@ uint16_t fs_get_nb_files(fs_context_t* ctx) {
     return nb_files;
 }
 
-bool fs_get_file_info(fs_context_t* ctx, uint16_t file_index, fs_file_info_t* file_info) {
+bool fs_get_file_info(fs_context_t* ctx, uint16_t file_index, fs_file_info_t* file_info, bool abs_index) {
     uint16_t current_file_index = 0;
     for (size_t i = 0; i < FS_MAX_NB_FILES; ++i) {
-        if (ctx->fat.file_infos[i].name[0]) {
+        if (ctx->fat.file_infos[i].name[0] || abs_index) {
             if (current_file_index == file_index) {
                 *file_info = ctx->fat.file_infos[i];
                 return true;

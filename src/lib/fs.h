@@ -33,7 +33,7 @@ bool fs_format(fs_context_t* ctx, bool quick);
 
 bool fs_mount(fs_context_t* ctx);
 uint16_t fs_get_nb_files(fs_context_t* ctx);
-bool fs_get_file_info(fs_context_t* ctx, uint16_t file_index, fs_file_info_t* file_info);
+bool fs_get_file_info(fs_context_t* ctx, uint16_t file_index, fs_file_info_t* file_info, bool abs_index);
 bool fs_read(fs_context_t* ctx, uint16_t file_index, uint8_t* buf, size_t current_pos, size_t nb_bytes, size_t* nb_read_bytes);
 bool fs_write(fs_context_t* ctx, uint16_t file_index, const uint8_t* buf, size_t current_pos, size_t nb_bytes);
 bool fs_delete(fs_context_t* ctx, const char* filename);
