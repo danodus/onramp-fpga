@@ -457,7 +457,16 @@ static bool run_command(const char *args[], bool show_time) {
                 crc(args[1]);
         } else if (strcmp(args[0], "help") == 0) {
             print_help();
-        } else printf("Unknown command\n");
+        } else {
+            char filename[64];
+            if (strlen(args[0]) < sizeof(filename)-3) {
+                strcpy(filename, args[0]);
+                strcat(filename, ".oe");
+                ret = run_program(filename, args);
+            } else {
+                printf("Command too long\n");
+            }
+        }
     }
 
     end_time = clock();
