@@ -23,14 +23,16 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     ../src/os/shell.oe:shell.oe \
     ../src/ed/ed.oe:ed.oe \
     \
-    ../extra/build_toolchain.sh:build_toolchain.sh \
-    ../extra/rebuild_toolchain.sh:rebuild_toolchain.sh \
     ../extra/build-ccargs:build-ccargs \
     ../extra/main.c:main.c \
     ../extra/build.sh:build.sh \
     \
     $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe:hex.oe \
+    $ONRAMP_BIN/../../intermediate/sh/sh.oe:sh.oe \
     \
+    $ONRAMP_BIN/../../../core/sh/sh.oe.ohx:core/sh/sh.oe.ohx \
+    \
+    $ONRAMP_BIN/../../../core/build.sh:core/build.sh \
     $ONRAMP_BIN/../../../core/ld/0-global/build.sh:core/ld/0-global/build.sh \
     $ONRAMP_BIN/../../../core/ld/0-global/ld.oe.ohx:core/ld/0-global/ld.oe.ohx \
     $ONRAMP_BIN/../../../core/libc/0-oo/build.sh:core/libc/0-oo/build.sh \

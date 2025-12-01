@@ -378,18 +378,6 @@ static bool parse_script(FILE* in)
     return true;
 }
 
-static bool run_script(const char* filename) {
-    FILE* f = fopen_t(filename, "rb");
-    bool ret = false;
-    if (f != NULL) {
-        ret = parse_script(f);
-        fclose_t(f);
-    } else {
-        printf("File not found\n");
-    }
-    return ret;
-}
-
 static void print_help(void) {
     printf("The built-in commands are: help echo onrampvm exit time ls cat xxd rm rmall cp mv touch ret crc\n");
 }
@@ -407,8 +395,6 @@ static bool run_command(const char *args[], bool show_time) {
         ext++;
         if (strcmp(ext, "oe") == 0) {
             ret = run_program(args[0], args);
-        } else if (strcmp(ext, "sh") == 0) {
-            ret = run_script(args[0]);
         }
     } else {
         // internal commands

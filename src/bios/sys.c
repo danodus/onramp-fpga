@@ -299,6 +299,10 @@ int sys_unlink(const char* path) {
     return -1;
 }
 
+int sys_mkdir(const char* path) {
+    return 0;
+}
+
 int sys_missing(unsigned int call_number) {
     print("System call not implemented: ");
     printv(call_number, 10);

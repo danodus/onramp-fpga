@@ -101,6 +101,7 @@ Num | Description
 12 | dread
 13 | stat
 16 | unlink
+18 | mkdir
 
 A file system is provided in the BIOS.  Directories are not yet supported.
 

@@ -1,1 +1,1 @@
-build/output/bin/cc.oe @build-ccargs main.c -o main.oe
+onrampvm build/output/bin/cc.oe -v @build-ccargs main.c -o main.oe

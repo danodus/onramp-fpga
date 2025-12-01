@@ -153,6 +153,15 @@
     add rsp rsp 4
     ret
 
+=sys_mkdir1
+    sub rsp rsp 4       ; save rpp
+    stw rpp 0 rsp
+    mov rpp 0           ; set rpp to BIOS
+    call ^sys_mkdir
+    ldw rpp 0 rsp       ; restore rpp
+    add rsp rsp 4
+    ret    
+
 =sys_missing1
     sub rsp rsp 4       ; save rpp
     stw rpp 0 rsp
@@ -200,7 +209,7 @@
     0x00000010
     ^sys_missing1  ; 17
     0x00000011
-    ^sys_missing1  ; 18
+    ^sys_mkdir1    ; 18
     0x00000012
     ^sys_missing1  ; 19
     0x00000013
