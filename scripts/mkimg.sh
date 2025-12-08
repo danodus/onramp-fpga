@@ -344,6 +344,7 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/3-full/src/stdbit_llong.c:core/libc/3-full/src/stdbit_llong.c \
     $ONRAMP_BIN/../../../core/libc/3-full/src/stdlib_3.c:core/libc/3-full/src/stdlib_3.c \
     $ONRAMP_BIN/../../../core/libc/3-full/src/time.c:core/libc/3-full/src/time.c \
+    $ONRAMP_BIN/../../../core/libc/3-full/src/strtol.c:core/libc/3-full/src/strtol.c \
     $ONRAMP_BIN/../../../core/as/2-full/build.sh:core/as/2-full/build.sh \
     $ONRAMP_BIN/../../../core/as/2-full/build-ccargs:core/as/2-full/build-ccargs \
     $ONRAMP_BIN/../../../core/as/2-full/src/common.c:core/as/2-full/src/common.c \
