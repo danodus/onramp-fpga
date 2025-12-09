@@ -107,13 +107,7 @@ A file system is provided in the BIOS.  Directories are not yet supported.
 
 With libc, `__start_c` calls `__time_setup`.  This function is calling `__sys_time` therefore this system call *must* be implemented.
 
-# Build Time
-
-Using the following Onramp to reduce build time: https://github.com/danodus/onramp/tree/reduce_build_time
-
 # Known Issues
-
-
 
 # Next Steps
 
