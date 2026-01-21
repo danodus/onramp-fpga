@@ -96,6 +96,7 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/common/include/sys/time.h:core/libc/common/include/sys/time.h \
     $ONRAMP_BIN/../../../core/libc/common/include/sys/types.h:core/libc/common/include/sys/types.h \
     $ONRAMP_BIN/../../../core/libc/common/include/sys/stat.h:core/libc/common/include/sys/stat.h \
+    $ONRAMP_BIN/../../../core/libc/common/include/sys/syscall.h:core/libc/common/include/sys/syscall.h \
     $ONRAMP_BIN/../../../core/libc/common/include/stdckdint.h:core/libc/common/include/stdckdint.h \
     $ONRAMP_BIN/../../../core/libc/common/include/ctype.h:core/libc/common/include/ctype.h \
     $ONRAMP_BIN/../../../core/libc/common/include/__onramp/__seek.h:core/libc/common/include/__onramp/__seek.h \
@@ -144,7 +145,6 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/ld/1-omc/ld.c:core/ld/1-omc/ld.c \
     \
     $ONRAMP_BIN/../../../core/libc/common/src/internal.h:core/libc/common/src/internal.h \
-    $ONRAMP_BIN/../../../core/libc/common/src/syscalls.h:core/libc/common/src/syscalls.h \
     \
     $ONRAMP_BIN/../../../core/libc/1-omc/build.sh:core/libc/1-omc/build.sh \
     $ONRAMP_BIN/../../../core/libc/1-omc/src/strrchr.c:core/libc/1-omc/src/strrchr.c \

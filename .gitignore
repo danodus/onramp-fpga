@@ -10,6 +10,7 @@ src/**/*.lst
 src/mkfs/mkfs
 src/bios/bios.os
 src/bios/io.os
+src/bios/.tmp.*
 src/os/shell.os
 ulx3s/*.config
 ulx3s/*.bit
