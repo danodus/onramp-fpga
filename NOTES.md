@@ -53,10 +53,10 @@ I'm only supporting the POSIX build of Onramp.  You can build the toolchain with
 git clone https://github.com/ludocode/onramp
 cd onramp
 ./scripts/posix/build.sh
-export ONRAMP_BIN=`pwd`/build/posix/bin
+export ONRAMP_BIN=`pwd`/output/posix/bin
 ```
 
-With the `onrampcc` script in the `build/posix/bin` folder, a Posix wrapper is added around the final binary with the `-wrap-header`. To avoid this option, I execute `cc.oe` with the VM directly.
+With the `onrampcc` script in the `output/posix/bin` folder, a Posix wrapper is added around the final binary with the `-wrap-header`. To avoid this option, I execute `cc.oe` with the VM directly.
 
 # BIOS
 

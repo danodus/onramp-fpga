@@ -18,7 +18,7 @@ Refer to my [notes](NOTES.md) for more details.
 ```bash
 source /path/to/oss-cad-suite/environment
 cd sim
-make run ONRAMP_BIN=/path/to/onramp/build/posix/bin
+make run ONRAMP_BIN=/path/to/onramp/output/posix/bin
 ```
 
 ### ULX3S FPGA Board
@@ -28,7 +28,7 @@ For the keyboard, you need a Digilent PS/2 PMOD connected to the top-left corner
 Generate a SD card image:
 
 ```bash
-export ONRAMP_BIN=/path/to/onramp/build/posix/bin
+export ONRAMP_BIN=/path/to/onramp/output/posix/bin
 cd scripts
 ./mkimg.sh
 cd ..
@@ -64,11 +64,11 @@ main
 The pre-built toolchain is already present on the image.  It is however possible to build it from scratch on the board directly with the following steps:
 
 ```sh
-rmall build/
+rmall output/
 rm sh.oe
 hex core/sh/sh.oe.ohx -o sh.oe
-cp hex.oe build/intermediate/hex-0-onramp/hex.oe
-cp sh.oe build/intermediate/sh/sh.oe
+cp hex.oe output/intermediate/hex-0-onramp/hex.oe
+cp sh.oe output/intermediate/sh/sh.oe
 sh core/build.sh
 ```
 

@@ -37,16 +37,16 @@ echo
 echo === Building hex/1-c89
 
 echo Compiling hex/1-c89
-onrampvm build/output/bin/cc.oe \
-    -with-cpp=build/output/bin/cpp.oe \
-    -with-cci=build/output/bin/cci.oe \
-    -with-as=build/output/bin/as.oe \
-    -with-ld=build/output/bin/ld.oe \
-    -Ibuild/output/include \
+onrampvm output/final/bin/cc.oe \
+    -with-cpp=output/final/bin/cpp.oe \
+    -with-cci=output/final/bin/cci.oe \
+    -with-as=output/final/bin/as.oe \
+    -with-ld=output/final/bin/ld.oe \
+    -Ioutput/final/include \
     -nostdlib \
     -include __onramp/__predef.h \
-    build/output/lib/libc.oa \
+    output/final/lib/libc.oa \
     -O \
     -g \
     core/hex/1-c89/hex.c \
-    -o build/output/bin/hex.oe
+    -o output/final/bin/hex.oe
