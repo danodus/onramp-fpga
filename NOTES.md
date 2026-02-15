@@ -52,7 +52,8 @@ I'm only supporting the POSIX build of Onramp.  You can build the toolchain with
 ```bash
 git clone https://github.com/ludocode/onramp
 cd onramp
-./scripts/posix/build.sh
+./configure.sh
+./build.sh
 export ONRAMP_BIN=`pwd`/output/posix/bin
 ```
 

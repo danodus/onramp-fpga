@@ -67,8 +67,8 @@ The pre-built toolchain is already present on the image.  It is however possible
 rmall output/
 rm sh.oe
 hex core/sh/sh.oe.ohx -o sh.oe
-cp hex.oe output/intermediate/hex-0-onramp/hex.oe
-cp sh.oe output/intermediate/sh/sh.oe
+cp hex.oe output/configure/hex-0-onramp/hex.oe
+cp sh.oe output/configure/sh/sh.oe
 sh core/build.sh
 ```
 

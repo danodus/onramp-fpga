@@ -27,8 +27,8 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     ../extra/main.c:main.c \
     ../extra/build.sh:build.sh \
     \
-    $ONRAMP_BIN/../../intermediate/hex-0-onramp/hex.oe:hex.oe \
-    $ONRAMP_BIN/../../intermediate/sh/sh.oe:sh.oe \
+    $ONRAMP_BIN/../../configure/hex-0-onramp/hex.oe:hex.oe \
+    $ONRAMP_BIN/../../configure/sh/sh.oe:sh.oe \
     \
     $ONRAMP_BIN/../../../core/sh/sh.oe.ohx:core/sh/sh.oe.ohx \
     \
