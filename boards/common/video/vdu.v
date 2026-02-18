@@ -57,7 +57,7 @@ module vdu (
     reg [3:0] ram_write_enable;
 
     vram #(
-        .A(14)
+        .A(12)
     ) vram(
         .clk(i_clk),
         .dout(ram_read),
@@ -120,8 +120,8 @@ module vdu (
     assign o_vga_g = {vga_g, vga_g};
     assign o_vga_b = {vga_b, vga_b};
 
-    wire [13:0] mux_ram_addr; // 14-bit RAM access
-    assign mux_ram_addr = cpu_accessing ? i_addr[15:2] : tile_ram_addr[13:0];
+    wire [11:0] mux_ram_addr; // 14-bit RAM access
+    assign mux_ram_addr = cpu_accessing ? i_addr[13:2] : tile_ram_addr[11:0];
 
     var [31:0] reg_read;
     always @(*) begin

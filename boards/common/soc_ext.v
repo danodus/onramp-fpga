@@ -1,56 +1,35 @@
-// Copyright (c) 2025 Daniel Cliche
+// Copyright (c) 2026 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
 `default_nettype none
 
-module top(
-    input        clk,
-    input  [6:0] btn,
-    output [7:0] led,
-    input        uart_rx,
-    output       uart_tx,
-    input        sd_miso,
-    output       sd_mosi,
-    output       sd_sck,
-    output       sd_ss,
-    // SDRAM
-    output        SDRAM_CLK,      // Clock for SDRAM chip
-    output        SDRAM_CKE,      // Clock enabled
-    inout  [15:0] SDRAM_DQ,       // Bidirectional data lines to/from SDRAM
-    output [12:0] SDRAM_A,        // Address bus, multiplexed, 13 bits
-    output [1:0]  SDRAM_BA,       // Bank select wires for 4 banks
-    output [1:0]  SDRAM_DQM,      // Byte mask
-    output        SDRAM_CSX,      // Chip select
-    output        SDRAM_WEX,      // Write enable
-    output        SDRAM_RASX,     // Row address select
-    output        SDRAM_CASX,     // Columns address select
-    // GPDI
-    output [3:0] gpdi_dp,
-    output [3:0] gpdi_dn,
-    // GPIO (PS/2)
-    inout [27:0] gp, gn           // GPIO Header pins available as one data block
+module soc_ext(
+    input         sys_clk,
+    input         sdr_clk,
+    input         pix_x5_clk,
+    input         i_rst,
+    output        o_sdram_clk,      // Clock for SDRAM chip
+    output        o_sdram_cke,      // Clock enabled
+    inout  [15:0] io_sdram_dq,      // Bidirectional data lines to/from SDRAM
+    output [12:0] o_sdram_a,        // Address bus, multiplexed, 13 bits
+    output [1:0]  o_sdram_ba,       // Bank select wires for 4 banks
+    output [1:0]  o_sdram_dqm,      // Byte mask
+    output        o_sdram_csn,      // Chip select
+    output        o_sdram_wen,      // Write enable
+    output        o_sdram_rasn,     // Row address select
+    output        o_sdram_casn,     // Columns address select
+    output [7:0]  o_led,
+    input         i_uart_rx,
+    output        o_uart_tx,
+    input         i_sd_miso,
+    output        o_sd_mosi,
+    output        o_sd_clk,
+    output        o_sd_csn,
+    input         i_ps2_kbd_clk,
+    input         i_ps2_kbd_data,
+    output [3:0]  o_gpdi_dp,
+    output [3:0]  o_gpdi_dn
 );
-
-    wire sys_clk, sdram_clk, pix_x5_clk, pll_locked, pll_video_locked;
-    pll pll(
-        .clkin(clk),
-        .clkout0(sdram_clk),
-        .clkout1(sys_clk),
-        .locked(pll_locked)
-    );
-
-    pll_video pll_video(
-        .clkin(clk),
-        .clkout0(pix_x5_clk),
-        .locked(pll_video_locked)
-    );
-
-    // Reset
-    reg [7:0]	rst_cnt = 0;
-    wire		rst = btn[1] || !(& rst_cnt) || !pll_locked || !pll_video_locked;
-    always @(posedge clk) begin
-        rst_cnt <= rst_cnt + {6'd0,rst};
-    end
 
     // External SBA bus
     wire [27:0] ext_addr;
@@ -64,8 +43,8 @@ module top(
         .FREQ_HZ(25_000_000)
     ) soc(
         .i_clk(sys_clk),
-        .i_clk_sdram(sdram_clk),
-        .i_rst(rst),
+        .i_clk_sdram(sdr_clk),
+        .i_rst(i_rst),
         // External bus
         .o_ext_addr(ext_addr),
         .o_ext_stb(ext_stb),
@@ -74,16 +53,16 @@ module top(
         .o_ext_dat_w(ext_dat_w),
         .i_ext_dat_r(ext_dat_r),
         // SDRAM
-        .SDRAM_CLK(SDRAM_CLK),        // Clock for SDRAM chip
-        .SDRAM_CKE(SDRAM_CKE),        // Clock enabled
-        .SDRAM_D(SDRAM_DQ),           // Bidirectional data lines to/from SDRAM
-        .SDRAM_ADDR(SDRAM_A),         // Address bus, multiplexed, 13 bits
-        .SDRAM_BA(SDRAM_BA),          // Bank select wires for 4 banks
-        .SDRAM_DQM(SDRAM_DQM),        // Byte mask
-        .SDRAM_CS(SDRAM_CSX),         // Chip select
-        .SDRAM_WE(SDRAM_WEX),         // Write enable
-        .SDRAM_RAS(SDRAM_RASX),       // Row address select
-        .SDRAM_CAS(SDRAM_CASX)        // Columns address select        
+        .SDRAM_CLK(o_sdram_clk),        // Clock for SDRAM chip
+        .SDRAM_CKE(o_sdram_cke),        // Clock enabled
+        .SDRAM_D(io_sdram_dq),          // Bidirectional data lines to/from SDRAM
+        .SDRAM_ADDR(o_sdram_a),         // Address bus, multiplexed, 13 bits
+        .SDRAM_BA(o_sdram_ba),          // Bank select wires for 4 banks
+        .SDRAM_DQM(o_sdram_dqm),        // Byte mask
+        .SDRAM_CS(o_sdram_csn),         // Chip select
+        .SDRAM_WE(o_sdram_wen),         // Write enable
+        .SDRAM_RAS(o_sdram_rasn),       // Row address select
+        .SDRAM_CAS(o_sdram_casn)        // Columns address select        
     );
 
     //
@@ -131,13 +110,13 @@ module top(
 
     led led_dev(
         .i_clk(sys_clk),
-        .i_rst(rst),
+        .i_rst(i_rst),
         .i_stb(addr_is_led & ext_stb),
         .i_we(ext_we[0]),
         .o_ack(led_ack),
         .i_dat_w(ext_dat_w),
         .o_dat_r(led_dat_r),	
-        .o_led(led)
+        .o_led(o_led)
     );
 
     // UART
@@ -149,15 +128,15 @@ module top(
         .FREQ_HZ(25_000_000)
     ) uart_dev(
         .i_clk(sys_clk),
-        .i_rst(rst),
+        .i_rst(i_rst),
         .i_stb(addr_is_uart & ext_stb),
         .i_we(ext_we),
         .o_ack(uart_ack),
         .i_addr(ext_addr[2:0]),
         .i_dat_w(ext_dat_w),
         .o_dat_r(uart_dat_r),
-        .o_tx(uart_tx),
-        .i_rx(uart_rx),
+        .o_tx(o_uart_tx),
+        .i_rx(i_uart_rx),
         .o_int()
     );
 
@@ -168,17 +147,17 @@ module top(
 
     spi spi_dev(
         .i_clk(sys_clk),
-        .i_rst(rst),
+        .i_rst(i_rst),
         .i_addr(ext_addr[3:0]),
         .i_stb(addr_is_spi & ext_stb),
         .i_we(ext_we[0]),
         .o_ack(spi_ack),
         .i_dat_w(ext_dat_w),
         .o_dat_r(spi_dat_r),
-        .i_miso(sd_miso),
-        .o_mosi(sd_mosi),
-        .o_sck(sd_sck),
-        .o_ss(sd_ss)
+        .i_miso(i_sd_miso),
+        .o_mosi(o_sd_mosi),
+        .o_sck(o_sd_clk),
+        .o_ss(o_sd_csn)
     );
 
     // PS/2
@@ -186,7 +165,7 @@ module top(
     wire ps2_ack;
 
     ps2 ps2(
-        .i_rst(rst),
+        .i_rst(i_rst),
         .i_clk(sys_clk),
         .i_addr(ext_addr[2:0]),
         .i_stb(addr_is_ps2 & ext_stb),
@@ -196,8 +175,8 @@ module top(
         .o_dat_r(ps2_dat_r),
         .o_int(),
         // keyboard
-        .i_ps2_kbd_clk(gn[1]),
-        .i_ps2_kbd_data(gn[3])
+        .i_ps2_kbd_clk(i_ps2_kbd_clk),
+        .i_ps2_kbd_data(i_ps2_kbd_data)
     );
 
     // VDU
@@ -213,7 +192,7 @@ module top(
     wire vdu_ack;
 
     vdu vdu(
-        .i_rst(rst),
+        .i_rst(i_rst),
         .i_clk(sys_clk),
         .i_addr(ext_addr[16:0]),
         .i_stb(addr_is_vdu & ext_stb),
@@ -243,8 +222,8 @@ module top(
         .hsync(vga_hsync),
         .vsync(vga_vsync),
 
-        .gpdi_dp(gpdi_dp),
-        .gpdi_dn(gpdi_dn)
+        .gpdi_dp(o_gpdi_dp),
+        .gpdi_dn(o_gpdi_dn)
     );    
-   
+
 endmodule

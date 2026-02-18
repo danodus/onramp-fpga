@@ -21,9 +21,7 @@ cd sim
 make run ONRAMP_BIN=/path/to/onramp/output/posix/bin
 ```
 
-### ULX3S FPGA Board
-
-For the keyboard, you need a Digilent PS/2 PMOD connected to the top-left corner of the board.
+### FPGA Board
 
 Generate a SD card image:
 
@@ -34,11 +32,25 @@ cd scripts
 cd ..
 ```
 
-Flash the SD card image `sd.img`.
+Flash the SD card image `sd.img` and insert it into the FPGA board.
+
+#### ULX3S
 
 ```bash
 source /path/to/oss-cad-suite/environment
-cd ulx3s
+cd boards/ulx3s
+make prog
+```
+
+For the keyboard, you need a Digilent PS/2 PMOD connected to the top-left corner of the board.
+
+#### Icepi Zero
+
+The PS/2 keyboard must be connected to USB1.
+
+```bash
+source /path/to/oss-cad-suite/environment
+cd boards/icepi-zero
 make prog
 ```
 
