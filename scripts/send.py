@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Daniel Cliche
+# Copyright (c) 2025-2026 Daniel Cliche
 # SPDX-License-Identifier: MIT
 
 import sys
@@ -10,7 +10,7 @@ def send(ser, bytes):
 
 def main(argv):
     if (len(argv) < 2):
-        print("Usage: sendhex.py <serial device> <hex file>")
+        print("Usage: send.py <serial device> <file>")
         exit(0)
     else:
         try:
@@ -18,19 +18,11 @@ def main(argv):
         except serial.serialutil.SerialException:
             print("Unable to open the serial device {0}".format(argv[0]))
             exit(1)
-        file = open(argv[1], 'r')
-        lines = file.read().splitlines()
-        lines = list(filter(None, lines))   # remove empty lines
-
-        length = len(lines)
+        file = open(argv[1], 'rb')
+        data = file.read()
+        length = len(data)
         send(ser, length.to_bytes(4, 'big'))
-
-        cnt = 0
-        for line in lines:
-            if (line == '0'):
-                line = '00000000'
-            send(ser, bytearray.fromhex(line))
-            cnt = cnt + 4
+        send(ser, data)
         time.sleep(2)
         ser.close()
     exit(0)

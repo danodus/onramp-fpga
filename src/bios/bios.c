@@ -14,7 +14,7 @@ static void receive(void) {
     print("Ready to receive...\n");
 
     // Read program
-    unsigned int addr = RAM_START;
+    volatile unsigned char *ram = (volatile unsigned char *)RAM_START;
     unsigned int size;
     size = receive_word();
 
@@ -24,10 +24,8 @@ static void receive(void) {
     }
 
     for (unsigned int i = 0; i < size; ++i) {
-        unsigned int word = receive_word();
-        *(volatile unsigned int *)addr = word;
-        addr += 4;
-        set_led(i << 1);        
+        *ram = receive_byte();
+        ++ram;
     }
     set_led(0x00);
     print("Program received.\n");

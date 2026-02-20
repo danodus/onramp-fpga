@@ -10,4 +10,3 @@ fi
 CC="$ONRAMP_BIN/onrampvm $ONRAMP_BIN/../share/onramp/bin/cc.oe"
 
 eval $CC ed.c -o ed.oe
-hexdump -v -e '1/4 "%08x\n"' ed.oe > ed.hex

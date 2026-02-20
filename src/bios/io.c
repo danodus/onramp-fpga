@@ -58,16 +58,16 @@ char getchar(int blocking) {
     return c;
 }
 
-unsigned int receive_word() {
+unsigned char receive_byte(void) {
+    while ((*((int *)UART_STATUS) & UART_RX_READY) == 0);
+    return *((unsigned int *)UART_DATA);
+}
+
+unsigned int receive_word(void) {
     unsigned int word = 0;
     for (int i = 0; i < 4; ++i) {
         word <<= 8;
-        int rx_ready;
-        do {
-            rx_ready = (*((int *)UART_STATUS) & UART_RX_READY);
-        } while (!rx_ready);        
-        unsigned int c = *((unsigned int *)UART_DATA);
-        word |= c;
+        word |= (unsigned int)receive_byte();
     }
     return word;
 }

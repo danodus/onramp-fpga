@@ -10,6 +10,7 @@ void set_led(int value);
 void putchar(char c);
 char getchar(int blocking);
 
+unsigned char receive_byte(void);
 unsigned int receive_word(void);
 
 #endif
