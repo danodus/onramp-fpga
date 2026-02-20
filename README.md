@@ -23,6 +23,8 @@ make run ONRAMP_BIN=/path/to/onramp/output/posix/bin
 
 ### FPGA Board
 
+The FPGA implementation provides two I/O interfaces: serial and video output + keyboard.  Both interfaces can be used simultaneously.
+
 Generate a SD card image:
 
 ```bash
@@ -40,19 +42,21 @@ Flash the SD card image `sd.img` and insert it into the FPGA board.
 source /path/to/oss-cad-suite/environment
 cd boards/ulx3s
 make prog
+picocom -b 115200 --imap lfcrlf <serial device>
 ```
 
 For the keyboard, you need a Digilent PS/2 PMOD connected to the top-left corner of the board.
 
 #### Icepi Zero
 
-The PS/2 keyboard must be connected to USB1.
-
 ```bash
 source /path/to/oss-cad-suite/environment
 cd boards/icepi-zero
 make prog
+picocom -b 115200 --imap lfcrlf <serial device>
 ```
+
+The PS/2 keyboard must be connected to USB1.
 
 ## Build Steps
 
@@ -63,6 +67,8 @@ To edit, do the following at the prompt:
 ```sh
 ed main.c
 ```
+
+Note: If a the serial port is used, the terminal must provide at least 80x60 characters.
 
 To build and run, do the following:
 
