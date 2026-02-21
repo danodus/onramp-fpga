@@ -3,7 +3,9 @@
 
 `default_nettype none
 
-module soc_ext(
+module soc_ext #(
+    parameter FREQ_HZ = 25_000_000
+) (
     input         sys_clk,
     input         sdr_clk,
     input         pix_x5_clk,
@@ -125,7 +127,7 @@ module soc_ext(
     wire [31:0] uart_dat_r;
 
     uart #(
-        .FREQ_HZ(25_000_000)
+        .FREQ_HZ(FREQ_HZ)
     ) uart_dev(
         .i_clk(sys_clk),
         .i_rst(i_rst),
@@ -145,7 +147,9 @@ module soc_ext(
     wire spi_ack;
     wire [31:0] spi_dat_r;
 
-    spi spi_dev(
+    spi #(
+        .FREQ_HZ(FREQ_HZ)
+    ) spi_dev(
         .i_clk(sys_clk),
         .i_rst(i_rst),
         .i_addr(ext_addr[3:0]),

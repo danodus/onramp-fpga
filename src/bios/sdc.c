@@ -7,7 +7,7 @@
 #define SPI_CTR 0x23000004
 
 #define SPI_SS 0x1
-#define SPI_SCK 0x2
+#define SPI_FAST 0x2
 
 #define SD_START_TOKEN  0xFE
 
@@ -15,6 +15,7 @@
 #define SD_MAX_WRITE_ATTEMPTS   750000
 
 #define CS_ENABLE()  *(volatile uint32_t *)SPI_CTR = 0
+#define CS_ENABLE_FAST()  *(volatile uint32_t *)SPI_CTR = SPI_FAST
 #define CS_DISABLE() *(volatile uint32_t *)SPI_CTR = SPI_SS
 
 int is_hardware(void);
@@ -27,6 +28,12 @@ static int msleep(unsigned int msec) {
 static uint8_t spi_transfer(uint8_t mosi)
 {
     *(volatile uint32_t *)SPI_RW = (uint32_t)mosi;
+    return *(volatile uint32_t *)SPI_RW;
+}
+
+static uint32_t spi_transfer_32(uint32_t mosi)
+{
+    *(volatile uint32_t *)SPI_RW = mosi;
     return *(volatile uint32_t *)SPI_RW;
 }
 
@@ -271,9 +278,15 @@ static bool sdc_read_single_block_hw(uint32_t addr, uint8_t *buf)
 
             // if response token is 0xFE
             if (read == 0xFE) {
+
+                CS_ENABLE_FAST();
+
+                uint32_t* buf32 = (uint32_t *)buf;
                 // read block
-                for (uint16_t i = 0; i < SDC_BLOCK_LEN; ++i)
-                    *buf++ = spi_transfer(0xFF);
+                for (uint16_t i = 0; i < 128/*SDC_BLOCK_LEN / 4*/; ++i)
+                    *buf32++ = spi_transfer_32(0xFFFFFFFF);
+
+                CS_ENABLE();
 
                 // read 16-bit CRC
                 spi_transfer(0xFF);
@@ -316,9 +329,16 @@ static bool sdc_write_single_block_hw(uint32_t addr, const uint8_t *buf)
         // send start token
         spi_transfer(SD_START_TOKEN);
 
+        CS_ENABLE_FAST();
+
+        uint32_t* buf32 = (uint32_t *)buf;
         // write buffer to card
-        for (uint16_t i = 0; i < SDC_BLOCK_LEN; ++i)
-            spi_transfer(buf[i]);
+        for (uint16_t i = 0; i < 128/*SDC_BLOCK_LEN / 4*/; ++i) {
+            spi_transfer_32(*buf32);
+            buf32++;
+        }
+
+        CS_ENABLE();
     }
 
     // if response received from the card
