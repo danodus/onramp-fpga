@@ -30,21 +30,7 @@ int __sys_unlink(const char* path);
 int __sys_fclose(int file_handle);
 int __sys_rename(const char* from, const char* to);
 
-bool file_open_table[MAX_OPEN_FILES] = {false};
-
 int last_ret = 0;
-
-FILE* fopen_t(const char* restrict filename, const char* restrict mode) {
-    FILE* file = fopen(filename, mode);
-    if (file != NULL)
-        file_open_table[fileno(file) - 3] = true;
-    return file;
-}
-
-int fclose_t(FILE* file) {
-    file_open_table[fileno(file) - 3] = false;
-    return fclose(file);
-}
 
 int is_hardware(void) {
     return *(int *)(CFG) & 1;
@@ -130,7 +116,7 @@ bool run_program(const char* filename, const char *args[]) {
         return false;
     }
 
-    FILE* f = fopen_t(filename, "rb");
+    FILE* f = fopen(filename, "rb");
     if (f == NULL) {
         printf("Program not found\n");
         return false;
@@ -139,19 +125,19 @@ bool run_program(const char* filename, const char *args[]) {
     char* program = malloc(program_size);
     if (program == NULL) {
         printf("Out of memory\n");
-        fclose_t(f);
+        fclose(f);
         return false;
     }
 
 
     if (fread(program, 1, program_size, f) != program_size) {
         printf("Unable to read the program\n");
-        fclose_t(f);
+        fclose(f);
         free(program);
         return false;
     };
 
-    fclose_t(f);
+    fclose(f);
 
     // Check if this is an Onramp program
     if (strncmp(program, "~Onr~amp~   ", 12) != 0) {
@@ -177,12 +163,6 @@ bool run_program(const char* filename, const char *args[]) {
 
     // Run it
     last_ret = __onramp_spawn_pit(program, program_size, child_pit, filename);
-    
-    // Clean up by forcefully close all remaining open files
-    for (int i = 0; i < MAX_OPEN_FILES; ++i) {
-        if (!file_open_table[i])
-            __sys_fclose(i + 3);
-    }
 
     free(child_pit);
     free(program);
@@ -193,7 +173,7 @@ void cat(const char* filename) {
     FILE* f;
     char buf[256];
     char* ss;
-    f = fopen_t(filename, "rb");
+    f = fopen(filename, "rb");
     if (f != NULL) {
         size_t n;
         do {
@@ -201,7 +181,7 @@ void cat(const char* filename) {
             fwrite(buf, 1, n, stdout);
         } while (n > 0);
 
-        fclose_t(f);
+        fclose(f);
     } else {
         printf("file not found\n");
     }
@@ -211,7 +191,7 @@ void xxd(const char* filename) {
     FILE* f;
     uint8_t buf[256];
     char* ss;
-    f = fopen_t(filename, "rb");
+    f = fopen(filename, "rb");
     if (f != NULL) {
         size_t n;
         do {
@@ -224,7 +204,7 @@ void xxd(const char* filename) {
         } while (n > 0);
         printf("\n");
 
-        fclose_t(f);
+        fclose(f);
     } else {
         printf("file not found\n");
     }
@@ -233,15 +213,15 @@ void xxd(const char* filename) {
 static bool copy_file(const char* src_filename, const char* dst_filename) {
     FILE* src_f;
     FILE* dst_f;
-    src_f = fopen_t(src_filename, "rb");
+    src_f = fopen(src_filename, "rb");
     if (src_f == NULL) {
         printf("Unable to open %s\n", src_filename);
         return false;
     }
-    dst_f = fopen_t(dst_filename, "wb");
+    dst_f = fopen(dst_filename, "wb");
     if (dst_f == NULL) {
         printf("Unable to open %s\n", dst_filename);
-        fclose_t(src_f);
+        fclose(src_f);
         return false;
     }
 
@@ -251,14 +231,14 @@ static bool copy_file(const char* src_filename, const char* dst_filename) {
         n = fread(buf, 1, sizeof(buf), src_f);
         if (fwrite(buf, 1, n, dst_f) != n) {
             printf("Unable to write\n");
-            fclose_t(dst_f);
-            fclose_t(src_f);
+            fclose(dst_f);
+            fclose(src_f);
             return false;
         }
     } while (n > 0);
 
-    fclose_t(dst_f);
-    fclose_t(src_f);
+    fclose(dst_f);
+    fclose(src_f);
 
     return true;
 }
@@ -272,7 +252,7 @@ static bool move_file(const char* src_filename, const char* dst_filename) {
 }
 
 static bool touch(const char* filename) {
-    FILE *f = fopen_t(filename, "wb");
+    FILE *f = fopen(filename, "wb");
     if (f == NULL) {
         printf("Unable to open %s\n", filename);
         return false;
