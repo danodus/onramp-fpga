@@ -148,6 +148,7 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/common/src/internal.h:core/libc/common/src/internal.h \
     \
     $ONRAMP_BIN/../../../core/libc/1-omc/build.sh:core/libc/1-omc/build.sh \
+    $ONRAMP_BIN/../../../core/libc/1-omc/src/string-fast.os:core/libc/1-omc/src/string-fast.os \
     $ONRAMP_BIN/../../../core/libc/1-omc/src/strrchr.c:core/libc/1-omc/src/strrchr.c \
     $ONRAMP_BIN/../../../core/libc/1-omc/src/strtol.c:core/libc/1-omc/src/strtol.c \
     $ONRAMP_BIN/../../../core/cc/build.sh:core/cc/build.sh \

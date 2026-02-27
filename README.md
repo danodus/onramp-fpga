@@ -87,7 +87,7 @@ rm sh.oe
 hex core/sh/sh.oe.ohx -o sh.oe
 cp hex.oe output/configure/hex-0-onramp/hex.oe
 cp sh.oe output/configure/sh/sh.oe
-sh core/build.sh
+time sh core/build.sh
 ```
 
-Note: The build process currently takes about 6 hours on the ULX3S.
+Note: The build process currently takes 14344 seconds (about 4 hours) on the FPGA board.
