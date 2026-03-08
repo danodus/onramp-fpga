@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Daniel Cliche
+// Copyright (c) 2025-2026 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
 #include <memory>
@@ -12,6 +12,7 @@
 
 #include <verilated.h>
 #include <iostream>
+#include <filesystem>
 
 // Include model header, generated from Verilating "top.v"
 #include "Vtop.h"
@@ -76,12 +77,29 @@ int main(int argc, char **argv, char **env)
 
     uint32_t sdc_addr = 0;
     // Read sd.img
-    std::ifstream input( "../sd.img", std::ios::in | std::ios::binary);
+    std::ifstream input("../sd.img", std::ios::in | std::ios::binary);
     if (!input.is_open()) {
         printf("Unable to open ../sd.img\n");
         return 1;
     }
-    std::vector<uint8_t> sdc_data((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+
+    // Get the file size (C++17)
+    size_t file_size = std::filesystem::file_size("../sd.img");
+    // Calculate the number of uint32_t elements
+    size_t numElements = file_size / sizeof(uint32_t);
+
+    std::vector<uint32_t> sdc_data(numElements);
+
+    // Read all elements into the vector's underlying array
+    input.read(reinterpret_cast<char*>(sdc_data.data()), file_size);
+
+    if (input.gcount() == file_size) {
+        std::cout << "Successfully read " << sdc_data.size() << " elements." << std::endl;
+    } else {
+        std::cerr << "Error reading all data." << std::endl;
+    }
+
+    input.close();
 
     enable_raw_mode(STDIN_FILENO);
 
@@ -286,7 +304,7 @@ int main(int argc, char **argv, char **env)
                         if (top->o_ext_addr == 0xC) {
                             sdc_addr = top->o_ext_dat_w;
                         } else {
-                            sdc_data.at(sdc_addr) = (uint8_t)top->o_ext_dat_w;
+                            sdc_data.at(sdc_addr) = top->o_ext_dat_w;
                             sdc_addr++;
                         }
                     } else {

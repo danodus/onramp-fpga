@@ -11,6 +11,8 @@ Refer to my [notes](NOTES.md) for more details.
 - Onramp installation (https://github.com/ludocode/onramp)
 - OSS CAD Suite (https://github.com/YosysHQ/oss-cad-suite-build)
 
+Tested with Onramp 3502f10944ffc0ec87d5e57ff30587e85e6459c8.
+
 ## Getting Started
 
 ### Simulator
@@ -68,7 +70,7 @@ To edit, do the following at the prompt:
 ed main.c
 ```
 
-Note: If a the serial port is used, the terminal must provide at least 80x60 characters.
+Note: If the serial port is used, the terminal must provide at least 80x60 characters.
 
 To build and run, do the following:
 

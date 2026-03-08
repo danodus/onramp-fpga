@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Daniel Cliche
+// Copyright (c) 2025-2026 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
 #include <stdio.h>
@@ -23,11 +23,9 @@
 
 extern unsigned* __process_info_table;
 
-int __sys_dopen(const char* path);
-int __sys_dread(int handle, char out_buffer[256]);
+int __sys_dopen(const char* path); // note: removed in v4
+int __sys_dread(int handle, char out_buffer[256]); // note: removed in v4
 int __sys_stat(const char* path, unsigned output[4]);
-int __sys_unlink(const char* path);
-int __sys_fclose(int file_handle);
 int __sys_rename(const char* from, const char* to);
 
 int last_ret = 0;

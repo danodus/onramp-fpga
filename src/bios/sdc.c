@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Daniel Cliche
+// Copyright (c) 2025-2026 Daniel Cliche
 // SPDX-License-Identifier: MIT
 
 #include "sdc.h"
@@ -379,10 +379,11 @@ bool sdc_read_single_block(uint32_t addr, uint8_t* buf) {
         return sdc_read_single_block_hw(addr, buf);
     } else {
         int i;
-        *(uint32_t *)(0x2000000C) = addr * SDC_BLOCK_LEN;
-        for (size_t i = 0; i < SDC_BLOCK_LEN; i++) {
-            *buf = *(uint32_t *)(0x20000010);
-            buf++;
+        uint32_t* buf32 = (uint32_t*)buf;
+        *(uint32_t *)(0x2000000C) = addr * 128/*SDC_BLOCK_LEN / 4*/;
+        for (size_t i = 0; i < 128/*SDC_BLOCK_LEN / 4*/; i++) {
+            *buf32 = *(uint32_t *)(0x20000010);
+            buf32++;
         }
 
         return true;
@@ -393,10 +394,11 @@ bool sdc_write_single_block(uint32_t addr, const uint8_t* buf) {
     if (is_hardware()) {
         return sdc_write_single_block_hw(addr, buf);
     } else {
-        *(uint32_t *)(0x2000000C) = addr * SDC_BLOCK_LEN;
-        for (size_t i = 0; i < SDC_BLOCK_LEN; i++) {
-            *(uint32_t *)(0x20000010) = *buf;
-            buf++;
+        *(uint32_t *)(0x2000000C) = addr * 128/*SDC_BLOCK_LEN / 4*/;
+        uint32_t* buf32 = (uint32_t*)buf;
+        for (size_t i = 0; i < 128/*SDC_BLOCK_LEN / 4*/; i++) {
+            *(uint32_t *)(0x20000010) = *buf32;
+            buf32++;
         }
 
         return true;

@@ -1,7 +1,7 @@
 VERILATOR = verilator
 
 LDFLAGS := 
-CFLAGS := -CFLAGS "--std=c++14"
+CFLAGS := -CFLAGS "--std=c++17"
 
 DEFINES = -DSDRAM
 
