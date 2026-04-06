@@ -187,10 +187,12 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/assert.c:core/libc/2-opc/src/assert.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/ctype.c:core/libc/2-opc/src/ctype.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/environ.c:core/libc/2-opc/src/environ.c \
+    $ONRAMP_BIN/../../../core/libc/2-opc/src/errno.c:core/libc/2-opc/src/errno.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/float.c:core/libc/2-opc/src/float.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/format.c:core/libc/2-opc/src/format.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/llong.c:core/libc/2-opc/src/llong.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/multibyte.c:core/libc/2-opc/src/multibyte.c \
+    $ONRAMP_BIN/../../../core/libc/2-opc/src/path.c:core/libc/2-opc/src/path.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/posixio.c:core/libc/2-opc/src/posixio.c \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/setjmp.os:core/libc/2-opc/src/setjmp.os \
     $ONRAMP_BIN/../../../core/libc/2-opc/src/start.os:core/libc/2-opc/src/start.os \
