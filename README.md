@@ -11,7 +11,7 @@ Refer to my [notes](NOTES.md) for more details.
 - Onramp installation (https://github.com/ludocode/onramp)
 - OSS CAD Suite (https://github.com/YosysHQ/oss-cad-suite-build)
 
-Tested with Onramp 7ce9870db8c63aa13ca8dffafd0350245678bde3.
+Tested with Onramp 31120d428929d2ad9e2b6e47a971004d38e0b94b.
 
 ## Getting Started
 
@@ -92,4 +92,4 @@ cp sh.oe output/configure/sh/sh.oe
 time sh core/build.sh
 ```
 
-Note: The build process currently takes 14698 seconds (about 4 hours) on the FPGA board.
+Note: The build process currently takes 14351 seconds (about 4 hours) on the FPGA board.

@@ -339,6 +339,8 @@ $ONRAMP_BIN/onrampvm ../src/mkfs/mkfs ../sd.img \
     $ONRAMP_BIN/../../../core/as/2-full/src/opcodes.h:core/as/2-full/src/opcodes.h \
     $ONRAMP_BIN/../../../core/as/2-full/src/parse.c:core/as/2-full/src/parse.c \
     $ONRAMP_BIN/../../../core/as/2-full/src/parse.h:core/as/2-full/src/parse.h \
+    $ONRAMP_BIN/../../../core/as/2-full/src/symbol.c:core/as/2-full/src/symbol.c \
+    $ONRAMP_BIN/../../../core/as/2-full/src/symbol.h:core/as/2-full/src/symbol.h \
     $ONRAMP_BIN/../../../core/libc/common/build.sh:core/libc/common/build.sh \
     $ONRAMP_BIN/../../../core/libc/3-full/rebuild.sh:core/libc/3-full/rebuild.sh \
     $ONRAMP_BIN/../../../core/libc/3-full/rebuild-ccargs:core/libc/3-full/rebuild-ccargs \
