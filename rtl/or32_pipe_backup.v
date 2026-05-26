@@ -265,13 +265,10 @@ module or32(
 
     wire advance = i_ce && !stall_all;
 
-    wire mem_gpr_we = i_ce && mem_valid && mem_wait && i_ack && mem_mem_read;
-    wire rip_mem_wb = mem_gpr_we && mem_rd == `RIP;
-
-    wire ex_gpr_we = i_ce && ex_valid && ex_reg_write &&
-                     !ex_mem_read && !ex_mem_write && !ex_branch_taken && !load_use_ex &&
-                     !ld_rip_wb;
-    wire div_gpr_we = i_ce && div_busy && div_done;
+    wire ex_gpr_we = advance && ex_valid && ex_reg_write &&
+                     !ex_mem_read && !ex_mem_write && !ex_branch_taken && !load_use_ex;
+    wire mem_gpr_we = advance && mem_valid && mem_wait && i_ack && mem_mem_read;
+    wire div_gpr_we = advance && div_busy && div_done;
 
     wire ex_rip_alu  = ex_gpr_we && ex_rd == `RIP;
     wire ld_rip_wb   = mem_gpr_we && mem_rd == `RIP;
@@ -302,16 +299,10 @@ module or32(
     wire id_issue     = !stall_ID && id_can_issue && !block_id_issue && !flush_pipe;
     wire if_id_ready  = !id_valid || id_issue;
 
-    wire rip_in_flight = (id_valid && id_reg_write && id_rd == `RIP) ||
-                         (ex_valid && ex_reg_write && ex_rd == `RIP) ||
-                         (mem_valid && mem_mem_read && mem_rd == `RIP);
-
     wire stall_fetch = stall_all || mem_port_busy || stall_pipe ||
-                       (id_valid && !id_can_issue) || if_pending || rip_in_flight ||
-                       id_valid || ex_valid || mem_valid || div_busy;
+                       (id_valid && !id_can_issue) || if_pending;
 
-    // Pulse o_stb only when starting a mem access (FSM-style); wait for ack with stb low.
-    wire mem_req  = mem_new;
+    wire mem_req  = (mem_valid && !mem_wait) || mem_new;
     wire if_start = !if_wait && !stall_fetch;
     wire if_req   = if_start && !mem_req;
 
@@ -380,7 +371,7 @@ module or32(
             end else if (div_gpr_we)
                 regs[div_rd] <= div_val;
 
-            if (ex_branch_taken && !rip_mem_wb)
+            if (ex_branch_taken)
                 regs[`RIP] <= ex_pc + 32'h4 + branch_offset;
 
             wb_valid     <= 1'b0;
@@ -402,33 +393,15 @@ module or32(
                 wb_wdata     <= div_val;
             end
 
-            if (mem_valid && mem_wait && i_ack) begin
-                mem_wait  <= 1'b0;
-                mem_valid <= 1'b0;
-                if (mem_mem_read)
-                    mem_load_data <= i_dat_r;
-            end
-
-            if (flush_pipe) begin
-                if_wait <= 1'b0;
-            end else if (if_start) begin
-                if_pc   <= regs[`RIP];
-                if_wait <= 1'b1;
-                if (!ex_branch_taken && !(ex_gpr_we && ex_rd == `RIP) && !rip_mem_wb)
-                    regs[`RIP] <= regs[`RIP] + 32'h4;
-            end else if (if_wait && i_ack) begin
-                if_wait        <= 1'b0;
-                if_instr_latch <= i_dat_r;
-                if (if_id_ready)
-                    if_push <= 1'b1;
-                else
-                    if_pending <= 1'b1;
-            end else if (!stall_ID && if_pending && if_id_ready) begin
-                if_push    <= 1'b1;
-                if_pending <= 1'b0;
-            end
-
             if (advance) begin
+                if_push <= 1'b0;
+
+                if (mem_valid && mem_wait && i_ack) begin
+                    mem_wait  <= 1'b0;
+                    mem_valid <= 1'b0;
+                    if (mem_mem_read)
+                        mem_load_data <= i_dat_r;
+                end
 
                 if (mem_new && ex_mem_read) begin
                     mem_valid      <= 1'b1;
@@ -448,46 +421,40 @@ module or32(
                     mem_wait       <= 1'b1;
                 end
 
+                if (id_issue) begin
+                    if (id_is_div) begin
+                        div_a     <= id_arg2_val;
+                        div_b     <= id_arg3_val;
+                        div_rd    <= id_rd;
+                        div_start <= 1'b1;
+                        div_busy  <= 1'b1;
+                    end else begin
+                        ex_valid      <= 1'b1;
+                        ex_pc         <= id_pc;
+                        ex_instr      <= id_instr;
+                        ex_arg1       <= id_arg1;
+                        ex_arg2       <= id_arg2;
+                        ex_arg3       <= id_arg3;
+                        ex_rd         <= id_rd;
+                        ex_reg_write  <= id_reg_write;
+                        ex_mem_read   <= id_mem_read;
+                        ex_mem_write  <= id_mem_write;
+                        ex_is_byte    <= id_is_byte;
+                        ex_store_val  <= id_arg1_val;
+                    end
+                end else if (ex_retire)
+                    ex_valid <= 1'b0;
+
                 if (flush_pipe) begin
                     id_valid       <= 1'b0;
                     ex_valid       <= 1'b0;
-                    if (!(mem_valid && mem_wait))
-                        mem_valid  <= 1'b0;
-                    if_push        <= 1'b0;
+                    mem_valid      <= 1'b0;
                     if_pending     <= 1'b0;
                     if_instr_latch <= 32'd0;
                     ex_instr       <= 32'd0;
                     ex_reg_write   <= 1'b0;
                     ex_mem_read    <= 1'b0;
                     ex_mem_write   <= 1'b0;
-                end else begin
-                    if (id_issue) begin
-                        if (id_is_div) begin
-                            div_a     <= id_arg2_val;
-                            div_b     <= id_arg3_val;
-                            div_rd    <= id_rd;
-                            div_start <= 1'b1;
-                            div_busy  <= 1'b1;
-                        end else begin
-                            ex_valid      <= 1'b1;
-                            ex_pc         <= id_pc;
-                            ex_instr      <= id_instr;
-                            ex_arg1       <= id_arg1;
-                            ex_arg2       <= id_arg2;
-                            ex_arg3       <= id_arg3;
-                            ex_rd         <= id_rd;
-                            ex_reg_write  <= id_reg_write;
-                            ex_mem_read   <= id_mem_read;
-                            ex_mem_write  <= id_mem_write;
-                            ex_is_byte    <= id_is_byte;
-                            ex_store_val  <= id_arg1_val;
-                        end
-                    end else if (ex_retire)
-                        ex_valid <= 1'b0;
-                end
-
-                if (flush_pipe) begin
-                    if_push <= 1'b0;
                 end else if (!stall_ID) begin
                     if (if_push) begin
                         id_valid      <= 1'b1;
@@ -527,14 +494,33 @@ module or32(
                                 default: ;
                             endcase
                         end
-                        if_push <= 1'b0;
                     end else if (id_issue)
                         id_valid <= 1'b0;
                 end
+
+                if (flush_pipe) begin
+                    if_wait <= 1'b0;
+                end else if (if_start) begin
+                    if_pc   <= regs[`RIP];
+                    if_wait <= 1'b1;
+                    if (!ex_branch_taken && !(ex_gpr_we && ex_rd == `RIP))
+                        regs[`RIP] <= regs[`RIP] + 32'h4;
+                end else if (if_wait && i_ack) begin
+                    if_wait        <= 1'b0;
+                    if_instr_latch <= i_dat_r;
+                    if (if_id_ready)
+                        if_push <= 1'b1;
+                    else
+                        if_pending <= 1'b1;
+                end else if (!stall_ID && if_pending && if_id_ready) begin
+                    if_push    <= 1'b1;
+                    if_pending <= 1'b0;
+                end
             end
-            if (div_busy && div_done)
-                div_busy <= 1'b0;
         end
+
+        if (div_busy && div_done)
+            div_busy <= 1'b0;
     end
 
 endmodule

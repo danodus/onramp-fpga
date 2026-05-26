@@ -25,7 +25,7 @@
 `define OP_JZ   4'hE
 `define OP_SYS  4'hF
 
-module or32(
+module or32_pipe(
     input               i_rst,
     input               i_clk,
     input               i_ce,

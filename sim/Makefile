@@ -11,7 +11,9 @@ clean:
 	rm -rf obj_dir
 	rm -f ../sd.img
 
-sim: top.v sim_main.cpp
+RTL = $(wildcard ../rtl/*.v)
+
+sim: top.v sim_main.cpp $(RTL)
 	$(VERILATOR) -cc --exe $(CFLAGS) $(LDFLAGS) top.v sim_main.cpp $(DEFINES) -I../rtl --trace -Wno-NULLPORT -Wno-PINMISSING
 	$(MAKE) -j 4 -C obj_dir -f Vtop.mk
 

@@ -324,6 +324,9 @@ int main(int argc, char **argv, char **env)
         top->eval();
     }
 
+    if (contextp->gotFinish()) {
+        exit_value = 1;
+    }
     // Final model cleanup
     top->final();
 
